@@ -20,7 +20,7 @@ GlossyIcon::GlossyIcon() {
 
 void GlossyIcon::onFocusGained() {
     m_focused = true;
-    m_focusScale.set(1.075f, 0.18f, nxui::Easing::outBack);
+    m_focusScale.set(m_expandOnSelect ? 1.075f : 1.f, 0.18f, nxui::Easing::outBack);
     m_focusGlow.set(1.f, 0.16f, nxui::Easing::outCubic);
 }
 
@@ -104,16 +104,25 @@ void GlossyIcon::onRender(nxui::Renderer& ren) {
     nxui::Rect r = drawRect;
     float rad = cornerRadius();
 
-    // 4 px accent gap surrounding the selected tile (the selection cursor wraps
-    // the tile + this gap).
-    if (m_focused && m_selectionColor.a > 0.f && s > 0.5f) {
-        ren.drawRoundedRectOutline(r.expanded(2.f),
-                                   m_selectionColor.withAlpha(m_selectionColor.a * a),
-                                   rad + 2.f, 4.f);
+    // Empty slots get a 4 px border (2 px each side -> inner content 252 in a
+    // 256 tile) so the empty tile reads as an outlined placeholder.
+    if (m_titleId == 0 && m_emptyBorderColor.a > 0.f && s > 0.5f) {
+        ren.drawRoundedRectOutline(r.shrunk(1.f),
+                                   m_emptyBorderColor.withAlpha(m_emptyBorderColor.a * a),
+                                   std::max(0.f, rad - 1.f), 2.f);
+    }
+
+    // Accent selection frame around the selected tile (the whole game selection
+    // indicator). Sized 4 px larger than the tile so it clears the empty border;
+    // fades with focus.
+    float focusGlow = m_focusGlow.value();
+    if (focusGlow > 0.01f && m_selectionColor.a > 0.f && s > 0.5f) {
+        ren.drawRoundedRectOutline(r.expanded(4.f),
+                                   m_selectionColor.withAlpha(m_selectionColor.a * a * focusGlow),
+                                   rad + 4.f, 4.f);
     }
 
     // Optional pulsing drop-shadow glow (config-gated; off by default like qlaunch).
-    float focusGlow = m_focusGlow.value();
     if (m_glowEnabled && focusGlow > 0.01f && s > 0.5f) {
         float breathe = 0.5f + 0.5f * std::sin(m_suspendPulse * 1.8f + 0.4f);
         nxui::Color glowBase = (m_selectionColor.a > 0.f)

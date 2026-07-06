@@ -62,6 +62,10 @@ public:
     // 4 px selection gap drawn around the tile when focused.
     void setGlowEnabled(bool e)            { m_glowEnabled = e; }
     void setSelectionColor(const nxui::Color& c) { m_selectionColor = c; }
+    // 4 px border drawn around empty slots (inner content = tile - 4 px).
+    void setEmptyBorderColor(const nxui::Color& c) { m_emptyBorderColor = c; }
+    // Whether the tile scales up when selected (off = qlaunch flat).
+    void setExpandOnSelect(bool e)         { m_expandOnSelect = e; }
 
     // Effective corner radius for a selection cursor framing this icon.
     float cursorRadius(const nxui::Rect& cursorRect) const {
@@ -93,7 +97,9 @@ private:
     Shape       m_shape = Shape::Square;   // qlaunch square (no rounding) by default
     float       m_roundedRadius = 12.f;    // radius for the "Rounded" (SwitchU) style
     bool        m_glowEnabled = false;     // pulsing drop-shadow glow on selection
+    bool        m_expandOnSelect = false;  // scale the tile up when selected
     nxui::Color m_selectionColor {0.f, 0.f, 0.f, 0.f};   // accent gap colour
+    nxui::Color m_emptyBorderColor {0.f, 0.f, 0.f, 0.f}; // empty-slot border
     bool        m_suspended = false;
     bool        m_isGameCard = false;
     bool        m_notLaunchable = false;

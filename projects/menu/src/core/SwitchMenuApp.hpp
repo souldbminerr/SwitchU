@@ -11,7 +11,7 @@
 #include "widgets/WaraWaraBackground.hpp"
 #include "widgets/DateTimeWidget.hpp"
 #include "widgets/BatteryWidget.hpp"
-#include "widgets/TitlePillWidget.hpp"
+#include "widgets/SelectionTitleWidget.hpp"
 #include "core/AudioManager.hpp"
 #include "widgets/LaunchAnimation.hpp"
 #include "widgets/OverlayDialog.hpp"
@@ -131,6 +131,7 @@ private:
     bool commitEditModePlacement();
     bool moveFocusedIcon(nxui::FocusDirection dir);
     void pageJumpFocus(int dir);   // shoulder-button jump by one screen of icons
+    void updateSelectionTitle();   // drives the selected-item title each frame
 
     // Settings gear open animation: shake -> gear spin -> pause -> open.
     void startSettingsOpenAnim();
@@ -167,7 +168,7 @@ private:
     std::shared_ptr<SelectionCursor>   m_pointerCursor;
     std::shared_ptr<DateTimeWidget>    m_clock;
     std::shared_ptr<BatteryWidget>     m_battery;
-    std::shared_ptr<TitlePillWidget>   m_titlePill;
+    std::shared_ptr<SelectionTitleWidget> m_titlePill;
     std::shared_ptr<PageIndicator>     m_pageIndicator;
     std::shared_ptr<LaunchAnimation>   m_launchAnim;
     std::shared_ptr<OverlayDialog>     m_userSelect;

@@ -126,8 +126,27 @@ void IconGrid::ensureIndexVisible(int idx, bool immediate) {
     idx = std::clamp(idx, 0, (int)m_allIcons.size() - 1);
     int col = columnOf(idx);
     float colLeft = col * columnPitch();
-    // Centre the focused column in the viewport.
-    float want = colLeft + m_cellW * 0.5f - m_rect.width * 0.5f;
+
+    float want;
+    if (m_scrollEasing) {
+        // Centre the focused column in the viewport.
+        want = colLeft + m_cellW * 0.5f - m_rect.width * 0.5f;
+    } else {
+        // Deadzone follow (qlaunch): the selection roams freely as long as it
+        // stays at least one icon in from either edge; only then does the strip
+        // scroll, keeping that one-icon margin. No centring, so releasing the
+        // button just leaves it where it is.
+        float bx = baseX();
+        float margin = columnPitch();
+        float screenLeft = bx + colLeft - m_scrollX;
+        float screenRight = screenLeft + m_cellW;
+        want = m_scrollX;
+        if (screenLeft < m_rect.x + margin)
+            want = bx + colLeft - (m_rect.x + margin);
+        else if (screenRight > m_rect.x + m_rect.width - margin)
+            want = bx + colLeft + m_cellW - (m_rect.x + m_rect.width - margin);
+    }
+
     want = std::clamp(want, 0.f, ms);
     m_scrollTargetX = want;
     if (immediate) m_scrollX = want;
@@ -269,6 +288,9 @@ void IconGrid::onUpdate(float dt) {
             ensureIndexVisible(fi, false);
     }
 
+    // Always smooth. In deadzone mode the target only moves when the selection
+    // reaches the edge margin, so it eases briefly and then stops; in centre
+    // mode it eases to keep the selection centred.
     float d = std::min(1.f, dt * 12.f);
     m_scrollX += (m_scrollTargetX - m_scrollX) * d;
     if (std::abs(m_scrollTargetX - m_scrollX) < 0.5f)

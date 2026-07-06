@@ -8,9 +8,9 @@
     "colors": {
       "accent":           [0.524, 1.00, 0.45],
       "cursor":           [0.524, 1.00, 0.45],
-      "background":       [0.0,   0.0,  0.9686],
-      "backgroundAccent": [0.0,   0.0,  0.9686],
-      "shapes":           [0.0,   0.0,  0.9686]
+      "background":       [0.0,   0.0,  0.7961],
+      "backgroundAccent": [0.0,   0.0,  0.7961],
+      "shapes":           [0.0,   0.0,  0.7961]
     },
     "background": {
       "opacity": 0.0,

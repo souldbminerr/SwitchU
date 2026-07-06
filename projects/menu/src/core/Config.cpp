@@ -51,6 +51,8 @@ bool AppConfig::load() {
     readJsonOpt(j, "backgroundEffectEnabled", backgroundEffectEnabled);
     readJsonOpt(j, "appIconShape", appIconShape);
     readJsonOpt(j, "appSelectionGlow", appSelectionGlow);
+    readJsonOpt(j, "appSelectionExpand", appSelectionExpand);
+    readJsonOpt(j, "appScrollEasing", appScrollEasing);
     readJsonOpt(j, "customThemeLight", customThemeLight);
     readJsonOpt(j, "customPrimary", customPrimary);
     readJsonOpt(j, "customText", customText);
@@ -102,6 +104,8 @@ bool AppConfig::save() const {
     j["backgroundEffectEnabled"] = backgroundEffectEnabled;
     j["appIconShape"] = appIconShape;
     j["appSelectionGlow"] = appSelectionGlow;
+    j["appSelectionExpand"] = appSelectionExpand;
+    j["appScrollEasing"] = appScrollEasing;
     j["customThemeLight"] = customThemeLight;
     j["customPrimary"] = customPrimary;
     j["customText"] = customText;

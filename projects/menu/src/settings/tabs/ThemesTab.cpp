@@ -82,6 +82,40 @@ SettingsScreen::Tab settings::tabs::ThemesTab::build(SettingsScreen& screen) {
         t.items.push_back(std::move(it));
     }
 
+    // Scale the selected app up (qlaunch keeps it flat).
+    {
+        SettingItem it;
+        it.label = i18n.tr("settings.themes.selection_expand", "Expand On Select");
+        it.description = i18n.tr("settings.themes.selection_expand_desc",
+                                 "Scale the selected app up slightly.");
+        it.type = ItemType::Toggle;
+        it.boolVal = screen.m_selectionExpand;
+        it.anim01 = it.boolVal ? 1.f : 0.f;
+        it.onChange = [&screen](SettingItem& self) {
+            screen.m_selectionExpand = self.boolVal;
+            if (screen.m_selectionExpandCb)
+                screen.m_selectionExpandCb(self.boolVal);
+        };
+        t.items.push_back(std::move(it));
+    }
+
+    // Smooth (eased/centred) scrolling vs. just stopping (qlaunch).
+    {
+        SettingItem it;
+        it.label = i18n.tr("settings.themes.scroll_center", "Center Selection");
+        it.description = i18n.tr("settings.themes.scroll_center_desc",
+                                 "Keep the selected app centred while scrolling (off = qlaunch deadzone).");
+        it.type = ItemType::Toggle;
+        it.boolVal = screen.m_scrollEasing;
+        it.anim01 = it.boolVal ? 1.f : 0.f;
+        it.onChange = [&screen](SettingItem& self) {
+            screen.m_scrollEasing = self.boolVal;
+            if (screen.m_scrollEasingCb)
+                screen.m_scrollEasingCb(self.boolVal);
+        };
+        t.items.push_back(std::move(it));
+    }
+
     // ---- Custom theme colour picker ----
     {
         SettingItem it;

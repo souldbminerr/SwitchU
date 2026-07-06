@@ -275,6 +275,8 @@ void SwitchMenuApp::createSettings() {
         m_settings->setIconShapeState(shapeNames, iconShapeStrToIndex(m_config.appIconShape));
     }
     m_settings->setSelectionGlowState(m_config.appSelectionGlow);
+    m_settings->setSelectionExpandState(m_config.appSelectionExpand);
+    m_settings->setScrollEasingState(m_config.appScrollEasing);
     m_settings->setCustomThemeState(isCustomThemeActive(), m_config.customThemeLight,
                                     m_config.customPrimary, m_config.customText,
                                     m_config.customHighlight, m_config.customAccent,
@@ -329,6 +331,19 @@ void SwitchMenuApp::createSettings() {
         if (m_grid)
             for (auto& icon : m_grid->allIcons())
                 if (icon) icon->setGlowEnabled(on);
+        m_config.save();
+    });
+    m_settings->onSelectionExpandChange([this](bool on) {
+        m_config.appSelectionExpand = on;
+        if (m_grid)
+            for (auto& icon : m_grid->allIcons())
+                if (icon) icon->setExpandOnSelect(on);
+        m_config.save();
+    });
+    m_settings->onScrollEasingChange([this](bool on) {
+        m_config.appScrollEasing = on;
+        if (m_grid)
+            m_grid->setScrollEasing(on);
         m_config.save();
     });
 
@@ -1152,17 +1167,38 @@ void SwitchMenuApp::applyTheme() {
     m_background->setShapeColor(m_theme.shapeColor);
     DebugLog::log("[theme-apply] widget recolor background done");
 
+    // Empty app-slot fill: #cccccc (light), #2d2d2d (near-black "Black"), #323232 (dark).
+    nxui::Color emptyFill;
+    if (m_theme.mode == nxui::ThemeMode::Light) {
+        emptyFill = nxui::Color(0.800f, 0.800f, 0.800f, 1.f);   // #cccccc
+    } else {
+        float lum = 0.299f * m_theme.primary.r + 0.587f * m_theme.primary.g
+                  + 0.114f * m_theme.primary.b;
+        emptyFill = (lum < 0.05f)
+            ? nxui::Color(0.176f, 0.176f, 0.176f, 1.f)   // #2d2d2d (Black theme)
+            : nxui::Color(0.196f, 0.196f, 0.196f, 1.f);  // #323232 (Dark theme)
+    }
+    // Home selection outline: qlaunch blue in dark (#0AB9E6), cyan in light (#0cd0c5).
+    const nxui::Color selectionColor = (m_theme.mode == nxui::ThemeMode::Dark)
+        ? nxui::Color(0.039f, 0.725f, 0.902f, 1.f)   // #0AB9E6
+        : nxui::Color(0.047f, 0.816f, 0.773f, 1.f);  // #0cd0c5
+    // Empty app-slot border: #f6f6f6 (light) / #414141 (dark & black).
+    const nxui::Color emptyBorder = (m_theme.mode == nxui::ThemeMode::Light)
+        ? nxui::Color(0.965f, 0.965f, 0.965f, 1.f)   // #f6f6f6
+        : nxui::Color(0.255f, 0.255f, 0.255f, 1.f);  // #414141
     for (auto& icon : m_grid->allIcons()) {
-        icon->setBaseColor(m_theme.iconDefault);
+        icon->setBaseColor(emptyFill);
         icon->setBorderColor(m_theme.panelBorder);
         icon->setHighlightColor(m_theme.panelHighlight);
         icon->setCornerRadius(m_theme.iconCornerRadius);
-        icon->setSelectionColor(m_theme.accent);
+        icon->setSelectionColor(selectionColor);
+        icon->setEmptyBorderColor(emptyBorder);
         icon->setGlowEnabled(m_config.appSelectionGlow);
+        icon->setExpandOnSelect(m_config.appSelectionExpand);
     }
     DebugLog::log("[theme-apply] widget recolor grid icons done");
 
-    m_cursor->setColor(m_theme.accent);   // green ON/Accent selection ring
+    m_cursor->setColor(selectionColor);   // blue (dark) / accent selection ring
     m_cursor->setCornerRadius(m_theme.cursorCornerRadius);
     m_cursor->setBorderWidth(4.f);   // 4 px selection outline
     if (m_pointerCursor) {
@@ -1187,10 +1223,11 @@ void SwitchMenuApp::applyTheme() {
     m_battery->setHighlightColor(kTransparent);
     m_battery->setTextColor(m_theme.textPrimary);
 
-    m_titlePill->setBaseColor(kTransparent);
-    m_titlePill->setBorderColor(kTransparent);
-    m_titlePill->setHighlightColor(kTransparent);
-    m_titlePill->setTextColor(m_theme.textPrimary);
+    // Selected-item title colour: cyan (#0cd0c7 light / #0fc4f9 dark & black).
+    m_titlePill->setTextColor(m_theme.mode == nxui::ThemeMode::Light
+        ? nxui::Color(0.047f, 0.816f, 0.780f, 1.f)    // #0cd0c7
+        : nxui::Color(0.059f, 0.769f, 0.976f, 1.f));  // #0fc4f9
+    m_titlePill->setBackgroundColor(m_theme.primary);
 
     m_pageIndicator->setBaseColor(m_theme.panelBase);
     m_pageIndicator->setBorderColor(m_theme.panelBorder);

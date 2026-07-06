@@ -67,6 +67,11 @@ public:
 
     void onPageSwitched(std::function<void()> cb) { m_onPageSwitched = std::move(cb); }
 
+    // When true, scrolling eases and centres the selection; when false (qlaunch
+    // default) the strip just stops where it is, scrolling minimally to keep the
+    // selection visible without snapping to an icon.
+    void setScrollEasing(bool e) { m_scrollEasing = e; }
+
     void render(nxui::Renderer& ren) override;
 
 protected:
@@ -97,6 +102,7 @@ private:
 
     float m_scrollX = 0.f, m_scrollTargetX = 0.f;
     bool  m_manualScroll = false;
+    bool  m_scrollEasing = false;
     bool  m_layoutInit = false;
 
     std::function<void()> m_onPageSwitched;

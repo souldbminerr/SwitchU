@@ -35,6 +35,8 @@ public:
     void onBackgroundEffectChange(BoolCb cb) { m_bgEffectCb = std::move(cb); }
     void onIconShapeChange(IntCb cb)         { m_iconShapeCb = std::move(cb); }
     void onSelectionGlowChange(BoolCb cb)    { m_selectionGlowCb = std::move(cb); }
+    void onSelectionExpandChange(BoolCb cb)  { m_selectionExpandCb = std::move(cb); }
+    void onScrollEasingChange(BoolCb cb)     { m_scrollEasingCb = std::move(cb); }
     using CustomColorsCb = std::function<void(bool light, unsigned bg, unsigned text,
                                               unsigned highlight, unsigned enabled, unsigned disabled)>;
     void onCustomColorsChange(CustomColorsCb cb) { m_customColorsCb = std::move(cb); }
@@ -80,6 +82,8 @@ public:
         m_iconShapeIndex = index;
     }
     void setSelectionGlowState(bool enabled) { m_selectionGlow = enabled; }
+    void setSelectionExpandState(bool enabled) { m_selectionExpand = enabled; }
+    void setScrollEasingState(bool enabled) { m_scrollEasing = enabled; }
     void setAccessibilityEnabledState(bool enabled) {
         m_accessibilityEnabled = enabled;
         setAccessibilityVoiceEnabled(enabled);
@@ -118,6 +122,8 @@ private:
     BoolCb m_bgEffectCb;
     IntCb  m_iconShapeCb;
     BoolCb m_selectionGlowCb;
+    BoolCb m_selectionExpandCb;
+    BoolCb m_scrollEasingCb;
     BoolCb m_musicEnabledCb;
     CustomColorsCb m_customColorsCb;
     BoolCb m_accessibilityEnabledCb;
@@ -142,6 +148,8 @@ private:
     std::vector<std::string> m_iconShapeNames;
     int  m_iconShapeIndex = 1;   // default: Square
     bool m_selectionGlow = false;
+    bool m_selectionExpand = false;
+    bool m_scrollEasing = false;
     bool m_musicEnabled = false;
     bool m_customActive = false;
     bool m_customLight = false;

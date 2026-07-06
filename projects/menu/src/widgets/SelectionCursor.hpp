@@ -9,6 +9,9 @@ public:
 
     void moveTo(const nxui::Rect& target, float duration = 0.2f);
     void moveTo(const nxui::Rect& target, float cornerRadius, float duration);
+    // Jump to a target fully shown (no fade) — used when re-showing the cursor
+    // after it was hidden, so it doesn't flash at its previous position.
+    void snap(const nxui::Rect& target, float cornerRadius);
     // Track a moving target (e.g. list scrolling) without triggering the
     // fade-out/in transition, so the highlight follows the row smoothly.
     void follow(const nxui::Rect& target, float cornerRadius);

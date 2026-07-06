@@ -113,6 +113,18 @@ void SelectionCursor::follow(const nxui::Rect& target, float cornerRadius) {
     m_cornerRadius.setImmediate(cornerRadius);
 }
 
+void SelectionCursor::snap(const nxui::Rect& target, float cornerRadius) {
+    m_x.setImmediate(target.x);
+    m_y.setImmediate(target.y);
+    m_w.setImmediate(target.width);
+    m_h.setImmediate(target.height);
+    m_cornerRadius.setImmediate(cornerRadius);
+    m_fade = 1.f;
+    m_fadePhase = Fade::Idle;
+    m_hasPending = false;
+    m_initialized = true;
+}
+
 nxui::Rect SelectionCursor::currentRect() const {
     return nxui::Rect{
         std::roundf(m_x.value()),

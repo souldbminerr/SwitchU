@@ -114,8 +114,7 @@ void SwitchMenuApp::enterEditMode() {
     m_editHeldTitle = icon->title();
     startEditGhost(icon);
     bindEditActions(icon);
-    m_titlePill->setText(nxui::I18n::instance().tr("game.move_prefix", "Move: ") + m_editHeldTitle);
-    m_titlePill->setVisible(true);
+    updateSelectionTitle();
 }
 
 void SwitchMenuApp::exitEditMode() {
@@ -128,14 +127,7 @@ void SwitchMenuApp::exitEditMode() {
     m_editHeldTitle.clear();
     stopEditGhost();
 
-    auto* cur = focusManager().current();
-    if (isEditableIcon(cur)) {
-        auto* icon = static_cast<GlossyIcon*>(cur);
-        m_titlePill->setText(icon->title());
-        m_titlePill->setVisible(true);
-    } else {
-        m_titlePill->hideAnimated();
-    }
+    updateSelectionTitle();
 
     if (m_layoutDirty)
         saveMenuLayout();
@@ -266,8 +258,8 @@ bool SwitchMenuApp::moveFocusedIcon(nxui::FocusDirection dir) {
     if (isEditableIcon(cur)) {
         auto* icon = static_cast<GlossyIcon*>(cur);
         bindEditActions(icon);
-        m_titlePill->setText(nxui::I18n::instance().tr("game.move_prefix", "Move: ") + icon->title());
     }
+    updateSelectionTitle();
 
     m_layoutDirty = true;
     updateCursor();
@@ -289,62 +281,22 @@ void SwitchMenuApp::wireFocusCallback() {
         if (!suppressSfx)
             m_audio.playSfx(Sfx::Navigate);
 
+        // The selected-item title is driven each frame by updateSelectionTitle();
+        // here we only maintain edit-mode binding / ghost state.
         if (cur && cur->tag() == "glossy_icon") {
             m_grid->focusManager().setFocus(cur);
-            auto* icon = static_cast<GlossyIcon*>(cur);
-            auto& i18n = nxui::I18n::instance();
             if (m_editMode) {
+                auto* icon = static_cast<GlossyIcon*>(cur);
                 bindEditActions(icon);
                 m_editGhostTargetRect = icon->focusRect();
-                if (!m_editHeldTitle.empty())
-                    m_titlePill->setText(i18n.tr("game.move_prefix", "Move: ") + m_editHeldTitle);
-                else if (icon->titleId() != 0)
-                    m_titlePill->setText(i18n.tr("game.move_prefix", "Move: ") + icon->title());
-                else
-                    m_titlePill->setText(i18n.tr("game.move", "Move"));
-                m_titlePill->setVisible(true);
-                return;
             }
-            if (icon->titleId() == 0) {
-                m_titlePill->hideAnimated();
-                return;
-            }
-#ifdef QLAUNCHEXT_MENU
-            if (m_launcher.isAppSuspended(icon->titleId())) {
-                m_titlePill->setText(icon->title());
-            } else
-#endif
-            m_titlePill->setText(icon->title());
-            m_titlePill->setVisible(true);
         } else if (cur) {
             if (m_editMode)
                 exitEditMode();
-            for (auto& btn : m_sidebar.leftButtons()) {
-                if (btn.get() == cur) { m_titlePill->setText(btn->label()); m_titlePill->setVisible(true); return; }
-            }
-            for (auto& btn : m_sidebar.rightButtons()) {
-                if (btn.get() == cur) { m_titlePill->setText(btn->label()); m_titlePill->setVisible(true); return; }
-            }
-            for (auto& avatar : m_userAvatarButtons) {
-                if (avatar.get() == cur) {
-                    m_titlePill->setText(avatar->nickname());
-                    m_titlePill->setVisible(!avatar->nickname().empty());
-                    return;
-                }
-            }
-            m_titlePill->hideAnimated();
-        } else {
-            m_titlePill->hideAnimated();
         }
     });
     updateCursor();
-    if (auto* cur = focusManager().current()) {
-        if (cur->tag() == "glossy_icon") {
-            auto* icon = static_cast<GlossyIcon*>(cur);
-            if (icon->titleId() != 0)
-                m_titlePill->setText(icon->title());
-        }
-    }
+    updateSelectionTitle();
 }
 
 bool SwitchMenuApp::isCurrentFocusableWidget(nxui::Widget* w) const {
@@ -433,6 +385,15 @@ bool SwitchMenuApp::onEdgeNavigate(nxui::FocusDirection dir) {
 
     nxui::Widget* cur = focusManager().current();
     if (!cur || cur->tag() != "glossy_icon") return false;
+
+    // Up from any app with nothing above it jumps to the user page (avatar).
+    if (dir == nxui::FocusDirection::UP) {
+        if (!m_userAvatarButtons.empty()) {
+            focusManager().setFocus(m_userAvatarButtons.front().get());
+            return true;
+        }
+        return false;
+    }
 
     const auto& icons = m_grid->allIcons();
     int firstIdx = -1, lastIdx = -1;
@@ -550,14 +511,7 @@ void SwitchMenuApp::markSuspendedIcon(uint64_t titleId) {
     if (titleId != 0)
         focusTitle(titleId);
 
-    if (auto* cur = m_grid->focusManager().current()) {
-        auto* icon = static_cast<GlossyIcon*>(cur);
-        if (m_launcher.isAppSuspended(icon->titleId())) {
-            m_titlePill->setText(icon->title());
-        } else {
-            m_titlePill->setText(icon->title());
-        }
-    }
+    updateSelectionTitle();
 }
 
 void SwitchMenuApp::closeActiveOverlays() {
@@ -651,10 +605,7 @@ void SwitchMenuApp::wireGlobalActions() {
                     m_launcher.setSuspendedTitleId(0);
                     for (auto& ic : m_grid->allIcons())
                         ic->setSuspended(false);
-                    if (auto* cur = m_grid->focusManager().current()) {
-                        auto* icon = static_cast<GlossyIcon*>(cur);
-                        m_titlePill->setText(icon->title());
-                    }
+                    updateSelectionTitle();
                 }, true}
             },
             1,
@@ -835,6 +786,10 @@ void SwitchMenuApp::updateCursor() {
         return;
 
     auto* cur = focusManager().current();
+    // Whether the cursor was on-screen last update. When it re-appears after
+    // being hidden (e.g. moving off a game tile onto a dock bubble), we snap it
+    // in rather than fading from its stale position (which flickers).
+    const bool wasVisible = m_cursor->isVisible();
     if (cur) {
         nxui::Rect fr = cur->focusRect().expanded(4.f);
 
@@ -847,16 +802,70 @@ void SwitchMenuApp::updateCursor() {
         if (!isCircular)
             for (const auto& a : m_userAvatarButtons) if (a.get() == cur) { isCircular = true; break; }
 
-        if (isCircular)
-            m_cursor->moveTo(fr, std::min(fr.width, fr.height) * 0.5f, 0.18f);
-        else if (cur->tag() == "glossy_icon")
-            // Match the icon shape: circle ring for circular icons, otherwise a
-            // subtle ~2px-curved rounded rectangle.
-            m_cursor->moveTo(fr, static_cast<GlossyIcon*>(cur)->cursorRadius(fr), 0.18f);
-        else
-            m_cursor->moveTo(fr);
-        m_cursor->setVisible(true);
+        if (isCircular) {
+            float radius = std::min(fr.width, fr.height) * 0.5f;
+            if (wasVisible) m_cursor->moveTo(fr, radius, 0.18f);
+            else            m_cursor->snap(fr, radius);
+            m_cursor->setVisible(true);
+        } else if (cur->tag() == "glossy_icon") {
+            // Games use the accent gap frame drawn by the tile itself as their
+            // selection; keep the cursor tracking (for the edit-move ghost) but
+            // only render it in edit mode.
+            float radius = static_cast<GlossyIcon*>(cur)->cursorRadius(fr);
+            if (wasVisible) m_cursor->moveTo(fr, radius, 0.18f);
+            else            m_cursor->snap(fr, radius);
+            m_cursor->setVisible(m_editMode);
+        } else {
+            if (wasVisible) m_cursor->moveTo(fr);
+            else            m_cursor->snap(fr, fr.height * 0.5f);
+            m_cursor->setVisible(true);
+        }
     } else {
         m_cursor->setVisible(false);
     }
+}
+
+void SwitchMenuApp::updateSelectionTitle() {
+    if (!m_titlePill) return;
+    if ((m_dialog && m_dialog->isActive()) ||
+        (m_themeShop && m_themeShop->isActive()) ||
+        (m_settings && m_settings->isActive()) ||
+        (m_userSelect && m_userSelect->isActive()) ||
+        (m_launchAnim && m_launchAnim->isPlaying())) {
+        m_titlePill->hide();
+        return;
+    }
+
+    auto* cur = focusManager().current();
+    if (!cur) { m_titlePill->hide(); return; }
+
+    if (cur->tag() == "glossy_icon") {
+        auto* icon = static_cast<GlossyIcon*>(cur);
+        auto& i18n = nxui::I18n::instance();
+        if (m_editMode) {
+            const std::string held = !m_editHeldTitle.empty() ? m_editHeldTitle : icon->title();
+            std::string text = held.empty()
+                ? i18n.tr("game.move", "Move")
+                : i18n.tr("game.move_prefix", "Move: ") + held;
+            m_titlePill->showGame(text, icon->focusRect(), 6.f, nullptr);
+            return;
+        }
+        if (icon->titleId() == 0) { m_titlePill->hide(); return; }
+        nxui::Texture* gc = icon->isGameCard() ? icon->gameCardTexture() : nullptr;
+        m_titlePill->showGame(icon->title(), icon->focusRect(), 6.f, gc);
+        return;
+    }
+
+    for (const auto& b : m_sidebar.leftButtons())
+        if (b.get() == cur) { m_titlePill->showBubble(b->label(), b->focusRect()); return; }
+    for (const auto& b : m_sidebar.rightButtons())
+        if (b.get() == cur) { m_titlePill->showBubble(b->label(), b->focusRect()); return; }
+    for (const auto& av : m_userAvatarButtons)
+        if (av.get() == cur) {
+            if (av->nickname().empty()) m_titlePill->hide();
+            else m_titlePill->showBubble(av->nickname(), av->focusRect());
+            return;
+        }
+
+    m_titlePill->hide();
 }

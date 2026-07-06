@@ -24,6 +24,8 @@ struct AppConfig {
     bool  backgroundEffectEnabled = false;
     std::string appIconShape = "square";   // "square" (qlaunch) | "rounded" (SwitchU) | "circular"
     bool  appSelectionGlow = false;        // pulsing drop-shadow glow on selected apps
+    bool  appSelectionExpand = false;      // scale the selected app up (qlaunch: off)
+    bool  appScrollEasing = false;         // ease/center scroll to stops (qlaunch: off)
 
     // "Custom" theme colours (0xRRGGBB), edited via the Themes color picker.
     bool     customThemeLight = false;          // light vs dark base (text/panels)

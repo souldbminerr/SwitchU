@@ -266,8 +266,18 @@ void SidebarManager::applyTheme(const nxui::Theme& theme) {
     // and neutral glyph colour follow the theme (light vs dark); the coloured
     // glyphs (News green, Album blue) keep their fixed tint set in build().
     const bool light = (theme.mode == nxui::ThemeMode::Light);
-    // Match the fill of the empty app slots (the middle of an empty icon).
-    const nxui::Color circle = theme.iconDefault;
+    // Dock bubble fill. Near-black ("Black") themes use #292929; other dark
+    // themes use #505050; light themes match the empty app-slot fill.
+    nxui::Color circle;
+    if (light) {
+        circle = theme.iconDefault;
+    } else {
+        float lum = 0.299f * theme.primary.r + 0.587f * theme.primary.g
+                  + 0.114f * theme.primary.b;
+        circle = (lum < 0.05f)
+            ? nxui::Color(0.161f, 0.161f, 0.161f, 1.f)   // #292929 (Black theme)
+            : nxui::Color(0.314f, 0.314f, 0.314f, 1.f);  // #505050 (Dark theme)
+    }
     const nxui::Color neutral = light ? nxui::Color(0.20f, 0.20f, 0.22f, 1.f)
                                       : nxui::Color(0.88f, 0.88f, 0.92f, 1.f);
     auto apply = [&](std::shared_ptr<AppletButton>& btn) {

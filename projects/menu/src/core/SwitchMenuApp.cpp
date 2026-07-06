@@ -711,6 +711,7 @@ std::shared_ptr<GlossyIcon> SwitchMenuApp::makeIcon(const AppEntry& entry) {
     icon->setRoundedRadius(m_theme.iconCornerRadius);
     icon->setSelectionColor(m_theme.accent);
     icon->setGlowEnabled(m_config.appSelectionGlow);
+    icon->setExpandOnSelect(m_config.appSelectionExpand);
     if (entry.titleId == 0) {
         icon->setTag("glossy_icon");
         icon->setTitle("");
@@ -922,6 +923,7 @@ void SwitchMenuApp::buildGrid() {
                   std::clamp(m_config.gridRows, 1, 5),
                   gridMetrics.cellW, gridMetrics.cellH,
                   gridMetrics.padX, gridMetrics.padY);
+    m_grid->setScrollEasing(m_config.appScrollEasing);
 
     m_cursor = std::make_shared<SelectionCursor>();
     m_pointerCursor = std::make_shared<SelectionCursor>();
@@ -949,13 +951,12 @@ void SwitchMenuApp::buildGrid() {
 
     buildUserAvatarBar();
 
-    // Selected game name, shown just below the tile strip (above the dock).
-    m_titlePill = std::make_shared<TitlePillWidget>();
-    m_titlePill->setPosition(0, 436.f);
+    // Selected-item title (game marquee above the tile / bubble label below the dock).
+    m_titlePill = std::make_shared<SelectionTitleWidget>();
+    m_titlePill->setRect({0.f, 0.f, 1280.f, 720.f});
     m_titlePill->setFont(&m_fontNormal);
-    m_titlePill->setPadding(9.f, 22.f, 9.f, 22.f);
-    m_titlePill->setForceLiquidGlass(false);
-    m_titlePill->setBlurEnabled(false);
+    m_titlePill->setTextColor(m_theme.textPrimary);
+    m_titlePill->setBackgroundColor(m_theme.primary);
 
     m_pageIndicator = std::make_shared<PageIndicator>();
     m_pageIndicator->setRect({0, 685.f, 1280.f, 28.f});
@@ -1168,7 +1169,7 @@ void SwitchMenuApp::buildGrid() {
     m_contentLayer->addChild(m_rightSidebar);
     m_contentLayer->addChild(m_topHud);
     m_contentLayer->addChild(m_titlePill);
-    m_contentLayer->addChild(m_pageIndicator);
+    // Page-dot indicator intentionally not added (qlaunch home has no page dots).
 
     m_overlayLayer = std::make_shared<nxui::Box>();
     m_overlayLayer->setRect({0, 0, 1280, 720});
@@ -1731,6 +1732,9 @@ void SwitchMenuApp::onUpdate(float dt) {
             m_cursorFollowIcon = nullptr;
         }
     }
+
+    // Drive the selected-item title (tracks the tile as it scrolls).
+    updateSelectionTitle();
 
     nxui::AnimationManager::instance().update(dt);
 

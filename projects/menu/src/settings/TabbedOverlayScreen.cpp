@@ -404,11 +404,18 @@ void TabbedOverlayScreen::onRender(nxui::Renderer& ren) {
 
     nxui::Rect p = panelRect(scale());
 
-    if (m_theme)
-        m_focusCursor.setColor(m_theme->cursorNormal);   // entry highlight keeps the normal color
-    // No selection outline on the category rail — the selected tab shows only its
-    // accent bar. The cursor is used for content items only.
-    m_focusCursor.setOpacity(m_focusArea == FocusArea::Tabs ? 0.f : contentOpacity());
+    // On the category rail the cursor outlines the focused category in the same
+    // blue used for the home app selection (dark) / accent (light); in the
+    // content area it keeps the normal entry-highlight colour. Shown in both
+    // areas (the accent bar marks the selected tab regardless of focus).
+    if (m_theme) {
+        const nxui::Color appSel = (m_theme->mode == nxui::ThemeMode::Dark)
+            ? nxui::Color(0.039f, 0.725f, 0.902f, 1.f)   // #0AB9E6
+            : nxui::Color(0.047f, 0.816f, 0.773f, 1.f);  // #0cd0c5
+        m_focusCursor.setColor(m_focusArea == FocusArea::Tabs
+                               ? appSel : m_theme->cursorNormal);
+    }
+    m_focusCursor.setOpacity(contentOpacity());
 
     if (m_tabBar) m_tabBar->setRect(tabsRect(p));
     if (m_tabContent) m_tabContent->setRect(contentRect(p));
@@ -615,8 +622,15 @@ void TabbedOverlayScreen::drawTabs(nxui::Renderer& ren, const nxui::Rect& panel,
         tabY += rowPitch;
     }
 
-    // (No focus-cursor outline on the rail: the selected tab is shown by its
-    //  accent bar only.)
+    // When focus is on the rail, outline the focused category (in addition to
+    // its accent bar) so the cursor location is clear.
+    if (m_focusArea == FocusArea::Tabs && m_tabIndex >= 0 &&
+        m_tabIndex < (int)tabChildren.size()) {
+        nxui::Rect ob = tabChildren[m_tabIndex]->rect().expanded(1.f);
+        ob.x     -= 7.f;    // ~14 px longer, centred
+        ob.width += 14.f;
+        m_focusCursor.moveTo(ob, 8.f, 0.08f);
+    }
 
     // Clip the rail so nothing bleeds into the header/footer bands.
     ren.pushClipRect(tr);
