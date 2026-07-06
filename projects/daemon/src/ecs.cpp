@@ -1,6 +1,6 @@
 #include "ecs.hpp"
-#include <switchu/smi_protocol.hpp>
-#include <switchu/file_log.hpp>
+#include <qlaunchext/smi_protocol.hpp>
+#include <qlaunchext/file_log.hpp>
 
 #include <stratosphere.hpp>
 #include <stratosphere/fssrv/interface_adapters/fssrv_filesystem_interface_adapter.hpp>
@@ -13,7 +13,7 @@ namespace ams::os {
     void Initialize();
 }
 
-namespace switchu::daemon {
+namespace qlaunchext::daemon {
 
 namespace {
 
@@ -41,9 +41,9 @@ std::atomic<bool> g_allocatorReady{false};
 std::atomic<bool> g_runtimeReady{false};
 
 void managerThreadEntry(void*) {
-    switchu::FileLog::log("[ecs] stratosphere manager thread started");
+    qlaunchext::FileLog::log("[ecs] stratosphere manager thread started");
     g_manager.LoopProcess();
-    switchu::FileLog::log("[ecs] stratosphere manager thread exiting");
+    qlaunchext::FileLog::log("[ecs] stratosphere manager thread exiting");
 }
 
 Result initializeRuntime() {
@@ -56,13 +56,13 @@ Result initializeRuntime() {
                                              kManagerThreadPriority);
         rc = amsRc.GetValue();
         if (R_FAILED(rc)) {
-            switchu::FileLog::log("[ecs] stratosphere CreateThread FAIL: 0x%X", rc);
+            qlaunchext::FileLog::log("[ecs] stratosphere CreateThread FAIL: 0x%X", rc);
             return;
         }
 
         ::ams::os::StartThread(&g_managerThread);
         g_runtimeReady.store(true);
-        switchu::FileLog::log("[ecs] stratosphere runtime ready");
+        qlaunchext::FileLog::log("[ecs] stratosphere runtime ready");
     });
 
     return g_runtimeReady.load() ? 0 : rc;
@@ -88,7 +88,7 @@ void initializeExternalContentAllocator() {
     if (g_allocatorReady.compare_exchange_strong(expected, true)) {
         ::ams::init::InitializeAllocator(g_amsHeap, sizeof(g_amsHeap));
         ::ams::os::Initialize();
-        ::ams::os::SetThreadNamePointer(::ams::os::GetCurrentThread(), "SwitchU.daemon.Main");
+        ::ams::os::SetThreadNamePointer(::ams::os::GetCurrentThread(), "qlaunch-ext.daemon.Main");
     }
 }
 
@@ -100,10 +100,10 @@ Result registerExternalContent(uint64_t program_id, const char* exefs_path) {
     Handle move_h = INVALID_HANDLE;
     rc = ldrAtmosRegisterExternalCode(program_id, &move_h);
     if (R_FAILED(rc)) {
-        switchu::FileLog::log("[ecs] RegisterExternalCode FAIL: 0x%X", rc);
+        qlaunchext::FileLog::log("[ecs] RegisterExternalCode FAIL: 0x%X", rc);
         return rc;
     }
-    switchu::FileLog::log("[ecs] RegisterExternalCode ok program=0x%016lX server=0x%X",
+    qlaunchext::FileLog::log("[ecs] RegisterExternalCode ok program=0x%016lX server=0x%X",
                           program_id, move_h);
 
     FsFileSystem sd_fs = {};
@@ -111,7 +111,7 @@ Result registerExternalContent(uint64_t program_id, const char* exefs_path) {
     if (R_FAILED(rc)) {
         ldrAtmosUnregisterExternalCode(program_id);
         svcCloseHandle(move_h);
-        switchu::FileLog::log("[ecs] fsOpenSdCard FAIL: 0x%X", rc);
+        qlaunchext::FileLog::log("[ecs] fsOpenSdCard FAIL: 0x%X", rc);
         return rc;
     }
 
@@ -129,7 +129,7 @@ Result registerExternalContent(uint64_t program_id, const char* exefs_path) {
         rc = amsRc.GetValue();
         ldrAtmosUnregisterExternalCode(program_id);
         svcCloseHandle(move_h);
-        switchu::FileLog::log("[ecs] SubDirectoryFileSystem init FAIL: 0x%X path=%s", rc, exefs_path);
+        qlaunchext::FileLog::log("[ecs] SubDirectoryFileSystem init FAIL: 0x%X path=%s", rc, exefs_path);
         return rc;
     }
 
@@ -142,20 +142,20 @@ Result registerExternalContent(uint64_t program_id, const char* exefs_path) {
         rc = amsRc.GetValue();
         ldrAtmosUnregisterExternalCode(program_id);
         svcCloseHandle(move_h);
-        switchu::FileLog::log("[ecs] RegisterSession FAIL: 0x%X", rc);
+        qlaunchext::FileLog::log("[ecs] RegisterSession FAIL: 0x%X", rc);
         return rc;
     }
 
-    switchu::FileLog::log("[ecs] registered %s -> 0x%016lX via stratosphere", exefs_path, program_id);
+    qlaunchext::FileLog::log("[ecs] registered %s -> 0x%016lX via stratosphere", exefs_path, program_id);
     return 0;
 }
 
 void unregisterExternalContent(uint64_t program_id) {
     Result rc = ldrAtmosUnregisterExternalCode(program_id);
     if (R_FAILED(rc))
-        switchu::FileLog::log("[ecs] Unregister FAIL: 0x%X", rc);
+        qlaunchext::FileLog::log("[ecs] Unregister FAIL: 0x%X", rc);
     else
-        switchu::FileLog::log("[ecs] unregistered 0x%016lX", program_id);
+        qlaunchext::FileLog::log("[ecs] unregistered 0x%016lX", program_id);
 }
 
 }

@@ -5,21 +5,21 @@
 #include <cstdarg>
 #include <cstdio>
 #include <fstream>
-#include <switchu/log_utils.hpp>
-#ifdef SWITCHU_MENU
-#include <switchu/file_log.hpp>
+#include <qlaunchext/log_utils.hpp>
+#ifdef QLAUNCHEXT_MENU
+#include <qlaunchext/file_log.hpp>
 #endif
 
 class DebugLog {
 public:
     static constexpr int MAX_LINES = 30;
-    static constexpr const char* LOG_DIR  = "sdmc:/config/SwitchU";
+    static constexpr const char* LOG_DIR  = "sdmc:/config/qlaunch-ext";
     static constexpr const char* LOG_BASE_NAME = "log";
     static constexpr const char* LOG_EXTENSION = ".txt";
-#ifdef SWITCHU_MENU
-    static constexpr const char* LOG_FILE = "sdmc:/config/SwitchU/menu.log";
+#ifdef QLAUNCHEXT_MENU
+    static constexpr const char* LOG_FILE = "sdmc:/config/qlaunch-ext/menu.log";
 #else
-    static constexpr const char* LOG_FILE = "sdmc:/config/SwitchU/log.txt";
+    static constexpr const char* LOG_FILE = "sdmc:/config/qlaunch-ext/log.txt";
 #endif
     static constexpr size_t MAX_LOG_FILES = 5;
     static constexpr size_t MAX_ARCHIVED_LOGS = MAX_LOG_FILES - 1;
@@ -28,21 +28,21 @@ public:
         auto& self = instance();
         std::lock_guard<std::mutex> lk(self.m_mutex);
 
-#ifdef SWITCHU_MENU
+#ifdef QLAUNCHEXT_MENU
         closeCurrentFile(self);
         return;
 #else
-        switchu::log_detail::ensure_log_dir(LOG_DIR);
+        qlaunchext::log_detail::ensure_log_dir(LOG_DIR);
         closeCurrentFile(self);
 
-        const bool canTruncate = switchu::log_detail::rotate_current_log(LOG_DIR, LOG_BASE_NAME, LOG_EXTENSION, MAX_ARCHIVED_LOGS);
+        const bool canTruncate = qlaunchext::log_detail::rotate_current_log(LOG_DIR, LOG_BASE_NAME, LOG_EXTENSION, MAX_ARCHIVED_LOGS);
         char path[256];
-        switchu::log_detail::build_current_log_path(path, sizeof(path), LOG_DIR, LOG_BASE_NAME, LOG_EXTENSION);
+        qlaunchext::log_detail::build_current_log_path(path, sizeof(path), LOG_DIR, LOG_BASE_NAME, LOG_EXTENSION);
         self.m_file.open(path, canTruncate ? std::ios::out | std::ios::trunc : std::ios::out | std::ios::app);
         if (self.m_file.is_open()) {
             char timestamp[32];
-            switchu::log_detail::format_line_timestamp(timestamp, sizeof(timestamp));
-            self.m_file << '[' << timestamp << "] === SwitchU log start ===\n";
+            qlaunchext::log_detail::format_line_timestamp(timestamp, sizeof(timestamp));
+            self.m_file << '[' << timestamp << "] === qlaunch-ext log start ===\n";
             self.m_file.flush();
         }
 #endif
@@ -62,7 +62,7 @@ public:
         va_end(args);
 
         char timestamp[32];
-        switchu::log_detail::format_line_timestamp(timestamp, sizeof(timestamp));
+        qlaunchext::log_detail::format_line_timestamp(timestamp, sizeof(timestamp));
         std::string line = std::string("[") + timestamp + "] " + buf;
 
         auto& self = instance();
@@ -72,8 +72,8 @@ public:
         if ((int)self.m_lines.size() > MAX_LINES)
             self.m_lines.erase(self.m_lines.begin());
 
-#ifdef SWITCHU_MENU
-        switchu::FileLog::log("%s", buf);
+#ifdef QLAUNCHEXT_MENU
+        qlaunchext::FileLog::log("%s", buf);
 #else
         if (self.m_file.is_open()) {
             self.m_file << line << '\n';
@@ -101,8 +101,8 @@ private:
             return;
 
         char timestamp[32];
-        switchu::log_detail::format_line_timestamp(timestamp, sizeof(timestamp));
-        self.m_file << '[' << timestamp << "] === SwitchU log end ===\n";
+        qlaunchext::log_detail::format_line_timestamp(timestamp, sizeof(timestamp));
+        self.m_file << '[' << timestamp << "] === qlaunch-ext log end ===\n";
         self.m_file.close();
     }
 

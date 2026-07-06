@@ -215,7 +215,9 @@ void IconStreamer::onPageChanged(int currentPage, int iconsPerPage,
     // 2. Re-attach already-loaded slots to the current widget order. This is
     //    needed after grid relayouts and swaps where the GlossyIcon objects
     //    may have moved while the GPU texture pool stayed valid.
-    for (int i = visibleStartApp; i < visibleEndApp; ++i) {
+    //    The home strip scrolls continuously and shows many tiles at once, so
+    //    we re-attach across the whole cache window, not just one page.
+    for (int i = cacheStartApp; i < cacheEndApp; ++i) {
         int slotIdx = m_appToSlot[i];
         if (slotIdx < 0)
             continue;
@@ -234,10 +236,12 @@ void IconStreamer::onPageChanged(int currentPage, int iconsPerPage,
         }
     }
 
-    // 3. Collect only visible apps that need loading. Neighbor pages are kept
-    //    when already loaded, but not decoded eagerly on this frame.
+    // 3. Collect apps in the cache window that need loading. The continuous
+    //    strip shows more tiles than a single page, so eagerly decode the whole
+    //    window; already-loaded neighbors are skipped, so a one-page scroll only
+    //    decodes the newly-entered page.
     std::vector<int> toLoad;
-    for (int i = visibleStartApp; i < visibleEndApp; ++i) {
+    for (int i = cacheStartApp; i < cacheEndApp; ++i) {
         if (m_appToSlot[i] < 0 && hasData(i))
             toLoad.push_back(i);
     }

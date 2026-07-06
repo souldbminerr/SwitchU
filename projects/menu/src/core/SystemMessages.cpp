@@ -2,7 +2,7 @@
 #include "DebugLog.hpp"
 #include <switch.h>
 
-#ifdef SWITCHU_MENU
+#ifdef QLAUNCHEXT_MENU
 
 void SystemMessages::pushAction(SysAction a) {
     std::lock_guard<std::mutex> lk(m_mutex);

@@ -48,18 +48,28 @@ bool AppConfig::load() {
     readJsonOpt(j, "accessibilitySpeakPosition", accessibilitySpeakPosition);
     readJsonOpt(j, "accessibilitySpeechRate", accessibilitySpeechRate);
     readJsonOpt(j, "themePreset", themePreset);
+    readJsonOpt(j, "backgroundEffectEnabled", backgroundEffectEnabled);
+    readJsonOpt(j, "appIconShape", appIconShape);
+    readJsonOpt(j, "customThemeLight", customThemeLight);
+    readJsonOpt(j, "customBg", customBg);
+    readJsonOpt(j, "customText", customText);
+    readJsonOpt(j, "customHighlight", customHighlight);
+    readJsonOpt(j, "customEnabled", customEnabled);
+    readJsonOpt(j, "customDisabled", customDisabled);
 
     if (musicVolume < 0.f) musicVolume = 0.f;
     if (musicVolume > 1.f) musicVolume = 1.f;
     if (sfxVolume   < 0.f) sfxVolume   = 0.f;
     if (sfxVolume   > 1.f) sfxVolume   = 1.f;
     gridColumns = std::clamp(gridColumns, 3, 8);
-    gridRows = std::clamp(gridRows, 2, 5);
+    gridRows = std::clamp(gridRows, 1, 5);
     if (uiLanguageOverride.empty()) uiLanguageOverride = "auto";
-    if (soundPreset.empty()) soundPreset = "wiiu";
+    if (soundPreset.empty()) soundPreset = "nx";
     if (!defaultProfileEnabled) defaultProfileUid.clear();
     accessibilitySpeechRate = std::clamp(accessibilitySpeechRate, 120, 320);
-    if (themePreset.empty()) themePreset = "Default Light";
+    if (themePreset.empty()) themePreset = "builtin:Switch Dark";
+    if (appIconShape != "square" && appIconShape != "rounded" && appIconShape != "circular")
+        appIconShape = "square";
 
     return true;
 }
@@ -75,7 +85,7 @@ bool AppConfig::save() const {
     j["musicVolume"] = musicVolume;
     j["sfxVolume"] = sfxVolume;
     j["gridColumns"] = std::clamp(gridColumns, 3, 8);
-    j["gridRows"] = std::clamp(gridRows, 2, 5);
+    j["gridRows"] = std::clamp(gridRows, 1, 5);
     j["uiLanguageOverride"] = uiLanguageOverride;
     j["soundPreset"] = soundPreset;
     j["defaultProfileEnabled"] = defaultProfileEnabled;
@@ -88,6 +98,14 @@ bool AppConfig::save() const {
     j["accessibilitySpeakPosition"] = accessibilitySpeakPosition;
     j["accessibilitySpeechRate"] = std::clamp(accessibilitySpeechRate, 120, 320);
     j["themePreset"] = themePreset;
+    j["backgroundEffectEnabled"] = backgroundEffectEnabled;
+    j["appIconShape"] = appIconShape;
+    j["customThemeLight"] = customThemeLight;
+    j["customBg"] = customBg;
+    j["customText"] = customText;
+    j["customHighlight"] = customHighlight;
+    j["customEnabled"] = customEnabled;
+    j["customDisabled"] = customDisabled;
 
     std::ofstream f(kConfigPath, std::ios::trunc);
     if (!f.is_open()) return false;

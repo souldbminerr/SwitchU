@@ -1,8 +1,8 @@
 #include "TabBuilders.hpp"
 #include <nxui/core/I18n.hpp>
 #include <switch.h>
-#ifdef SWITCHU_MENU
-#include <switchu/control_cache.hpp>
+#ifdef QLAUNCHEXT_MENU
+#include <qlaunchext/control_cache.hpp>
 #endif
 #include <algorithm>
 #include <cmath>
@@ -29,7 +29,7 @@ std::string formatBytes(uint64_t bytes) {
 }
 
 bool queryStorageSize(NcmStorageId storageId, uint64_t& total, uint64_t& freeSpace) {
-#ifdef SWITCHU_HOMEBREW
+#ifdef QLAUNCHEXT_HOMEBREW
     (void)storageId;
     total = 0;
     freeSpace = 0;
@@ -48,7 +48,7 @@ bool queryStorageSize(NcmStorageId storageId, uint64_t& total, uint64_t& freeSpa
 }
 
 uint64_t queryApplicationSize(uint64_t titleId) {
-#ifdef SWITCHU_HOMEBREW
+#ifdef QLAUNCHEXT_HOMEBREW
     (void)titleId;
     return 0;
 #else
@@ -78,7 +78,7 @@ std::string formatAppDetails(const std::string& location,
                              const std::string& status);
 
 std::string applicationStorageLocation(uint64_t titleId, const nxui::I18n& i18n) {
-#ifdef SWITCHU_HOMEBREW
+#ifdef QLAUNCHEXT_HOMEBREW
     (void)titleId;
     (void)i18n;
     return std::string();
@@ -182,13 +182,13 @@ AppControlInfo queryApplicationControlInfo(uint64_t titleId) {
         return info;
     }
 
-#ifdef SWITCHU_HOMEBREW
+#ifdef QLAUNCHEXT_HOMEBREW
     return info;
 #endif
 
-#ifdef SWITCHU_MENU
-    switchu::control_cache::Meta meta{};
-    if (switchu::control_cache::readMeta(titleId, meta)) {
+#ifdef QLAUNCHEXT_MENU
+    qlaunchext::control_cache::Meta meta{};
+    if (qlaunchext::control_cache::readMeta(titleId, meta)) {
         if (meta.name[0] != '\0')
             info.title = meta.name;
         info.state = AppState::Installed;
@@ -313,7 +313,7 @@ SettingsScreen::Tab settings::tabs::StorageTab::build(SettingsScreen& screen) {
     };
 
     std::vector<AppEntry> apps;
-#ifndef SWITCHU_HOMEBREW
+#ifndef QLAUNCHEXT_HOMEBREW
     NsApplicationRecord records[1024] = {};
     s32 recordCount = 0;
     if (R_SUCCEEDED(nsListApplicationRecord(records, 1024, 0, &recordCount)) && recordCount > 0) {
@@ -347,7 +347,7 @@ SettingsScreen::Tab settings::tabs::StorageTab::build(SettingsScreen& screen) {
         SettingItem it;
         it.label = i18n.tr("settings.storage.empty_library", "No installed games found");
         it.type = ItemType::Info;
-#ifdef SWITCHU_HOMEBREW
+#ifdef QLAUNCHEXT_HOMEBREW
         it.infoText = i18n.tr("settings.storage.homebrew_library_unavailable",
                               "Installed software management is unavailable in homebrew mode.");
 #else

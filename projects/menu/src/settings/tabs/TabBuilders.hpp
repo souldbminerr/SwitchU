@@ -9,7 +9,7 @@ public:
     static SettingsScreen::Tab build(SettingsScreen& screen);
 };
 
-class AccessibilityTab {
+class ThemesTab {
 public:
     static SettingsScreen::Tab build(SettingsScreen& screen);
 };

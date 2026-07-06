@@ -9,7 +9,7 @@
 
 namespace bluetooth {
 
-#ifdef SWITCHU_MENU
+#ifdef QLAUNCHEXT_MENU
 
 namespace {
 

@@ -9,10 +9,6 @@
 #include <nxui/core/Renderer.hpp>
 #include <nxui/core/ThreadPool.hpp>
 
-#include <curlpp/Easy.hpp>
-#include <curlpp/Infos.hpp>
-#include <curlpp/Options.hpp>
-#include <curlpp/cURLpp.hpp>
 #include <switch.h>
 
 #include <algorithm>

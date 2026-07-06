@@ -818,6 +818,37 @@ void Renderer::drawTextureSub(const Texture* tex, const Rect& src, const Rect& d
     addQuad(dest.x, dest.y, dest.right(), dest.bottom(), u0, v0, u1, v1, tint);
 }
 
+void Renderer::drawTextureRotated(const Texture* tex, const Rect& dest, float angle, const Color& tint) {
+    if (!tex) return;
+    if (angle == 0.f) { drawTexture(tex, dest, tint); return; }
+
+    bindTexture(tex->descriptorSlot());
+
+    const float cx = dest.x + dest.width  * 0.5f;
+    const float cy = dest.y + dest.height * 0.5f;
+    const float hw = dest.width  * 0.5f;
+    const float hh = dest.height * 0.5f;
+    const float c = std::cos(angle);
+    const float s = std::sin(angle);
+    auto rot = [&](float ox, float oy, float& outX, float& outY) {
+        outX = cx + ox * c - oy * s;
+        outY = cy + ox * s + oy * c;
+    };
+    float tlx, tly, trx, try_, brx, bry, blx, bly;
+    rot(-hw, -hh, tlx, tly);   // top-left     (u0,v0)
+    rot( hw, -hh, trx, try_);  // top-right    (u1,v0)
+    rot( hw,  hh, brx, bry);   // bottom-right (u1,v1)
+    rot(-hw,  hh, blx, bly);   // bottom-left  (u0,v1)
+
+    if (m_vtxCount + 6 > GpuDevice::MAX_VERTICES) flush();
+    addVertex(tlx, tly, 0, 0, tint);
+    addVertex(trx, try_, 1, 0, tint);
+    addVertex(brx, bry, 1, 1, tint);
+    addVertex(tlx, tly, 0, 0, tint);
+    addVertex(brx, bry, 1, 1, tint);
+    addVertex(blx, bly, 0, 1, tint);
+}
+
 void Renderer::drawTextureRounded(const Texture* tex, const Rect& dest, float radius, const Color& tint) {
     if (!tex) { return; }
     if (radius <= 0) { drawTexture(tex, dest, tint); return; }

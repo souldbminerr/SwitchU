@@ -98,42 +98,64 @@ void Application::dispatchInput() {
         }
     }
 
-    // Debounced D-pad and stick navigation.
-    // For each direction: if the focused widget has an action for that
-    // D-pad/stick button, fire it (consumed). Otherwise navigate spatially.
-    bool anyDpad =
-        m_input.isDown(Button::DLeft)   || m_input.isDown(Button::DRight)  ||
-        m_input.isDown(Button::DUp)     || m_input.isDown(Button::DDown)   ||
-        m_input.isDown(Button::LStickL) || m_input.isDown(Button::LStickR) ||
-        m_input.isDown(Button::LStickU) || m_input.isDown(Button::LStickD) ||
-        m_input.isDown(Button::RStickL) || m_input.isDown(Button::RStickR) ||
-        m_input.isDown(Button::RStickU) || m_input.isDown(Button::RStickD);
+    // D-pad / stick navigation with key-repeat: a fresh press fires immediately,
+    // then holding repeats after an initial delay at ~4 presses/second.
+    struct NavDir { Button dpad, leftStick, rightStick; FocusDirection dir; };
+    static const NavDir kDirs[4] = {
+        { Button::DLeft,  Button::LStickL, Button::RStickL, FocusDirection::LEFT  },
+        { Button::DRight, Button::LStickR, Button::RStickR, FocusDirection::RIGHT },
+        { Button::DUp,    Button::LStickU, Button::RStickU, FocusDirection::UP    },
+        { Button::DDown,  Button::LStickD, Button::RStickD, FocusDirection::DOWN  },
+    };
+    constexpr int kNavInitialDelay = 16;  // ~0.27 s before repeat starts
+    constexpr int kNavRepeatEvery  = 5;   // ~0.083 s -> ~12 / second
 
-    if (m_navDebounce > 0) {
-        --m_navDebounce;
-    } else if (anyDpad) {
-        m_navDebounce = 6;  // ~100 ms at 60 fps
+    auto dirDown = [&](const NavDir& d) {
+        return m_input.isDown(d.dpad) || m_input.isDown(d.leftStick) || m_input.isDown(d.rightStick);
+    };
+    auto dirHeld = [&](const NavDir& d) {
+        return m_input.isHeld(d.dpad) || m_input.isHeld(d.leftStick) || m_input.isHeld(d.rightStick);
+    };
 
-        Widget* cur = fm.current();
-        auto tryDir = [&](Button dpad, Button leftStick, Button rightStick, FocusDirection dir) {
-            bool dpadDown  = m_input.isDown(dpad);
-            bool leftStickDown = m_input.isDown(leftStick);
-            bool rightStickDown = m_input.isDown(rightStick);
-            if (!dpadDown && !leftStickDown && !rightStickDown) return;
-
-            // Focused widget's action takes priority (no bubbling for D-pad)
-            if (cur) {
-                if (dpadDown && cur->fireAction(static_cast<uint64_t>(dpad))) return;
-                if (leftStickDown && cur->fireAction(static_cast<uint64_t>(leftStick))) return;
-                if (rightStickDown && cur->fireAction(static_cast<uint64_t>(rightStick))) return;
+    int fireDir = -1;
+    bool fireFresh = false;
+    for (int i = 0; i < 4; ++i) {
+        if (dirDown(kDirs[i])) {            // fresh press takes over immediately
+            fireDir = i;
+            fireFresh = true;
+            m_navActiveDir = i;
+            m_navRepeatTimer = kNavInitialDelay;
+            break;
+        }
+    }
+    if (fireDir < 0 && m_navActiveDir >= 0) {
+        if (dirHeld(kDirs[m_navActiveDir])) {
+            if (--m_navRepeatTimer <= 0) {
+                fireDir = m_navActiveDir;
+                m_navRepeatTimer = kNavRepeatEvery;
             }
-            fm.navigate(dir, root);
-        };
+        } else {
+            m_navActiveDir = -1;            // direction released
+        }
+    }
 
-        tryDir(Button::DLeft,  Button::LStickL, Button::RStickL, FocusDirection::LEFT);
-        tryDir(Button::DRight, Button::LStickR, Button::RStickR, FocusDirection::RIGHT);
-        tryDir(Button::DUp,    Button::LStickU, Button::RStickU, FocusDirection::UP);
-        tryDir(Button::DDown,  Button::LStickD, Button::RStickD, FocusDirection::DOWN);
+    if (fireDir >= 0) {
+        const NavDir& d = kDirs[fireDir];
+        Widget* cur = fm.current();
+        bool consumed = false;
+        if (cur) {
+            if (m_input.isHeld(d.dpad)       && cur->fireAction(static_cast<uint64_t>(d.dpad)))       consumed = true;
+            else if (m_input.isHeld(d.leftStick)  && cur->fireAction(static_cast<uint64_t>(d.leftStick)))  consumed = true;
+            else if (m_input.isHeld(d.rightStick) && cur->fireAction(static_cast<uint64_t>(d.rightStick))) consumed = true;
+        }
+        if (!consumed) {
+            bool moved = fm.navigate(d.dir, root);
+            // A fresh press that couldn't move (focus is at an edge) lets the
+            // activity implement wrap-around. Held repeats are excluded, so
+            // holding pauses at the edge until the button is pressed again.
+            if (!moved && fireFresh)
+                m_activity->onEdgeNavigate(d.dir);
+        }
     }
 
     // Dispatch non-D-pad actions with parent bubbling.

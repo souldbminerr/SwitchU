@@ -15,7 +15,7 @@ class SidebarManager {
 public:
     struct Actions {
         std::function<void()> onAlbum;
-        std::function<void()> onMiiEditor;
+        std::function<void()> onNews;
         std::function<void()> onControllers;
         std::function<void()> onSleep;
         std::function<void()> onSettings;
@@ -40,7 +40,7 @@ public:
     const std::vector<std::shared_ptr<AppletButton>>& rightButtons() const { return m_rightButtons; }
 
     AppletButton*  albumButton()    const { return m_albumButton; }
-    nxui::Widget*  settingsButton() const { return m_settingsButton; }
+    AppletButton*  settingsButton() const { return m_settingsButton; }
     nxui::Widget*  themeShopButton() const { return m_themeShopButton; }
 
 private:
@@ -55,7 +55,7 @@ private:
     std::vector<std::shared_ptr<AppletButton>> m_leftButtons;
     std::vector<std::shared_ptr<AppletButton>> m_rightButtons;
     AppletButton*  m_albumButton    = nullptr;
-    nxui::Widget*  m_settingsButton = nullptr;
+    AppletButton*  m_settingsButton = nullptr;
     nxui::Widget*  m_themeShopButton = nullptr;
 
     struct AnimEntry {

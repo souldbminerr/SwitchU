@@ -28,6 +28,10 @@ struct Theme {
     Color textPrimary;
     Color textSecondary;
 
+    // Settings value colours (qlaunch): "Enabled"/editable values + "Disabled".
+    Color enabledColor  {0.027f, 0.992f, 0.800f, 1.f};   // #07fdcc
+    Color disabledColor {0.220f, 0.224f, 0.231f, 1.f};   // #38393b
+
     // Page indicator dots
     Color pageIndicator;
     Color pageIndicatorActive;

@@ -96,13 +96,13 @@ std::string normalizeThemeId(const char* prefix, const std::string& value) {
     return makeThemeId(prefix, trimmed);
 }
 
-#ifdef SWITCHU_HOMEBREW
+#ifdef QLAUNCHEXT_HOMEBREW
 static constexpr const char* kBuiltInThemesDir = "romfs:/themes";
 #else
-static constexpr const char* kBuiltInThemesDir = "sdmc:/switch/SwitchU/themes";
+static constexpr const char* kBuiltInThemesDir = "sdmc:/switch/qlaunch-ext/themes";
 #endif
 
-static constexpr const char* kDefaultSharedSoundPreset = "wiiu";
+static constexpr const char* kDefaultSharedSoundPreset = "nx";
 
 bool parseHslTripletString(std::string value, float& h, float& s, float& l) {
     value = trimString(value);
@@ -597,7 +597,7 @@ ThemePreset makeLegacyBuiltInPreset(const char* name, nxui::ThemeMode mode) {
     ThemePreset preset;
     preset.id = makeThemeId("builtin:", name);
     preset.name = name;
-    preset.author = "SwitchU";
+    preset.author = "qlaunch-ext";
     preset.mode = mode;
     preset.colors = ThemePreset::extractColors(
         mode == nxui::ThemeMode::Light ? nxui::Theme::light() : nxui::Theme::dark());
@@ -647,8 +647,10 @@ static std::vector<ThemePreset> makeBuiltInPresets() {
         const char* dirName;
         nxui::ThemeMode mode;
     } defs[] = {
-        {"Default Dark", nxui::ThemeMode::Dark},
-        {"Default Light", nxui::ThemeMode::Light},
+        {"Basic Dark", nxui::ThemeMode::Dark},
+        {"Basic White", nxui::ThemeMode::Light},
+        {"Basic Black", nxui::ThemeMode::Dark},
+        {"Custom", nxui::ThemeMode::Dark},
     };
 
     for (const auto& def : defs) {
@@ -674,8 +676,8 @@ const std::vector<ThemePreset>& ThemePreset::builtInPresets() {
     return presets;
 }
 
-static constexpr const char* kUserPresetsPath = "sdmc:/config/SwitchU/theme_presets.ini";
-static constexpr const char* kInstalledThemesDir = "sdmc:/config/SwitchU/themes";
+static constexpr const char* kUserPresetsPath = "sdmc:/config/qlaunch-ext/theme_presets.ini";
+static constexpr const char* kInstalledThemesDir = "sdmc:/config/qlaunch-ext/themes";
 
 std::vector<ThemePreset> ThemePreset::loadUserPresets() {
     std::vector<ThemePreset> result;
@@ -777,7 +779,7 @@ bool ThemePreset::saveUserPresets(const std::vector<ThemePreset>& presets) {
     std::error_code ec;
     std::filesystem::create_directory("sdmc:/config", ec);
     ec.clear();
-    std::filesystem::create_directory("sdmc:/config/SwitchU", ec);
+    std::filesystem::create_directory("sdmc:/config/qlaunch-ext", ec);
 
     std::ofstream f(kUserPresetsPath, std::ios::trunc);
     if (!f.is_open()) return false;

@@ -38,6 +38,7 @@ Theme Theme::light() {
     t.pageIndicator     = Color(0.30f, 0.30f, 0.40f, 0.30f);
     t.pageIndicatorActive = Color(0.15, 1, 0.447, 1.f);
     t.shapeColor        = Color(0.55f, 0.58f, 0.80f, 0.10f);
+    t.enabledColor      = Color(0.200f, 0.322f, 0.757f, 1.f);  // #3352c1
     return t;
 }
 

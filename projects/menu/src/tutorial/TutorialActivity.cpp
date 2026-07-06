@@ -12,10 +12,10 @@
 #include <cctype>
 #include <cmath>
 
-#ifdef SWITCHU_HOMEBREW
+#ifdef QLAUNCHEXT_HOMEBREW
 static constexpr const char* TUTORIAL_ASSETS = "romfs:";
 #else
-static constexpr const char* TUTORIAL_ASSETS = "sdmc:/switch/SwitchU";
+static constexpr const char* TUTORIAL_ASSETS = "sdmc:/switch/qlaunch-ext";
 #endif
 
 namespace {
@@ -110,13 +110,8 @@ bool TutorialActivity::onCreate() {
         i18n.setLanguageAuto();
     else
         i18n.setLanguage(savedConfig.uiLanguageOverride);
-    m_accessibilityEnabled = false;
-    m_accessibility.initialize(true, i18n.activeLanguageTag(), TUTORIAL_ASSETS);
-    m_accessibility.setSpeakHints(savedConfig.accessibilitySpeakHints);
-    m_accessibility.setSpeakContextEveryFocus(savedConfig.accessibilitySpeakContextEveryFocus);
-    m_accessibility.setSpeechRate(savedConfig.accessibilitySpeechRate);
 
-    const std::string fontPath = std::string(TUTORIAL_ASSETS) + "/fonts/DejaVuSans.ttf";
+    const std::string fontPath = std::string(TUTORIAL_ASSETS) + "/fonts/font.otf";
     m_fontTitle.load(app().gpu(), app().renderer(), fontPath, 34);
     m_fontBody.load(app().gpu(), app().renderer(), fontPath, 25);
     m_fontSmall.load(app().gpu(), app().renderer(), fontPath, 18);
@@ -124,7 +119,7 @@ bool TutorialActivity::onCreate() {
 
     m_audio.initialize();
     m_audio.setVolume(0.34f);
-    m_audio.loadTrack(std::string(TUTORIAL_ASSETS) + "/sounds/wiiu/music/bg4.mp3");
+    m_audio.loadTrack(std::string(TUTORIAL_ASSETS) + "/sounds/nx/music/bg1.mp3");
     m_audio.play();
     m_audio.setSfxVolume(0.52f);
     loadAnimaleseSfx();
@@ -140,14 +135,10 @@ bool TutorialActivity::onCreate() {
     m_finishing = false;
     m_finishTimer = 0.f;
     m_transitionAlpha = 0.f;
-    announceCurrentStep();
-    if (!m_accessibilityEnabled)
-        m_accessibility.setEnabled(false);
     return true;
 }
 
 void TutorialActivity::onDestroy() {
-    m_accessibility.shutdown();
     m_audio.shutdown();
     DebugLog::log("[tutorial] activity destroy");
 }
@@ -156,27 +147,9 @@ void TutorialActivity::buildSteps() {
     auto& i18n = nxui::I18n::instance();
     m_steps = {
         {
-            StepKind::AccessibilityChoice,
-            i18n.tr("tutorial.accessibility.title", "Voice guidance"),
-            i18n.tr("tutorial.accessibility.body", "Voice guidance is available for this menu. It can read the selected item and the available actions aloud."),
-            i18n.tr("tutorial.accessibility.objective", "Press X to enable voice guidance for later. Press A to continue without it.")
-        },
-    };
-
-    if (m_accessibilityEnabled) {
-        m_steps.push_back({
-            StepKind::AccessibilitySettings,
-            i18n.tr("tutorial.accessibility_settings.title", "Accessibility settings"),
-            i18n.tr("tutorial.accessibility_settings.body", "Accessibility options are available in Settings, then Accessibility. You can adjust speech speed, repeated hints, location announcements, and position details."),
-            ""
-        });
-    }
-
-    std::vector<Step> rest = {
-        {
             StepKind::Text,
-            i18n.tr("tutorial.welcome.title", "Welcome to SwitchU"),
-            i18n.tr("tutorial.welcome.body", "SwitchU replaces the HOME menu with a fast interface for launching your games, homebrew apps, and system tools."),
+            i18n.tr("tutorial.welcome.title", "Welcome to qlaunch-ext"),
+            i18n.tr("tutorial.welcome.body", "qlaunch-ext replaces the HOME menu with a fast interface for launching your games, homebrew apps, and system tools."),
             ""
         },
         {
@@ -206,11 +179,10 @@ void TutorialActivity::buildSteps() {
         {
             StepKind::Text,
             i18n.tr("tutorial.support.title", "Support"),
-            i18n.tr("tutorial.support.body", "To report an issue, open the project GitHub: github.com/PoloNX/SwitchU"),
+            i18n.tr("tutorial.support.body", "To report an issue, open the project GitHub: github.com/PoloNX/qlaunch-ext"),
             ""
         },
     };
-    m_steps.insert(m_steps.end(), rest.begin(), rest.end());
 }
 
 void TutorialActivity::loadAnimaleseSfx() {
@@ -272,14 +244,12 @@ void TutorialActivity::buildUi() {
 
     m_navCursor = std::make_shared<SelectionCursor>();
     m_navCursor->setColor(m_theme.cursorNormal);
-    m_navCursor->setBorderWidth(m_theme.cursorBorderWidth);
+    m_navCursor->setBorderWidth(4.f);
     m_navCursor->setVisible(false);
     m_navCursor->moveTo({928.f, 352.f, 107.f, 41.f}, 16.f, 0.01f);
 }
 
 void TutorialActivity::playAnimaleseFor(char ch) {
-    if (m_accessibilityEnabled)
-        return;
     if (!isTextChar(ch))
         return;
 
@@ -357,10 +327,7 @@ void TutorialActivity::advanceStep() {
         return;
     }
 
-    if (step.kind != StepKind::Text
-        && step.kind != StepKind::AccessibilityChoice
-        && step.kind != StepKind::AccessibilitySettings
-        && !step.complete)
+    if (step.kind != StepKind::Text && !step.complete)
         return;
 
     if (m_stepIndex + 1 >= (int)m_steps.size()) {
@@ -380,64 +347,10 @@ void TutorialActivity::advanceStep() {
         m_objectivePanel->setVisible(false);
     if (m_navCursor)
         m_navCursor->setVisible(false);
-    announceCurrentStep();
 }
 
 void TutorialActivity::skipAll() {
     finish();
-}
-
-void TutorialActivity::toggleAccessibility() {
-    if (m_accessibilityEnabled) {
-        m_accessibility.announce(nxui::I18n::instance().tr(
-            "tutorial.accessibility.already_enabled_announcement",
-            "Voice guidance is already enabled for later."));
-        return;
-    }
-
-    m_accessibilityEnabled = true;
-
-    AppConfig config;
-    config.load();
-    config.accessibilityEnabled = m_accessibilityEnabled;
-    config.save();
-
-    m_accessibility.setEnabled(true);
-    m_accessibility.announce(nxui::I18n::instance().tr(
-        "tutorial.accessibility.enabled_announcement",
-        "Voice guidance enabled for later. Press A to continue."));
-
-    if (m_stepIndex >= 0 && m_stepIndex < (int)m_steps.size()
-        && m_steps[(size_t)m_stepIndex].kind == StepKind::AccessibilityChoice) {
-        const bool hasSettingsSlide = std::any_of(m_steps.begin(), m_steps.end(), [](const Step& step) {
-            return step.kind == StepKind::AccessibilitySettings;
-        });
-        if (!hasSettingsSlide) {
-            auto& i18n = nxui::I18n::instance();
-            Step settingsStep{
-                StepKind::AccessibilitySettings,
-                i18n.tr("tutorial.accessibility_settings.title", "Accessibility settings"),
-                i18n.tr("tutorial.accessibility_settings.body", "Accessibility options are available in Settings, then Accessibility. You can adjust speech speed, repeated hints, location announcements, and position details."),
-                ""
-            };
-            m_steps.insert(m_steps.begin() + m_stepIndex + 1, std::move(settingsStep));
-        }
-    }
-}
-
-void TutorialActivity::announceCurrentStep() {
-    if (m_steps.empty() || m_stepIndex < 0 || m_stepIndex >= (int)m_steps.size())
-        return;
-
-    const Step& step = m_steps[(size_t)m_stepIndex];
-    std::string text = step.title + ". " + step.body;
-    if (!step.objective.empty())
-        text += ". " + step.objective;
-    if (step.kind == StepKind::Text || step.kind == StepKind::AccessibilitySettings)
-        text += ". " + nxui::I18n::instance().tr(
-            "tutorial.accessibility.text_actions",
-            "A to continue. B to skip this step. Plus to skip everything.");
-    m_accessibility.announce(text);
 }
 
 void TutorialActivity::finish() {
@@ -449,7 +362,6 @@ void TutorialActivity::finish() {
     AppConfig config;
     config.load();
     config.tutorialCompleted = true;
-    config.accessibilityEnabled = m_accessibilityEnabled;
     config.save();
 }
 
@@ -481,11 +393,6 @@ void TutorialActivity::onUpdate(float dt) {
         skipAll();
         return;
     }
-    if (input.isDown(nxui::Button::X)) {
-        if (m_steps[(size_t)m_stepIndex].kind == StepKind::AccessibilityChoice)
-            toggleAccessibility();
-        return;
-    }
     if (input.isDown(nxui::Button::B)) {
         if (m_visibleChars < m_steps[(size_t)m_stepIndex].body.size())
             m_visibleChars = m_steps[(size_t)m_stepIndex].body.size();
@@ -501,8 +408,6 @@ void TutorialActivity::onUpdate(float dt) {
 
     const Step& step = m_steps[(size_t)m_stepIndex];
     const bool showObjective = step.kind != StepKind::Text
-        && step.kind != StepKind::AccessibilityChoice
-        && step.kind != StepKind::AccessibilitySettings
         && m_visibleChars >= step.body.size();
     if (m_objectivePanel)
         m_objectivePanel->setVisible(showObjective);
@@ -580,20 +485,10 @@ std::vector<TutorialActivity::ActionHint> TutorialActivity::buildActionHints() c
     const Step& step = m_steps[(size_t)m_stepIndex];
     const bool typing = m_visibleChars < step.body.size();
     const bool testPending = step.kind != StepKind::Text
-        && step.kind != StepKind::AccessibilityChoice
-        && step.kind != StepKind::AccessibilitySettings
         && !step.complete
         && !typing;
 
-    if (step.kind == StepKind::AccessibilityChoice) {
-        hints.push_back({buttonGlyph(nxui::Button::X),
-                         m_accessibilityEnabled
-                            ? nxui::I18n::instance().tr("tutorial.hints.voice_enabled", "Voice enabled")
-                            : nxui::I18n::instance().tr("tutorial.hints.enable_voice", "Enable voice")});
-        hints.push_back({buttonGlyph(nxui::Button::A), typing
-                         ? nxui::I18n::instance().tr("tutorial.hints.reveal", "Reveal")
-                         : nxui::I18n::instance().tr("tutorial.hints.continue", "Continue")});
-    } else if (typing)
+    if (typing)
         hints.push_back({buttonGlyph(nxui::Button::A), nxui::I18n::instance().tr("tutorial.hints.reveal", "Reveal")});
     else if (testPending)
         hints.push_back({dpadGlyph(), nxui::I18n::instance().tr("tutorial.hints.test", "Test")});
@@ -769,7 +664,7 @@ void TutorialActivity::onRender(nxui::Renderer& ren) {
     const Step& step = m_steps[(size_t)m_stepIndex];
     const std::string visible = step.body.substr(0, std::min(m_visibleChars, step.body.size()));
 
-    ren.drawText("Tutoriel SwitchU", {76.f, 50.f}, &m_fontBody,
+    ren.drawText("Tutoriel qlaunch-ext", {76.f, 50.f}, &m_fontBody,
                  m_theme.textSecondary.withAlpha(0.82f), 0.92f);
     ren.drawText(step.title, {76.f, 128.f}, &m_fontTitle,
                  m_theme.textPrimary, 1.f);

@@ -13,12 +13,13 @@ enum class Sfx {
     ModalShow,
     ModalHide,
     LaunchGame,
-    ThemeToggle,
+    ToggleOn,
     ToggleOff,
     SliderUp,
     SliderDown,
     ConfirmPositive,
     Volume,
+    SettingsOpen,
 };
 
 class AudioManager {

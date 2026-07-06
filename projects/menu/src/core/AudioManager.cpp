@@ -9,6 +9,14 @@ bool AudioManager::initialize() {
         std::fprintf(stderr, "[Audio] SDL_Init(AUDIO) failed: %s\n", SDL_GetError());
         return false;
     }
+    // SDL2_mixer needs the MP3 (mpg123) / OGG decoders explicitly initialised;
+    // without this Mix_LoadMUS() fails on .mp3 files and no music ever plays.
+    const int wantFlags = MIX_INIT_MP3 | MIX_INIT_OGG;
+    const int gotFlags  = Mix_Init(wantFlags);
+    if ((gotFlags & wantFlags) != wantFlags) {
+        std::fprintf(stderr, "[Audio] Mix_Init: requested 0x%x got 0x%x (%s)\n",
+                     wantFlags, gotFlags, Mix_GetError());
+    }
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096) < 0) {
         std::fprintf(stderr, "[Audio] Mix_OpenAudio failed: %s\n", Mix_GetError());
         return false;
@@ -27,6 +35,7 @@ void AudioManager::shutdown() {
     Mix_HaltMusic();
     Mix_HaltChannel(-1);
     Mix_CloseAudio();
+    Mix_Quit();
     m_initialized = false;
     m_playing.store(false);
 

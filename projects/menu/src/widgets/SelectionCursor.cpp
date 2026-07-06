@@ -51,50 +51,66 @@ float SelectionCursor::computeAdaptiveDuration(const nxui::Rect& target,
 }
 
 void SelectionCursor::moveTo(const nxui::Rect& target, float duration) {
-    if (!m_initialized) {
-        m_x.setImmediate(target.x);
-        m_y.setImmediate(target.y);
-        m_w.setImmediate(target.width);
-        m_h.setImmediate(target.height);
-        m_initialized = true;
-        return;
-    }
-    constexpr float eps = 0.5f;
-    if (std::abs(m_x.target() - target.x) < eps &&
-        std::abs(m_y.target() - target.y) < eps &&
-        std::abs(m_w.target() - target.width) < eps &&
-        std::abs(m_h.target() - target.height) < eps)
-        return;
-    float adaptiveDuration = computeAdaptiveDuration(target, m_cornerRadius.value(), duration);
-    m_x.set(target.x, adaptiveDuration, nxui::Easing::outCubic);
-    m_y.set(target.y, adaptiveDuration, nxui::Easing::outCubic);
-    m_w.set(target.width, adaptiveDuration, nxui::Easing::outCubic);
-    m_h.set(target.height, adaptiveDuration, nxui::Easing::outCubic);
+    moveTo(target, m_cornerRadius.value(), duration);
 }
 
 void SelectionCursor::moveTo(const nxui::Rect& target, float cornerRadius, float duration) {
+    (void)duration;
     if (!m_initialized) {
         m_x.setImmediate(target.x);
         m_y.setImmediate(target.y);
         m_w.setImmediate(target.width);
         m_h.setImmediate(target.height);
         m_cornerRadius.setImmediate(cornerRadius);
+        m_fade = 1.f;
+        m_fadePhase = Fade::Idle;
+        m_hasPending = false;
         m_initialized = true;
         return;
     }
+
+    // If we are already targeting this rect, do nothing.
+    const float curX = m_hasPending ? m_pendingX : m_x.value();
+    const float curY = m_hasPending ? m_pendingY : m_y.value();
+    const float curW = m_hasPending ? m_pendingW : m_w.value();
+    const float curH = m_hasPending ? m_pendingH : m_h.value();
     constexpr float eps = 0.5f;
-    if (std::abs(m_x.target() - target.x) < eps &&
-        std::abs(m_y.target() - target.y) < eps &&
-        std::abs(m_w.target() - target.width) < eps &&
-        std::abs(m_h.target() - target.height) < eps &&
-        std::abs(m_cornerRadius.target() - cornerRadius) < eps)
+    if (std::abs(curX - target.x) < eps &&
+        std::abs(curY - target.y) < eps &&
+        std::abs(curW - target.width) < eps &&
+        std::abs(curH - target.height) < eps)
         return;
-    float adaptiveDuration = computeAdaptiveDuration(target, cornerRadius, duration);
-    m_x.set(target.x, adaptiveDuration, nxui::Easing::outCubic);
-    m_y.set(target.y, adaptiveDuration, nxui::Easing::outCubic);
-    m_w.set(target.width, adaptiveDuration, nxui::Easing::outCubic);
-    m_h.set(target.height, adaptiveDuration, nxui::Easing::outCubic);
-    m_cornerRadius.set(cornerRadius, adaptiveDuration, nxui::Easing::outCubic);
+
+    // qlaunch does not slide: fade the old highlight out, then snap + fade in.
+    m_pendingX = target.x;
+    m_pendingY = target.y;
+    m_pendingW = target.width;
+    m_pendingH = target.height;
+    m_pendingR = cornerRadius;
+    m_hasPending = true;
+    m_fadePhase = Fade::Out;
+}
+
+void SelectionCursor::follow(const nxui::Rect& target, float cornerRadius) {
+    if (!m_initialized) {
+        moveTo(target, cornerRadius, 0.f);
+        return;
+    }
+    // Snap to the moving target without disturbing the fade state. If a
+    // fade transition is in-flight, redirect its pending destination instead.
+    if (m_fadePhase == Fade::Out && m_hasPending) {
+        m_pendingX = target.x;
+        m_pendingY = target.y;
+        m_pendingW = target.width;
+        m_pendingH = target.height;
+        m_pendingR = cornerRadius;
+        return;
+    }
+    m_x.setImmediate(target.x);
+    m_y.setImmediate(target.y);
+    m_w.setImmediate(target.width);
+    m_h.setImmediate(target.height);
+    m_cornerRadius.setImmediate(cornerRadius);
 }
 
 nxui::Rect SelectionCursor::currentRect() const {
@@ -108,10 +124,36 @@ nxui::Rect SelectionCursor::currentRect() const {
 
 void SelectionCursor::onUpdate(float dt) {
     m_time += dt;
+
+    // Fast fade-out / fade-in on selection change (~2-3 frames each way).
+    constexpr float kFadeSpeed = 1.f / 0.05f;
+    if (m_fadePhase == Fade::Out) {
+        m_fade -= dt * kFadeSpeed;
+        if (m_fade <= 0.f) {
+            m_fade = 0.f;
+            if (m_hasPending) {
+                m_x.setImmediate(m_pendingX);
+                m_y.setImmediate(m_pendingY);
+                m_w.setImmediate(m_pendingW);
+                m_h.setImmediate(m_pendingH);
+                m_cornerRadius.setImmediate(m_pendingR);
+                m_hasPending = false;
+            }
+            m_fadePhase = Fade::In;
+        }
+    } else if (m_fadePhase == Fade::In) {
+        m_fade += dt * kFadeSpeed;
+        if (m_fade >= 1.f) {
+            m_fade = 1.f;
+            m_fadePhase = Fade::Idle;
+        }
+    }
 }
 
 void SelectionCursor::onRender(nxui::Renderer& ren) {
-    if (!m_initialized || m_opacity <= 0.01f) return;
+    if (!m_initialized) return;
+    float a = m_opacity * m_fade;
+    if (a <= 0.01f) return;
 
     float x = m_x.value(), y = m_y.value();
     float w = m_w.value(), h = m_h.value();
@@ -120,24 +162,10 @@ void SelectionCursor::onRender(nxui::Renderer& ren) {
     nxui::Rect r = {x, y, w, h};
     float cr = m_cornerRadius.value();
 
-    float wave = std::sin(m_time * m_waveSpeed) * 0.5f + 0.5f;
-
-    constexpr int BLOOM_LAYERS = 5;
-    constexpr float bloomExpand[] = {12.f, 9.f, 6.f, 4.f, 2.f};
-    constexpr float bloomAlpha[]  = {0.03f, 0.05f, 0.08f, 0.12f, 0.16f};
-    for (int i = 0; i < BLOOM_LAYERS; ++i) {
-        float expand = bloomExpand[i] * (1.f + 0.15f * wave);
-        nxui::Rect glowRect = r.expanded(expand);
-        float a = bloomAlpha[i] * m_opacity * (0.8f + 0.2f * wave);
-        nxui::Color gc = m_color.withAlpha(a);
-        ren.drawRoundedRect(glowRect, gc, cr + expand + 2.f);
-    }
-
-    nxui::Color mainC = m_color.withAlpha(m_opacity);
-    ren.drawRoundedRectOutline(r, mainC, cr, m_borderWidth);
-
-    nxui::Rect inner = r.shrunk(m_borderWidth * 0.5f);
-    nxui::Color innerC = nxui::Color(0.3f, 0.85f, 1.f, 0.25f * m_opacity * (0.7f + 0.3f * wave));
-    ren.drawRoundedRectOutline(inner, innerC, cr - 2.f, 1.5f);
+    // Transparent-centre outline (qlaunch): a crisp accent border with a faint
+    // outer ring for a subtle glow. Nothing fills the middle.
+    ren.drawRoundedRectOutline(r.expanded(1.5f), m_color.withAlpha(0.30f * a),
+                               cr + 1.5f, 1.5f);
+    ren.drawRoundedRectOutline(r, m_color.withAlpha(a), cr, m_borderWidth);
 }
 

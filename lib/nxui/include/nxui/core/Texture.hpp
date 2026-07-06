@@ -23,10 +23,10 @@ public:
     Texture(Texture&& o) noexcept
         : m_image(o.m_image)
         , m_mem(static_cast<dk::MemBlock&&>(o.m_mem))
-        , m_width(o.m_width), m_height(o.m_height)
-        , m_slot(o.m_slot), m_valid(o.m_valid)
         , m_allocSize(o.m_allocSize)
         , m_gpu(o.m_gpu)
+        , m_width(o.m_width), m_height(o.m_height)
+        , m_slot(o.m_slot), m_valid(o.m_valid)
     {
         o.m_width = o.m_height = 0;
         o.m_slot = -1;

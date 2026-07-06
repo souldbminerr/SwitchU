@@ -2,6 +2,7 @@
 #include <nxui/widgets/GlassWidget.hpp>
 #include <nxui/core/Texture.hpp>
 #include <nxui/core/Animation.hpp>
+#include <algorithm>
 #include <string>
 
 
@@ -34,6 +35,39 @@ public:
     void startAppear(float delay);
     void forceVisible();
 
+    // App icon shape.
+    //   Square   – minimal rounding, like qlaunch (default)
+    //   Rounded  – larger rounded corners, original SwitchU style
+    //   Circular – full circle
+    enum class Shape { Square, Rounded, Circular };
+    void setShape(Shape s) { m_shape = s; }
+    Shape shape() const    { return m_shape; }
+    static Shape shapeFromString(const std::string& s) {
+        if (s == "circular") return Shape::Circular;
+        if (s == "rounded")  return Shape::Rounded;
+        return Shape::Square;
+    }
+    static const char* shapeToString(Shape s) {
+        switch (s) {
+            case Shape::Circular: return "circular";
+            case Shape::Rounded:  return "rounded";
+            case Shape::Square:
+            default:              return "square";
+        }
+    }
+    // Radius used by the original SwitchU "Rounded" style (from the theme).
+    void setRoundedRadius(float r) { m_roundedRadius = r; }
+
+    // Effective corner radius for a selection cursor framing this icon.
+    float cursorRadius(const nxui::Rect& cursorRect) const {
+        switch (m_shape) {
+            case Shape::Circular: return std::min(cursorRect.width, cursorRect.height) * 0.5f;
+            case Shape::Rounded:  return m_roundedRadius + 4.f;
+            case Shape::Square:
+            default:              return 4.f;   // subtle ~2px curve
+        }
+    }
+
     void setFocusable(bool f) { m_focusable = f; }
     bool isFocusable() const override { return m_focusable; }
     void onFocusGained() override;
@@ -51,6 +85,8 @@ private:
     uint64_t    m_titleId = 0;
     bool        m_focused = false;
     bool        m_focusable = true;
+    Shape       m_shape = Shape::Square;   // qlaunch square (no rounding) by default
+    float       m_roundedRadius = 12.f;    // radius for the "Rounded" (SwitchU) style
     bool        m_suspended = false;
     bool        m_isGameCard = false;
     bool        m_notLaunchable = false;

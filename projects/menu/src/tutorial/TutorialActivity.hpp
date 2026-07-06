@@ -7,7 +7,6 @@
 #include "widgets/SelectionCursor.hpp"
 #include "widgets/WaraWaraBackground.hpp"
 #include "core/AudioManager.hpp"
-#include "core/AccessibilityManager.hpp"
 #include <functional>
 #include <memory>
 #include <string>
@@ -28,8 +27,6 @@ public:
 
 private:
     enum class StepKind {
-        AccessibilityChoice,
-        AccessibilitySettings,
         Text,
         NavigationTest,
         ConfirmTest,
@@ -51,8 +48,6 @@ private:
     void skipAll();
     void finish();
     void completeFinish();
-    void toggleAccessibility();
-    void announceCurrentStep();
     void updateTyping(float dt);
     void updateCurrentTest();
     std::vector<std::string> wrapText(const std::string& text, nxui::Font& font,
@@ -71,7 +66,6 @@ private:
 
     ActivityFactory m_nextFactory;
     AudioManager m_audio;
-    AccessibilityManager m_accessibility;
     nxui::Theme m_theme;
     nxui::Font m_fontTitle;
     nxui::Font m_fontBody;
@@ -97,5 +91,4 @@ private:
     bool m_navLeftRight = false;
     bool m_navUpDown = false;
     int m_navGridIndex = 0;
-    bool m_accessibilityEnabled = true;
 };

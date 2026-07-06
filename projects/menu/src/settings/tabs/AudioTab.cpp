@@ -4,13 +4,28 @@
 #include <algorithm>
 
 SettingsScreen::Tab settings::tabs::AudioTab::build(SettingsScreen& screen) {
-    (void)screen;
     using Tab = SettingsScreen::Tab;
     using SettingItem = SettingsScreen::SettingItem;
     using ItemType = SettingsScreen::ItemType;
     auto& i18n = nxui::I18n::instance();
     Tab t;
     t.name = i18n.tr("settings.tabs.audio", "Audio");
+
+    {
+        SettingItem it;
+        it.label = i18n.tr("settings.audio.background_music", "Background Music");
+        it.description = i18n.tr("settings.audio.background_music_desc",
+                                 "Play music on the home menu.");
+        it.type = ItemType::Toggle;
+        it.boolVal = screen.m_musicEnabled;
+        it.anim01 = it.boolVal ? 1.f : 0.f;
+        it.onChange = [&screen](SettingItem& self) {
+            screen.m_musicEnabled = self.boolVal;
+            if (screen.m_musicEnabledCb)
+                screen.m_musicEnabledCb(self.boolVal);
+        };
+        t.items.push_back(std::move(it));
+    }
 
     {
         SettingItem it; it.label = i18n.tr("settings.audio.speaker_auto_mute", "Speaker Auto-Mute"); it.type = ItemType::Toggle;

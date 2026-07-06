@@ -1,6 +1,6 @@
 #pragma once
 #include <nxui/core/Types.hpp>
-#include <switchu/ns_ext.hpp>
+#include <qlaunchext/ns_ext.hpp>
 #include <string>
 #include <vector>
 #include <utility>
@@ -19,25 +19,25 @@ struct AppEntry {
     uint8_t     startupUserAccountOption = 0;
 
     bool isGameCard() const {
-        return switchu::ns::viewHasFlag(viewFlags, switchu::ns::AppViewFlag_IsGameCard);
+        return qlaunchext::ns::viewHasFlag(viewFlags, qlaunchext::ns::AppViewFlag_IsGameCard);
     }
     bool isGameCardInserted() const {
-        return isGameCard() && switchu::ns::viewHasFlag(viewFlags, switchu::ns::AppViewFlag_IsGameCardInserted);
+        return isGameCard() && qlaunchext::ns::viewHasFlag(viewFlags, qlaunchext::ns::AppViewFlag_IsGameCardInserted);
     }
     bool isGameCardNotInserted() const {
-        return isGameCard() && !switchu::ns::viewHasFlag(viewFlags, switchu::ns::AppViewFlag_IsGameCardInserted);
+        return isGameCard() && !qlaunchext::ns::viewHasFlag(viewFlags, qlaunchext::ns::AppViewFlag_IsGameCardInserted);
     }
     bool needsVerify() const {
-        return switchu::ns::viewHasFlag(viewFlags, switchu::ns::AppViewFlag_NeedsVerify);
+        return qlaunchext::ns::viewHasFlag(viewFlags, qlaunchext::ns::AppViewFlag_NeedsVerify);
     }
     bool canLaunch() const {
-        return switchu::ns::viewHasFlag(viewFlags, switchu::ns::AppViewFlag_CanLaunch);
+        return qlaunchext::ns::viewHasFlag(viewFlags, qlaunchext::ns::AppViewFlag_CanLaunch);
     }
     bool hasContents() const {
-        return switchu::ns::viewHasFlag(viewFlags, switchu::ns::AppViewFlag_HasMainContents);
+        return qlaunchext::ns::viewHasFlag(viewFlags, qlaunchext::ns::AppViewFlag_HasMainContents);
     }
     bool needsUpdate() const {
-        return switchu::ns::viewHasFlag(viewFlags, switchu::ns::AppViewFlag_NeedsUpdate);
+        return qlaunchext::ns::viewHasFlag(viewFlags, qlaunchext::ns::AppViewFlag_NeedsUpdate);
     }
     bool isLaunchable() const {
         if (viewFlags == 0) return true;

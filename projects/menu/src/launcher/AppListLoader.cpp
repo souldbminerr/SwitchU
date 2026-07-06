@@ -5,9 +5,9 @@
 #include <cstdio>
 #include <vector>
 #include <algorithm>
-#ifdef SWITCHU_MENU
-#include <switchu/control_cache.hpp>
-#include <switchu/ns_ext.hpp>
+#ifdef QLAUNCHEXT_MENU
+#include <qlaunchext/control_cache.hpp>
+#include <qlaunchext/ns_ext.hpp>
 #endif
 
 namespace {
@@ -16,14 +16,14 @@ bool requiresInteractiveUserSelection(uint8_t account, uint8_t option) {
     return account == 1 && option == 0;
 }
 
-#ifdef SWITCHU_MENU
+#ifdef QLAUNCHEXT_MENU
 static constexpr s32 kMaxTrackedApplicationRecords = 1024;
 static constexpr s32 kApplicationRecordChunkCount = 30;
 
-bool listApplicationRecords(std::vector<switchu::ns::ExtApplicationRecord>& records) {
+bool listApplicationRecords(std::vector<qlaunchext::ns::ExtApplicationRecord>& records) {
     records.clear();
 
-    switchu::ns::ExtApplicationRecord chunk[kApplicationRecordChunkCount] = {};
+    qlaunchext::ns::ExtApplicationRecord chunk[kApplicationRecordChunkCount] = {};
     s32 offset = 0;
     while (offset < kMaxTrackedApplicationRecords) {
         s32 readCount = 0;
@@ -51,15 +51,15 @@ bool listApplicationRecords(std::vector<switchu::ns::ExtApplicationRecord>& reco
     }
 
     std::sort(records.begin(), records.end(),
-              [](const switchu::ns::ExtApplicationRecord& a,
-                 const switchu::ns::ExtApplicationRecord& b) {
+              [](const qlaunchext::ns::ExtApplicationRecord& a,
+                 const qlaunchext::ns::ExtApplicationRecord& b) {
                   return a.id < b.id;
               });
     return true;
 }
 
-void queryApplicationViews(const std::vector<switchu::ns::ExtApplicationRecord>& records,
-                           std::vector<switchu::ns::ExtApplicationView>& views) {
+void queryApplicationViews(const std::vector<qlaunchext::ns::ExtApplicationRecord>& records,
+                           std::vector<qlaunchext::ns::ExtApplicationView>& views) {
     views.clear();
     if (records.empty())
         return;
@@ -69,21 +69,21 @@ void queryApplicationViews(const std::vector<switchu::ns::ExtApplicationRecord>&
         tids[i] = records[i].id;
 
     views.resize(records.size());
-    Result rc = switchu::ns::queryApplicationViews(
+    Result rc = qlaunchext::ns::queryApplicationViews(
         tids.data(),
         static_cast<int>(tids.size()),
         views.data());
     if (R_FAILED(rc)) {
         DebugLog::log("[loader] queryApplicationViews failed rc=0x%X", rc);
-        std::fill(views.begin(), views.end(), switchu::ns::ExtApplicationView{});
+        std::fill(views.begin(), views.end(), qlaunchext::ns::ExtApplicationView{});
     }
 }
 #endif
 
 bool fetchDaemonCatalog(std::vector<PendingApp>& out) {
-#ifdef SWITCHU_MENU
-    std::vector<switchu::menu::smi_cmd::AppEntry> catalog;
-    Result rc = switchu::menu::smi_cmd::getAppList(catalog, true);
+#ifdef QLAUNCHEXT_MENU
+    std::vector<qlaunchext::menu::smi_cmd::AppEntry> catalog;
+    Result rc = qlaunchext::menu::smi_cmd::getAppList(catalog, true);
     if (R_FAILED(rc) || catalog.empty()) {
         DebugLog::log("[loader] daemon catalog unavailable rc=0x%X count=%d",
                       rc, (int)catalog.size());
@@ -111,8 +111,8 @@ bool fetchDaemonCatalog(std::vector<PendingApp>& out) {
                                                           a.startupUserAccountOption);
         a.iconData = std::move(ent.icon);
 
-        switchu::control_cache::Meta meta{};
-        if (switchu::control_cache::readMeta(ent.titleId, meta)) {
+        qlaunchext::control_cache::Meta meta{};
+        if (qlaunchext::control_cache::readMeta(ent.titleId, meta)) {
             if (meta.name[0] != '\0')
                 a.title = meta.name;
             a.startupUserKnown = true;
@@ -120,7 +120,7 @@ bool fetchDaemonCatalog(std::vector<PendingApp>& out) {
             a.startupUserAccountOption = meta.startup_user_account_option;
             a.userRequired = requiresInteractiveUserSelection(a.startupUserAccount,
                                                               a.startupUserAccountOption);
-            a.iconData = switchu::control_cache::readIcon(ent.titleId);
+            a.iconData = qlaunchext::control_cache::readIcon(ent.titleId);
         }
 
         out.push_back(std::move(a));
@@ -167,7 +167,7 @@ void AppListLoader::fetchApps() {
     char tidBuf[17];
     m_pending.clear();
 
-#ifdef SWITCHU_HOMEBREW
+#ifdef QLAUNCHEXT_HOMEBREW
     static const char* dummyNames[] = {
         "The Legend of Zelda: TotK",
         "Super Mario Odyssey",
@@ -217,16 +217,16 @@ void AppListLoader::fetchApps() {
         return;
     }
 
-#ifdef SWITCHU_MENU
+#ifdef QLAUNCHEXT_MENU
     DebugLog::log("[loader] daemon catalog required; skipping menu-side app scan");
     return;
 #endif
 
-    std::vector<switchu::ns::ExtApplicationRecord> records;
+    std::vector<qlaunchext::ns::ExtApplicationRecord> records;
     if (!listApplicationRecords(records))
         return;
 
-    std::vector<switchu::ns::ExtApplicationView> views;
+    std::vector<qlaunchext::ns::ExtApplicationView> views;
     queryApplicationViews(records, views);
 
     m_pending.reserve(records.size());
@@ -237,8 +237,8 @@ void AppListLoader::fetchApps() {
 
         uint32_t vf = views[i].flags;
 
-        switchu::control_cache::Meta meta{};
-        if (switchu::control_cache::readMeta(tid, meta)) {
+        qlaunchext::control_cache::Meta meta{};
+        if (qlaunchext::control_cache::readMeta(tid, meta)) {
             PendingApp a;
             a.id      = tidBuf;
             a.title   = meta.name;
@@ -249,7 +249,7 @@ void AppListLoader::fetchApps() {
             a.startupUserAccountOption = meta.startup_user_account_option;
             a.userRequired = requiresInteractiveUserSelection(a.startupUserAccount,
                                                               a.startupUserAccountOption);
-            a.iconData = switchu::control_cache::readIcon(tid);
+            a.iconData = qlaunchext::control_cache::readIcon(tid);
             m_pending.push_back(std::move(a));
             continue;
         }
@@ -275,8 +275,8 @@ std::vector<uint8_t> AppListLoader::loadIconData(uint64_t titleId) {
     if (titleId == 0)
         return iconData;
 
-#ifdef SWITCHU_MENU
-    iconData = switchu::control_cache::readIcon(titleId);
+#ifdef QLAUNCHEXT_MENU
+    iconData = qlaunchext::control_cache::readIcon(titleId);
 #endif
 
     return iconData;

@@ -35,12 +35,12 @@ public:
     void setAppHasForeground(bool v);
     void setSuspendedTitleId(uint64_t v);
 
-#ifdef SWITCHU_MENU
+#ifdef QLAUNCHEXT_MENU
     void setStartupStatus(uint64_t suspendedTitleId, bool appRunning);
 #endif
 
 private:
-#ifdef SWITCHU_MENU
+#ifdef QLAUNCHEXT_MENU
     std::atomic<bool>     m_appRunning{false};
     std::atomic<bool>     m_appHasForeground{false};
     std::atomic<uint64_t> m_suspendedTitleId{0};

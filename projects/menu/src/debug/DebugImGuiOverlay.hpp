@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef SWITCHU_DEBUG_UI
+#ifdef QLAUNCHEXT_DEBUG_UI
 
 #include <nxui/core/Renderer.hpp>
 #include <nxui/core/Input.hpp>

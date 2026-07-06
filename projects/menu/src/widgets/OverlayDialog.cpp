@@ -30,7 +30,7 @@ static nxui::Rect scaledRect(const nxui::Rect& rect, float scale) {
 OverlayDialog::OverlayDialog() {
     setFrameworkTouchEnabled(false);
     setVisible(false);
-    m_cursor.setBorderWidth(2.6f);
+    m_cursor.setBorderWidth(4.f);
 }
 
 

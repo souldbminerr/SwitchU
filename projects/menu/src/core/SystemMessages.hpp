@@ -5,7 +5,7 @@
 #include <functional>
 #include <switch.h>
 
-#ifdef SWITCHU_MENU
+#ifdef QLAUNCHEXT_MENU
 enum class SysAction {
     HomeButton,
     Sleep,
@@ -17,7 +17,7 @@ enum class SysAction {
 
 class SystemMessages {
 public:
-#ifdef SWITCHU_MENU
+#ifdef QLAUNCHEXT_MENU
     using ActionCallback = std::function<void(SysAction)>;
 
     void setCallback(ActionCallback cb) { m_callback = std::move(cb); }

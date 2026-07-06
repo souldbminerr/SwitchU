@@ -1,6 +1,6 @@
 #pragma once
-#include <switchu/smi_protocol.hpp>
-#include <switchu/smi_helpers.hpp>
+#include <qlaunchext/smi_protocol.hpp>
+#include <qlaunchext/smi_helpers.hpp>
 #include <switch.h>
 
 #include <cstring>
@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-namespace switchu::menu::smi_cmd {
+namespace qlaunchext::menu::smi_cmd {
 
 
 static Result pushOutStorage(const void* data, size_t size) {
@@ -99,7 +99,7 @@ inline Result getAppList(std::vector<AppEntry>& outList, bool waitForDaemon = tr
     std::ifstream file;
     const int retries = waitForDaemon ? 20 : 1;
     for (int retry = 0; retry < retries && !file.is_open(); ++retry) {
-        file.open("sdmc:/config/SwitchU/applist.bin", std::ios::binary);
+        file.open("sdmc:/config/qlaunch-ext/applist.bin", std::ios::binary);
         if (!file.is_open() && waitForDaemon) svcSleepThread(50'000'000ULL);
     }
     if (!file.is_open()) return MAKERESULT(Module_Libnx, 0xFE);

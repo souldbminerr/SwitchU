@@ -6,11 +6,6 @@
 
 #include <nxui/core/ThreadPool.hpp>
 
-#include <curlpp/Easy.hpp>
-#include <curlpp/Exception.hpp>
-#include <curlpp/Infos.hpp>
-#include <curlpp/Options.hpp>
-#include <curlpp/cURLpp.hpp>
 #include <nlohmann/json.hpp>
 #include <switch.h>
 

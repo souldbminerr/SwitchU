@@ -31,7 +31,7 @@ public:
         std::uint64_t revision = 0;
     };
 
-    static constexpr const char* kDefaultCatalogUrl = "https://raw.githubusercontent.com/PoloNX/SwitchU-Themes/main/index.json";
+    static constexpr const char* kDefaultCatalogUrl = "https://raw.githubusercontent.com/PoloNX/qlaunch-ext-Themes/main/index.json";
 
     explicit ThemeCatalogClient(std::string catalogUrl = kDefaultCatalogUrl);
 

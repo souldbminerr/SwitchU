@@ -4,7 +4,7 @@
 
 namespace settings::tabs {
 class SystemTab;
-class AccessibilityTab;
+class ThemesTab;
 class AudioTab;
 class DisplayTab;
 class InternetTab;
@@ -31,6 +31,24 @@ public:
     void onAccessibilitySpeakContextEveryFocusChange(BoolCb cb) { m_accessibilitySpeakContextEveryFocusCb = std::move(cb); }
     void onAccessibilitySpeakPositionChange(BoolCb cb) { m_accessibilitySpeakPositionCb = std::move(cb); }
     void onAccessibilitySpeechRateChange(IntCb cb) { m_accessibilitySpeechRateCb = std::move(cb); }
+    void onThemeChange(IntCb cb)             { m_themeChangeCb = std::move(cb); }
+    void onBackgroundEffectChange(BoolCb cb) { m_bgEffectCb = std::move(cb); }
+    void onIconShapeChange(IntCb cb)         { m_iconShapeCb = std::move(cb); }
+    using CustomColorsCb = std::function<void(bool light, unsigned bg, unsigned text,
+                                              unsigned highlight, unsigned enabled, unsigned disabled)>;
+    void onCustomColorsChange(CustomColorsCb cb) { m_customColorsCb = std::move(cb); }
+    void setCustomThemeState(bool active, bool light, unsigned bg, unsigned text,
+                             unsigned highlight, unsigned enabled, unsigned disabled) {
+        m_customActive = active; m_customLight = light;
+        m_customBg = bg; m_customText = text; m_customHighlight = highlight;
+        m_customEnabled = enabled; m_customDisabled = disabled;
+    }
+    void fireCustomColors() {
+        if (m_customColorsCb)
+            m_customColorsCb(m_customLight, m_customBg, m_customText,
+                             m_customHighlight, m_customEnabled, m_customDisabled);
+    }
+    void onMusicEnabledChange(BoolCb cb)     { m_musicEnabledCb = std::move(cb); }
     void onNetConnect(VoidCb cb)        { m_netConnectCb = std::move(cb); }
     void onSleepRequest(VoidCb cb)      { m_sleepCb = std::move(cb); }
     void onShutdownRequest(VoidCb cb)   { m_shutdownCb = std::move(cb); }
@@ -50,6 +68,16 @@ public:
     void setClockUse12HourState(bool enabled) {
         m_clockUse12Hour = enabled;
     }
+    void setThemeState(std::vector<std::string> names, int index, bool effectEnabled) {
+        m_themeNames = std::move(names);
+        m_themeIndex = index;
+        m_bgEffectEnabled = effectEnabled;
+    }
+    void setMusicEnabledState(bool enabled) { m_musicEnabled = enabled; }
+    void setIconShapeState(std::vector<std::string> names, int index) {
+        m_iconShapeNames = std::move(names);
+        m_iconShapeIndex = index;
+    }
     void setAccessibilityEnabledState(bool enabled) {
         m_accessibilityEnabled = enabled;
         setAccessibilityVoiceEnabled(enabled);
@@ -68,7 +96,7 @@ protected:
 
 private:
     friend class settings::tabs::SystemTab;
-    friend class settings::tabs::AccessibilityTab;
+    friend class settings::tabs::ThemesTab;
     friend class settings::tabs::AudioTab;
     friend class settings::tabs::DisplayTab;
     friend class settings::tabs::InternetTab;
@@ -84,6 +112,11 @@ private:
     StringCb m_uiLanguageCb;
     StringCb m_defaultProfileCb;
     BoolCb m_clockUse12HourCb;
+    IntCb  m_themeChangeCb;
+    BoolCb m_bgEffectCb;
+    IntCb  m_iconShapeCb;
+    BoolCb m_musicEnabledCb;
+    CustomColorsCb m_customColorsCb;
     BoolCb m_accessibilityEnabledCb;
     BoolCb m_accessibilitySpeakHintsCb;
     BoolCb m_accessibilitySpeakContextEveryFocusCb;
@@ -100,6 +133,16 @@ private:
     std::string m_uiLanguageOverride = "auto";
     std::string m_defaultProfileUid;
     bool m_clockUse12Hour = false;
+    std::vector<std::string> m_themeNames;
+    int  m_themeIndex = 0;
+    bool m_bgEffectEnabled = false;
+    std::vector<std::string> m_iconShapeNames;
+    int  m_iconShapeIndex = 1;   // default: Square
+    bool m_musicEnabled = false;
+    bool m_customActive = false;
+    bool m_customLight = false;
+    unsigned m_customBg = 0x2D2D2D, m_customText = 0xFFFFFF, m_customHighlight = 0x00C3E3;
+    unsigned m_customEnabled = 0x07FDCC, m_customDisabled = 0x38393B;
     bool m_accessibilityEnabled = true;
     bool m_accessibilitySpeakHints = true;
     bool m_accessibilitySpeakContextEveryFocus = false;

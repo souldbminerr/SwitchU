@@ -1,9 +1,9 @@
 #pragma once
 #include <switch.h>
-#include <switchu/control_cache.hpp>
-#include <switchu/file_log.hpp>
+#include <qlaunchext/control_cache.hpp>
+#include <qlaunchext/file_log.hpp>
 
-namespace switchu::daemon::app {
+namespace qlaunchext::daemon::app {
 
 static AppletApplication g_app = {};
 static bool g_running = false;
@@ -55,13 +55,13 @@ static inline void ensureSaveData(uint64_t app_id, uint64_t owner_id,
 
     Result rc = fsCreateSaveDataFileSystem(&attr, &cr, &meta);
     if (R_FAILED(rc))
-        switchu::FileLog::log("[app] ensureSaveData type=%d FAIL: 0x%X", static_cast<int>(type), rc);
+        qlaunchext::FileLog::log("[app] ensureSaveData type=%d FAIL: 0x%X", static_cast<int>(type), rc);
 }
 
 static inline void ensureApplicationSaveData(uint64_t title_id, AccountUid uid) {
-    switchu::control_cache::Meta meta{};
-    if (!switchu::control_cache::readMeta(title_id, meta)) {
-        switchu::FileLog::log("[app] control cache missing for 0x%016lX; save data not precreated",
+    qlaunchext::control_cache::Meta meta{};
+    if (!qlaunchext::control_cache::readMeta(title_id, meta)) {
+        qlaunchext::FileLog::log("[app] control cache missing for 0x%016lX; save data not precreated",
                               title_id);
         return;
     }
@@ -98,7 +98,7 @@ static inline void ensureApplicationSaveData(uint64_t title_id, AccountUid uid) 
 }
 
 inline Result launch(uint64_t title_id, AccountUid uid) {
-    switchu::FileLog::log("[app] launch request title=0x%016lX running=%d fg=%d suspended=0x%016lX uid_valid=%d uid[0]=0x%016lX uid[1]=0x%016lX",
+    qlaunchext::FileLog::log("[app] launch request title=0x%016lX running=%d fg=%d suspended=0x%016lX uid_valid=%d uid[0]=0x%016lX uid[1]=0x%016lX",
                           title_id,
                           g_running ? 1 : 0,
                           g_hasForeground ? 1 : 0,
@@ -106,7 +106,7 @@ inline Result launch(uint64_t title_id, AccountUid uid) {
                           accountUidIsValid(&uid) ? 1 : 0,
                           uid.uid[0], uid.uid[1]);
     if (g_running) {
-        switchu::FileLog::log("[app] closing previous app before launch");
+        qlaunchext::FileLog::log("[app] closing previous app before launch");
         appletApplicationRequestExit(&g_app);
         appletApplicationJoin(&g_app);
         appletApplicationClose(&g_app);
@@ -118,9 +118,9 @@ inline Result launch(uint64_t title_id, AccountUid uid) {
     // Non-fatal: some special titles (stubs, forwarders) may return an error here.
     Result touchRc = nsTouchApplication(title_id);
     if (R_FAILED(touchRc))
-        switchu::FileLog::log("[app] nsTouchApplication FAIL: 0x%X (non-fatal)", touchRc);
+        qlaunchext::FileLog::log("[app] nsTouchApplication FAIL: 0x%X (non-fatal)", touchRc);
     else
-        switchu::FileLog::log("[app] nsTouchApplication ok");
+        qlaunchext::FileLog::log("[app] nsTouchApplication ok");
 
     g_lastLaunchAcceptsUser = true;
     g_lastLaunchNeedsUser = true;
@@ -130,7 +130,7 @@ inline Result launch(uint64_t title_id, AccountUid uid) {
 
     Result rc = appletCreateApplication(&g_app, title_id);
     if (R_FAILED(rc)) {
-        switchu::FileLog::log("[app] CreateApp FAIL: 0x%X", rc);
+        qlaunchext::FileLog::log("[app] CreateApp FAIL: 0x%X", rc);
         return rc;
     }
 
@@ -144,7 +144,7 @@ inline Result launch(uint64_t title_id, AccountUid uid) {
     static_assert(sizeof(userArg) == 0x88);
 
     if (g_lastLaunchAcceptsUser && accountUidIsValid(&uid)) {
-        switchu::FileLog::log("[app] preselecting user startup_user=%u option=%u needs_user=%d uid[0]=0x%016lX uid[1]=0x%016lX",
+        qlaunchext::FileLog::log("[app] preselecting user startup_user=%u option=%u needs_user=%d uid[0]=0x%016lX uid[1]=0x%016lX",
                               (unsigned)g_lastStartupUserAccount,
                               (unsigned)g_lastStartupUserAccountOption,
                               g_lastLaunchNeedsUser ? 1 : 0,
@@ -161,17 +161,17 @@ inline Result launch(uint64_t title_id, AccountUid uid) {
                 Result pushRc = appletApplicationPushLaunchParameter(&g_app,
                     AppletLaunchParameterKind_PreselectedUser, &st);
                 if (R_FAILED(pushRc)) {
-                    switchu::FileLog::log("[app] PushUser FAIL: 0x%X", pushRc);
+                    qlaunchext::FileLog::log("[app] PushUser FAIL: 0x%X", pushRc);
                 }
             } else {
-                switchu::FileLog::log("[app] PushUser storage write FAIL: 0x%X", writeRc);
+                qlaunchext::FileLog::log("[app] PushUser storage write FAIL: 0x%X", writeRc);
             }
             appletStorageClose(&st);
         } else {
-            switchu::FileLog::log("[app] PushUser storage create FAIL: 0x%X", rc);
+            qlaunchext::FileLog::log("[app] PushUser storage create FAIL: 0x%X", rc);
         }
     } else {
-        switchu::FileLog::log("[app] launch without preselected user (accepts_user=%d needs_user=%d startup_user=%u option=%u uid_valid=%d)",
+        qlaunchext::FileLog::log("[app] launch without preselected user (accepts_user=%d needs_user=%d startup_user=%u option=%u uid_valid=%d)",
                               g_lastLaunchAcceptsUser ? 1 : 0,
                               g_lastLaunchNeedsUser ? 1 : 0,
                               (unsigned)g_lastStartupUserAccount,
@@ -181,40 +181,40 @@ inline Result launch(uint64_t title_id, AccountUid uid) {
 
     appletUnlockForeground();
 
-    switchu::FileLog::log("[app] Start call");
+    qlaunchext::FileLog::log("[app] Start call");
     rc = appletApplicationStart(&g_app);
     if (R_FAILED(rc)) {
-        switchu::FileLog::log("[app] Start FAIL: 0x%X", rc);
+        qlaunchext::FileLog::log("[app] Start FAIL: 0x%X", rc);
         appletApplicationClose(&g_app);
         return rc;
     }
-    switchu::FileLog::log("[app] Start ok");
+    qlaunchext::FileLog::log("[app] Start ok");
 
     rc = appletApplicationRequestForApplicationToGetForeground(&g_app);
     if (R_FAILED(rc)) {
-        switchu::FileLog::log("[app] ReqFG FAIL: 0x%X", rc);
+        qlaunchext::FileLog::log("[app] ReqFG FAIL: 0x%X", rc);
         appletApplicationClose(&g_app);
         return rc;
     }
-    switchu::FileLog::log("[app] ReqFG ok");
+    qlaunchext::FileLog::log("[app] ReqFG ok");
 
     g_running = true;
     g_hasForeground = true;
     g_suspendedTitleId = title_id;
-    switchu::FileLog::log("[app] launched 0x%016lX", title_id);
+    qlaunchext::FileLog::log("[app] launched 0x%016lX", title_id);
     return 0;
 }
 
 inline Result resume() {
     if (!g_running) return MAKERESULT(Module_Libnx, 0xFE);
-    switchu::FileLog::log("[app] resume request fg=%d suspended=0x%016lX",
+    qlaunchext::FileLog::log("[app] resume request fg=%d suspended=0x%016lX",
                           g_hasForeground ? 1 : 0, g_suspendedTitleId);
     appletUnlockForeground();
     Result rc = appletApplicationRequestForApplicationToGetForeground(&g_app);
     if (R_FAILED(rc))
-        switchu::FileLog::log("[app] resume ReqFG FAIL: 0x%X", rc);
+        qlaunchext::FileLog::log("[app] resume ReqFG FAIL: 0x%X", rc);
     else
-        switchu::FileLog::log("[app] resume ReqFG ok");
+        qlaunchext::FileLog::log("[app] resume ReqFG ok");
     g_hasForeground = true;
     return rc;
 }
@@ -225,43 +225,43 @@ inline Result areLibraryAppletsLeft(bool* out) {
     if (!g_running) return 0;
     Result rc = appletApplicationAreAnyLibraryAppletsLeft(&g_app, out);
     if (R_FAILED(rc)) {
-        switchu::FileLog::log("[app] AreAnyLibraryAppletsLeft FAIL: 0x%X", rc);
+        qlaunchext::FileLog::log("[app] AreAnyLibraryAppletsLeft FAIL: 0x%X", rc);
     } else {
-        switchu::FileLog::log("[app] AreAnyLibraryAppletsLeft -> %d", *out ? 1 : 0);
+        qlaunchext::FileLog::log("[app] AreAnyLibraryAppletsLeft -> %d", *out ? 1 : 0);
     }
     return rc;
 }
 
 inline Result requestExitLibraryAppletOrTerminate(u64 timeout) {
     if (!g_running) return 0;
-    switchu::FileLog::log("[app] RequestExitLibraryAppletOrTerminate timeout=%lu app=0x%016lX",
+    qlaunchext::FileLog::log("[app] RequestExitLibraryAppletOrTerminate timeout=%lu app=0x%016lX",
                           timeout, g_suspendedTitleId);
     Result rc = appletApplicationRequestExitLibraryAppletOrTerminate(&g_app, timeout);
     if (R_FAILED(rc))
-        switchu::FileLog::log("[app] RequestExitLibraryAppletOrTerminate FAIL: 0x%X", rc);
+        qlaunchext::FileLog::log("[app] RequestExitLibraryAppletOrTerminate FAIL: 0x%X", rc);
     else
-        switchu::FileLog::log("[app] RequestExitLibraryAppletOrTerminate ok");
+        qlaunchext::FileLog::log("[app] RequestExitLibraryAppletOrTerminate ok");
     return rc;
 }
 
 inline Result terminate() {
     if (!g_running) return 0;
-    switchu::FileLog::log("[app] terminate request app=0x%016lX fg=%d",
+    qlaunchext::FileLog::log("[app] terminate request app=0x%016lX fg=%d",
                           g_suspendedTitleId, g_hasForeground ? 1 : 0);
     Result libRc = appletApplicationTerminateAllLibraryApplets(&g_app);
-    switchu::FileLog::log("[app] terminate TerminateAllLibraryApplets rc=0x%X", libRc);
+    qlaunchext::FileLog::log("[app] terminate TerminateAllLibraryApplets rc=0x%X", libRc);
     Result requestRc = appletApplicationRequestExit(&g_app);
-    switchu::FileLog::log("[app] terminate RequestExit rc=0x%X", requestRc);
+    qlaunchext::FileLog::log("[app] terminate RequestExit rc=0x%X", requestRc);
     Result waitRc = eventWait(&g_app.StateChangedEvent, 15'000'000'000ULL);
     if (waitRc == KERNELRESULT(TimedOut)) {
-        switchu::FileLog::log("[app] terminate graceful wait timed out; forcing terminate");
+        qlaunchext::FileLog::log("[app] terminate graceful wait timed out; forcing terminate");
         Result forceRc = appletApplicationTerminate(&g_app);
-        switchu::FileLog::log("[app] terminate force rc=0x%X", forceRc);
+        qlaunchext::FileLog::log("[app] terminate force rc=0x%X", forceRc);
     } else {
-        switchu::FileLog::log("[app] terminate wait rc=0x%X", waitRc);
+        qlaunchext::FileLog::log("[app] terminate wait rc=0x%X", waitRc);
     }
     Result resultRc = serviceDispatch(&g_app.s, 30);
-    switchu::FileLog::log("[app] terminate result rc=0x%X", resultRc);
+    qlaunchext::FileLog::log("[app] terminate result rc=0x%X", resultRc);
     appletApplicationClose(&g_app);
     g_running = false;
     g_hasForeground = false;
@@ -272,7 +272,7 @@ inline Result terminate() {
 inline bool checkFinished() {
     if (!g_running) return false;
     if (appletApplicationCheckFinished(&g_app)) {
-        switchu::FileLog::log("[app] finished (reason=%d)",
+        qlaunchext::FileLog::log("[app] finished (reason=%d)",
             (int)appletApplicationGetExitReason(&g_app));
         appletApplicationJoin(&g_app);
         appletApplicationClose(&g_app);
@@ -285,7 +285,7 @@ inline bool checkFinished() {
 }
 
 inline void onHomeSuspend() {
-    switchu::FileLog::log("[app] onHomeSuspend fg %d -> 0 app=0x%016lX",
+    qlaunchext::FileLog::log("[app] onHomeSuspend fg %d -> 0 app=0x%016lX",
                           g_hasForeground ? 1 : 0, g_suspendedTitleId);
     g_hasForeground = false;
 }

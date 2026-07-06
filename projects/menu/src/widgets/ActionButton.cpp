@@ -24,10 +24,10 @@ void ActionButton::setVisualState(float opacity, float emphasis, float accentMix
 }
 
 void ActionButton::onRender(nxui::Renderer& ren) {
-    auto style = switchu::ui::resolveActionButtonStyle(
+    auto style = qlaunchext::ui::resolveActionButtonStyle(
         m_theme,
         m_opacity * m_panelOpacity * m_styleOpacity,
         m_emphasis,
         m_accentMix);
-    switchu::ui::drawActionButtonChrome(ren, m_rect, cornerRadius(), style);
+    qlaunchext::ui::drawActionButtonChrome(ren, m_rect, cornerRadius(), style);
 }

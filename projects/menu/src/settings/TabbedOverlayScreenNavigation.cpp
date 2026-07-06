@@ -733,10 +733,12 @@ void TabbedOverlayScreen::handleTouch(nxui::Input& input) {
 
         if (tr.contains(tx, ty)) {
             m_touchTarget = TouchTarget::Tab;
-            int idx = (int)((ty - tr.y) / kTabRowHeight);
+            // Account for the rail's inset and scroll offset.
+            int idx = (int)((ty - (tr.y + 14.f) + m_tabScrollY) / kTabRowHeight);
             idx = std::clamp(idx, 0, (int)m_tabs.size() - 1);
             m_touchHitIndex = idx;
             m_touchOnSelected = (idx == m_tabIndex && m_focusArea == FocusArea::Tabs);
+            m_touchStartTabScroll = m_tabScrollTarget;
             return;
         }
 
@@ -808,6 +810,22 @@ void TabbedOverlayScreen::handleTouch(nxui::Input& input) {
                     m_scrollTarget = nextScroll;
                     m_scrollY = nextScroll;
                 }
+            }
+        } else if (m_touchTarget == TouchTarget::Tab) {
+            // Drag to scroll the category rail.
+            if (!m_touchScrolling && (dx > kPanThreshold || dy > kPanThreshold) && dy > dx) {
+                m_touchScrolling = true;
+                m_railTouchScrolling = true;
+                m_touchStartY = ty;
+                m_touchStartTabScroll = m_tabScrollTarget;
+            }
+            if (m_touchScrolling) {
+                nxui::Rect trr = tabsRect();
+                float viewH = std::max(1.f, trr.height - 28.f);
+                float maxScroll = std::max(0.f, (float)m_tabs.size() * kTabRowHeight - viewH);
+                float next = std::clamp(m_touchStartTabScroll - (ty - m_touchStartY), 0.f, maxScroll);
+                m_tabScrollTarget = next;
+                m_tabScrollY = next;
             }
         } else if (m_touchTarget == TouchTarget::Dropdown) {
             auto& items = m_tabs[m_tabIndex].items;
@@ -970,6 +988,7 @@ void TabbedOverlayScreen::handleTouch(nxui::Input& input) {
         m_touchOnSelected = false;
         m_touchDirectControl = false;
         m_touchScrolling = false;
+        m_railTouchScrolling = false;
         m_touchDraggingSlider = false;
     }
 }
@@ -998,6 +1017,28 @@ void TabbedOverlayScreen::onContentUpdate(float dt) {
     syncPanelState(visibilityProgress());
 
     m_scrollY += (m_scrollTarget - m_scrollY) * std::min(1.f, dt * 14.f);
+
+    // Smooth category-rail scroll: keep the selected tab within the band.
+    {
+        const float kRailInset = 14.f;
+        nxui::Rect tr = tabsRect();
+        float viewH = std::max(1.f, tr.height - kRailInset * 2.f);
+        float totalH = (float)m_tabs.size() * kTabRowHeight;
+        float selTop = m_tabIndex * kTabRowHeight;
+        float target = m_tabScrollTarget;
+        // Auto-follow the selection (skipped while the user drag-scrolls the rail).
+        if (!m_railTouchScrolling) {
+            if (selTop - target < 0.f)
+                target = selTop;
+            else if (selTop + kTabRowHeight - target > viewH)
+                target = selTop + kTabRowHeight - viewH;
+        }
+        m_tabScrollTarget = std::clamp(target, 0.f, std::max(0.f, totalH - viewH));
+        m_tabScrollY += (m_tabScrollTarget - m_tabScrollY) * std::min(1.f, dt * 14.f);
+        if (std::abs(m_tabScrollTarget - m_tabScrollY) < 0.5f)
+            m_tabScrollY = m_tabScrollTarget;
+    }
+
     m_uiTime += dt;
 
     if (m_active && !m_animating && m_tabIndex >= 0 && m_tabIndex < (int)m_tabs.size()) {

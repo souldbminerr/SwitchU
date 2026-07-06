@@ -2,6 +2,7 @@
 #include "widgets/ActionButton.hpp"
 
 #include <nxui/core/Renderer.hpp>
+#include <nxui/core/I18n.hpp>
 #include <nxui/widgets/Label.hpp>
 #include <nxui/widgets/GlassBox.hpp>
 #include <nxui/widgets/GlassWidget.hpp>
@@ -277,10 +278,18 @@ public:
     }
 protected:
     float preferredRightWidth(float rowWidth) const override {
-        return std::max(120.f, rowWidth * 0.42f);
+        // No value -> give the whole row to the label (avoids clipping long
+        // descriptive Info rows). Otherwise size the column to the value text
+        // (so long values like URLs are not ellipsized), capped to most of row.
+        if (m_item.infoText.empty())
+            return 0.f;
+        nxui::Font* f = smallFont();
+        float w = f ? f->measure(m_item.infoText).x * 0.84f : rowWidth * 0.42f;
+        return std::clamp(w + 10.f, 120.f, rowWidth * 0.72f);
     }
 
     void syncRight(const nxui::Rect& rightRect) override {
+        m_value->setVisible(!m_item.infoText.empty());
         nxui::Font* rowSmallFont = smallFont();
         const nxui::Theme* rowTheme = theme();
 
@@ -312,61 +321,52 @@ class ToggleRowWidget final : public SettingRowBase {
 public:
     ToggleRowWidget(SettingsScreen::SettingItem& item, const SettingWidgetContext& ctx)
         : SettingRowBase(item, ctx) {
-        m_track = std::make_shared<nxui::GlassBox>(nxui::Axis::ROW);
-        m_track->setSize(64.f, 32.f);
-        m_track->setPadding(4.f);
-        m_track->setAlignItems(nxui::AlignItems::CENTER);
-        m_track->setJustifyContent(nxui::JustifyContent::FLEX_START);
-        m_track->setCornerRadius(16.f);
-        m_track->setBorderWidth(0.f);
-
-        m_knob = std::make_shared<nxui::GlassBox>();
-        m_knob->setSize(24.f, 24.f);
-        m_knob->setCornerRadius(12.f);
-        m_knob->setBorderWidth(0.f);
-
-        m_track->addChild(m_knob);
-        m_right->addChild(m_track);
+        m_value = std::make_shared<nxui::Label>("");
+        m_value->setHAlign(nxui::Label::HAlign::Right);
+        m_value->setVAlign(nxui::Label::VAlign::Center);
+        m_right->addChild(m_value);
     }
 protected:
-    float preferredRightWidth(float rowWidth) const override {
-        return std::max(120.f, rowWidth * 0.42f);
+    // "Enabled"/"Disabled" colours come from the theme (customizable).
+    nxui::Color onColor() const {
+        const nxui::Theme* th = theme();
+        return th ? th->enabledColor : nxui::Color(0.027f, 0.992f, 0.800f, 1.f);
+    }
+    nxui::Color offColor() const {
+        const nxui::Theme* th = theme();
+        return th ? th->disabledColor : nxui::Color(0.220f, 0.224f, 0.231f, 1.f);
     }
 
-    void syncRight(const nxui::Rect& rightRect) override {
-        const nxui::Theme* rowTheme = theme();
+    float preferredRightWidth(float rowWidth) const override {
+        return std::max(90.f, rowWidth * 0.24f);
+    }
 
-        float t = std::clamp(m_item.anim01, 0.f, 1.f);
-        if (rowTheme) {
-            nxui::Color offC = nxui::Color(0.45f, 0.45f, 0.5f, 1.f);
-            nxui::Color onC = nxui::Color(0.2f, 0.8f, 0.4f, 1.f);
-            nxui::Color bg = nxui::Color(
-                offC.r + (onC.r - offC.r) * t,
-                offC.g + (onC.g - offC.g) * t,
-                offC.b + (onC.b - offC.b) * t,
-                1.f
-            );
-            m_track->setBaseColor(bg.withAlpha(opacity()));
-            m_knob->setBaseColor(nxui::Color(1.f, 1.f, 1.f, opacity()));
-        }
-        float travel = 64.f - 8.f - 24.f;
-        nxui::Rect trackRect = {
-            rightRect.right() - 64.f,
-            rightRect.y + (rightRect.height - 32.f) * 0.5f,
-            64.f,
-            32.f
-        };
-        m_track->setRect(trackRect);
-        m_knob->setRect({
-            trackRect.x + 4.f + travel * t,
-            trackRect.y + 4.f,
-            24.f,
-            24.f
-        });
+    // qlaunch shows the state as "On"/"Off" text. The screen animates
+    // m_item.anim01 (0=off, 1=on) toward the current value; we use it to swap
+    // the text at the midpoint with a quick pop-out / pop-in.
+    void syncRight(const nxui::Rect& rightRect) override {
+        nxui::Font* f = font();
+        const float a01 = std::clamp(m_item.anim01, 0.f, 1.f);
+        const bool shownOn = a01 >= 0.5f;
+        auto& i18n = nxui::I18n::instance();
+        const std::string txt = shownOn ? i18n.tr("common.on", "On")
+                                        : i18n.tr("common.off", "Off");
+        if (f != m_cachedFont) { m_cachedFont = f; if (f) m_value->setFont(f); }
+        if (m_cachedText != txt) { m_cachedText = txt; m_value->setText(txt); }
+
+        // d = 1 at rest (fully on/off), 0 at the mid-swap point.
+        const float d = std::abs(a01 - 0.5f) * 2.f;
+        const float scale = 0.9f * (1.f + (1.f - d) * 0.45f);
+        const float alpha = d;
+        m_value->setScale(scale);
+        m_value->setTextColor(shownOn ? onColor() : offColor());
+        m_value->setOpacity(alpha * opacity());
+        m_value->setRect(rightRect);
     }
 private:
-    std::shared_ptr<nxui::GlassBox> m_track;
-    std::shared_ptr<nxui::GlassBox> m_knob;
+    std::shared_ptr<nxui::Label> m_value;
+    nxui::Font* m_cachedFont = nullptr;
+    std::string m_cachedText;
 };
 
 class SliderRowWidget final : public SettingRowBase {
@@ -577,62 +577,35 @@ class SelectorRowWidget final : public SettingRowBase {
 public:
     SelectorRowWidget(SettingsScreen::SettingItem& item, const SettingWidgetContext& ctx)
         : SettingRowBase(item, ctx) {
-        m_pill = std::make_shared<nxui::GlassBox>(nxui::Axis::ROW);
-        m_pill->setPadding(8.f, 12.f, 8.f, 12.f);
-        m_pill->setAlignItems(nxui::AlignItems::CENTER);
-        m_pill->setJustifyContent(nxui::JustifyContent::SPACE_BETWEEN);
-        m_pill->setCornerRadius(11.f);
-
         m_value = std::make_shared<nxui::Label>("");
-        m_value->setScale(0.82f);
-        m_value->setGrow(1.f);
-        m_value->setHAlign(nxui::Label::HAlign::Left);
+        m_value->setHAlign(nxui::Label::HAlign::Right);
         m_value->setVAlign(nxui::Label::VAlign::Center);
-
-        m_pill->addChild(m_value);
-        m_right->addChild(m_pill);
+        m_right->addChild(m_value);
     }
 protected:
     float preferredRightWidth(float rowWidth) const override {
-        return std::max(170.f, rowWidth * 0.38f);
+        int idx = std::clamp(m_item.intVal, 0, std::max(0, (int)m_item.options.size() - 1));
+        std::string text = m_item.options.empty() ? std::string() : m_item.options[idx];
+        nxui::Font* f = font();
+        float w = f ? f->measure(text).x * 0.9f : rowWidth * 0.38f;
+        return std::clamp(w + 10.f, 100.f, rowWidth * 0.6f);
     }
 
+    // qlaunch shows the current option as accent-coloured text (no pill/box).
     void syncRight(const nxui::Rect& rightRect) override {
-        nxui::Font* rowSmallFont = smallFont();
-        const nxui::Theme* rowTheme = theme();
-
+        nxui::Font* f = font();
+        const nxui::Theme* th = theme();
         int idx = std::clamp(m_item.intVal, 0, std::max(0, (int)m_item.options.size() - 1));
-        float w = std::max(170.f, rightRect.width);
-        float h = std::max(36.f, rect().height - 22.f);
-        nxui::Rect pillRect = {
-            rightRect.right() - w,
-            rightRect.y + (rightRect.height - h) * 0.5f,
-            w,
-            h
-        };
-
         std::string text = m_item.options.empty() ? std::string() : m_item.options[idx];
-        text = fitTextToWidth(rowSmallFont, text, 0.82f, std::max(0.f, pillRect.width - 24.f));
-        if (text != m_cachedValueText) {
-            m_cachedValueText = text;
-            m_value->setText(m_cachedValueText);
-        }
-        if (rowSmallFont != m_cachedFont) {
-            m_cachedFont = rowSmallFont;
-            if (rowSmallFont)
-                m_value->setFont(rowSmallFont);
-        }
-        if (rowTheme) {
-            m_pill->setBaseColor(rowTheme->panelBase.withAlpha(0.42f * opacity()));
-            m_pill->setBorderColor(rowTheme->panelBorder.withAlpha(0.5f * opacity()));
-            m_value->setTextColor(rowTheme->textPrimary);
-        }
-        m_pill->setRect(pillRect);
+        if (f != m_cachedFont) { m_cachedFont = f; if (f) m_value->setFont(f); }
+        m_value->setScale(0.9f);
+        if (text != m_cachedValueText) { m_cachedValueText = text; m_value->setText(text); }
+        // Editable values use the theme "Enabled" colour (same teal as "On").
+        m_value->setTextColor(th ? th->enabledColor : nxui::Color(0.027f, 0.992f, 0.800f, 1.f));
         m_value->setOpacity(opacity());
-        m_value->setRect({pillRect.x + 12.f, pillRect.y, std::max(0.f, pillRect.width - 24.f), pillRect.height});
+        m_value->setRect(rightRect);
     }
 private:
-    std::shared_ptr<nxui::GlassBox> m_pill;
     std::shared_ptr<nxui::Label> m_value;
     nxui::Font* m_cachedFont = nullptr;
     std::string m_cachedValueText;
@@ -642,60 +615,30 @@ class ActionRowWidget final : public SettingRowBase {
 public:
     ActionRowWidget(SettingsScreen::SettingItem& item, const SettingWidgetContext& ctx)
         : SettingRowBase(item, ctx) {
-        m_btn = std::make_shared<ActionButton>();
-        m_btn->setCornerRadius(9.f);
-
-        m_btnLabel = std::make_shared<nxui::Label>(item.label);
-        m_btnLabel->setScale(0.84f);
-        m_btnLabel->setHAlign(nxui::Label::HAlign::Center);
-        m_btnLabel->setVAlign(nxui::Label::VAlign::Center);
-        m_btnLabel->setGrow(1.f);
-        m_btn->addChild(m_btnLabel);
-        m_right->addChild(m_btn);
+        // qlaunch actionable rows show a right-pointing chevron (no button).
+        m_chevron = std::make_shared<nxui::Label>(">");
+        m_chevron->setHAlign(nxui::Label::HAlign::Right);
+        m_chevron->setVAlign(nxui::Label::VAlign::Center);
+        m_right->addChild(m_chevron);
     }
 protected:
     float preferredRightWidth(float rowWidth) const override {
-        return std::max(160.f, rowWidth * 0.42f);
+        (void)rowWidth;
+        return 40.f;
     }
 
     void syncRight(const nxui::Rect& rightRect) override {
-        nxui::Font* rowSmallFont = smallFont();
-        const nxui::Theme* rowTheme = theme();
-
-        if (rowSmallFont != m_cachedLabelFont) {
-            m_cachedLabelFont = rowSmallFont;
-            if (rowSmallFont)
-                m_btnLabel->setFont(rowSmallFont);
-        }
-        if (m_cachedButtonText != m_item.label) {
-            m_cachedButtonText = m_item.label;
-            m_btnLabel->setText(m_cachedButtonText);
-        }
-
-        m_btn->setTheme(rowTheme);
-        m_btn->setVisualState(opacity(), m_item.anim01, 1.f);
-        if (rowTheme) {
-            m_btnLabel->setTextColor(rowTheme->textPrimary);
-        }
-        float btnW = std::max(140.f, std::min(rightRect.width, rect().width * 0.30f));
-        float btnH = std::max(30.f, rect().height - 16.f);
-        nxui::Rect buttonRect = {
-            rightRect.right() - btnW,
-            rightRect.y + (rightRect.height - btnH) * 0.5f,
-            btnW,
-            btnH
-        };
-        m_btn->setRect(buttonRect);
-        m_btnLabel->setOpacity(opacity());
-        m_btnLabel->setRect({buttonRect.x + 12.f, buttonRect.y + 4.f,
-                             std::max(0.f, buttonRect.width - 24.f),
-                             std::max(0.f, buttonRect.height - 8.f)});
+        nxui::Font* f = font();
+        const nxui::Theme* th = theme();
+        if (f != m_cachedFont) { m_cachedFont = f; if (f) m_chevron->setFont(f); }
+        m_chevron->setScale(0.9f);
+        if (th) m_chevron->setTextColor(th->textSecondary);
+        m_chevron->setOpacity(opacity());
+        m_chevron->setRect(rightRect);
     }
 private:
-    std::shared_ptr<ActionButton> m_btn;
-    std::shared_ptr<nxui::Label> m_btnLabel;
-    nxui::Font* m_cachedLabelFont = nullptr;
-    std::string m_cachedButtonText;
+    std::shared_ptr<nxui::Label> m_chevron;
+    nxui::Font* m_cachedFont = nullptr;
 };
 
 }

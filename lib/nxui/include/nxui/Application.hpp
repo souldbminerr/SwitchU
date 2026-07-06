@@ -64,6 +64,8 @@ private:
     bool m_running = true;
     bool m_renderEnabled = true;
     int  m_navDebounce = 0;
+    int  m_navActiveDir = -1;   // held direction driving key-repeat (-1 = none)
+    int  m_navRepeatTimer = 0;  // frames until the next repeat fires
 };
 
 } // namespace nxui

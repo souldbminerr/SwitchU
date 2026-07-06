@@ -186,19 +186,35 @@ static float spatialScore(const Rect& from, const Rect& to, FocusDirection dir) 
     // This makes a vertically-aligned column navigate naturally up/down even
     // if items aren't pixel-perfect.
     float mainDist = 0, crossDist = 0;
+    float perpOverlap = 0.f;   // overlap on the axis perpendicular to travel
+    auto overlap1D = [](float a0, float a1, float b0, float b1) {
+        return std::min(a1, b1) - std::max(a0, b0);
+    };
     switch (dir) {
         case FocusDirection::UP:
         case FocusDirection::DOWN:
             mainDist  = std::abs(dy);
             crossDist = std::abs(dx);
+            perpOverlap = overlap1D(from.x, from.x + from.width,
+                                    to.x,   to.x   + to.width);
             break;
         case FocusDirection::LEFT:
         case FocusDirection::RIGHT:
             mainDist  = std::abs(dx);
             crossDist = std::abs(dy);
+            perpOverlap = overlap1D(from.y, from.y + from.height,
+                                    to.y,   to.y   + to.height);
             break;
         default: break;
     }
+
+    // Require overlap on the perpendicular axis: you can only step to a widget
+    // that shares some extent across the direction of travel. A widget with no
+    // overlap (e.g. the top-left avatar relative to a game tile on a horizontal
+    // move) is not a valid candidate, so navigation cleanly fails at edges
+    // rather than jumping to a diagonal neighbour.
+    if (perpOverlap <= 0.f)
+        return 1.0e18f;
 
     return mainDist + crossDist * 3.0f;
 }

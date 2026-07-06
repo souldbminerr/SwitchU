@@ -377,11 +377,11 @@ void drawActionButtonChip(nxui::Renderer& ren,
                           float emphasis,
                           float accentMix = -1.f,
                           float scale = 0.72f) {
-    auto style = switchu::ui::resolveActionButtonStyle(theme, opacity, emphasis, accentMix);
-    nxui::Rect buttonRect = switchu::ui::scaledActionButtonRect(rect, style.scale);
+    auto style = qlaunchext::ui::resolveActionButtonStyle(theme, opacity, emphasis, accentMix);
+    nxui::Rect buttonRect = qlaunchext::ui::scaledActionButtonRect(rect, style.scale);
     float radius = std::min(kActionButtonRadius, buttonRect.height * 0.5f);
 
-    switchu::ui::drawActionButtonChrome(ren, rect, radius, style);
+    qlaunchext::ui::drawActionButtonChrome(ren, rect, radius, style);
 
     if (font) {
         float textScale = scale * style.scale;

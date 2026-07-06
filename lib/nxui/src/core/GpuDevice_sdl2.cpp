@@ -10,7 +10,7 @@ bool GpuDevice::initialize() {
         return false;
     }
 
-    m_sdlWindow = SDL_CreateWindow("SwitchU",
+    m_sdlWindow = SDL_CreateWindow("qlaunch-ext",
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
         FB_WIDTH, FB_HEIGHT, SDL_WINDOW_FULLSCREEN);
     if (!m_sdlWindow) {

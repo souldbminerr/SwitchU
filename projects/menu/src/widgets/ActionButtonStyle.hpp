@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace switchu::ui {
+namespace qlaunchext::ui {
 
 struct ActionButtonVisualStyle {
     nxui::Color baseColor;
@@ -166,4 +166,4 @@ inline void drawActionButtonChrome(nxui::Renderer& ren,
     }
 }
 
-} // namespace switchu::ui
+} // namespace qlaunchext::ui

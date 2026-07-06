@@ -1,14 +1,14 @@
 
-#include "core/WiiUMenuApp.hpp"
+#include "core/SwitchMenuApp.hpp"
 #include "core/DebugLog.hpp"
 #include "core/Config.hpp"
 #include "tutorial/TutorialActivity.hpp"
 #include <nxui/Application.hpp>
 #include <fmt/format.h>
-#ifdef SWITCHU_MENU
+#ifdef QLAUNCHEXT_MENU
 #include <nxui/core/Renderer.hpp>
-#include <switchu/smi_protocol.hpp>
-#include <switchu/file_log.hpp>
+#include <qlaunchext/smi_protocol.hpp>
+#include <qlaunchext/file_log.hpp>
 #endif
 #include <switch.h>
 #include <SDL2/SDL.h>
@@ -16,7 +16,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
-#ifdef SWITCHU_MENU
+#ifdef QLAUNCHEXT_MENU
 #include <cstring>
 #endif
 #include <memory>
@@ -26,7 +26,7 @@ constexpr size_t kMenuAppletHeapSize = 224u * 1024u * 1024u;
 }
 
 extern "C" {
-#ifdef SWITCHU_HOMEBREW
+#ifdef QLAUNCHEXT_HOMEBREW
     u32 __nx_applet_type = AppletType_Application;
 
     size_t __nx_heap_size = 0xD000000;
@@ -45,7 +45,7 @@ extern "C" {
 #endif
 }
 
-#ifdef SWITCHU_HOMEBREW
+#ifdef QLAUNCHEXT_HOMEBREW
 extern "C" void userAppInit(void) {
     timeInitialize();
     plInitialize(PlServiceType_System);
@@ -71,7 +71,7 @@ extern "C" void userAppExit(void) {
 extern "C" void __appInit(void) {
     Result rc;
 
-    svcOutputDebugString("[SwitchU-menu] __appInit start", 30);
+    svcOutputDebugString("[qlaunch-ext-menu] __appInit start", 30);
 
     rc = smInitialize();
     if (R_FAILED(rc)) diagAbortWithResult(MAKERESULT(Module_Libnx, 500));
@@ -81,13 +81,13 @@ extern "C" void __appInit(void) {
 
     rc = appletInitialize();
     if (R_FAILED(rc)) {
-        svcOutputDebugString("[SwitchU-menu] appletInitialize FAIL", 37);
+        svcOutputDebugString("[qlaunch-ext-menu] appletInitialize FAIL", 37);
         diagAbortWithResult(MAKERESULT(Module_Libnx, 502));
     }
-    svcOutputDebugString("[SwitchU-menu] appletInitialize OK", 34);
+    svcOutputDebugString("[qlaunch-ext-menu] appletInitialize OK", 34);
 
     rc = hidInitialize();
-    if (R_FAILED(rc)) svcOutputDebugString("[SwitchU-menu] hidInitialize FAIL", 33);
+    if (R_FAILED(rc)) svcOutputDebugString("[qlaunch-ext-menu] hidInitialize FAIL", 33);
 
     timeInitialize();
     __libnx_init_time();
@@ -107,12 +107,12 @@ extern "C" void __appInit(void) {
 
     rc = fsdevMountSdmc();
     if (R_FAILED(rc)) {
-        svcOutputDebugString("[SwitchU-menu] fsdevMountSdmc FAIL, retry", 42);
+        svcOutputDebugString("[qlaunch-ext-menu] fsdevMountSdmc FAIL, retry", 42);
         svcSleepThread(100'000'000ULL);
         rc = fsdevMountSdmc();
     }
 
-    switchu::FileLog::open("menu");
+    qlaunchext::FileLog::open("menu");
     DebugLog::openFileLog();
     DebugLog::log("[menu] __appInit complete (sd mount: 0x%X)", rc);
 
@@ -125,12 +125,12 @@ extern "C" void __appInit(void) {
     __nx_win_init();
     DebugLog::log("[menu] __nx_win_init done");
 
-    svcOutputDebugString("[SwitchU-menu] __appInit done", 29);
+    svcOutputDebugString("[qlaunch-ext-menu] __appInit done", 29);
 }
 
 extern "C" void __appExit(void) {
     DebugLog::closeFileLog();
-    switchu::FileLog::close();
+    qlaunchext::FileLog::close();
 
     __nx_win_exit();
 
@@ -153,7 +153,7 @@ extern "C" void __appExit(void) {
     smExit();
 }
 
-static switchu::smi::MenuStartMode readStartMode() {
+static qlaunchext::smi::MenuStartMode readStartMode() {
     LibAppletArgs args{};
     AppletStorage stor{};
     if (R_SUCCEEDED(appletPopInData(&stor))) {
@@ -164,16 +164,16 @@ static switchu::smi::MenuStartMode readStartMode() {
         }
         appletStorageClose(&stor);
     }
-    return static_cast<switchu::smi::MenuStartMode>(args.LaVersion);
+    return static_cast<qlaunchext::smi::MenuStartMode>(args.LaVersion);
 }
 
-static switchu::smi::SystemStatus readSystemStatus() {
-    switchu::smi::SystemStatus status{};
+static qlaunchext::smi::SystemStatus readSystemStatus() {
+    qlaunchext::smi::SystemStatus status{};
     AppletStorage stor{};
     if (R_SUCCEEDED(appletPopInData(&stor))) {
         s64 sz = 0;
         appletStorageGetSize(&stor, &sz);
-        if (sz >= (s64)sizeof(switchu::smi::SystemStatus)) {
+        if (sz >= (s64)sizeof(qlaunchext::smi::SystemStatus)) {
             appletStorageRead(&stor, 0, &status, sizeof(status));
         }
         appletStorageClose(&stor);
@@ -187,7 +187,7 @@ int main(int argc, char* argv[]) {
 
     std::srand(static_cast<unsigned>(std::time(nullptr)));
 
-#ifdef SWITCHU_HOMEBREW
+#ifdef QLAUNCHEXT_HOMEBREW
     DebugLog::openFileLog();
     DebugLog::log("[hb] main() entry");
     DebugLog::log("[main] applet config...");
@@ -218,9 +218,9 @@ int main(int argc, char* argv[]) {
     DebugLog::log("[main] creating app...");
     {
         nxui::Application app;
-#ifdef SWITCHU_HOMEBREW
+#ifdef QLAUNCHEXT_HOMEBREW
         auto makeMenuActivity = [](bool fromTutorial = false) -> std::unique_ptr<nxui::Activity> {
-            auto activity = std::make_unique<WiiUMenuApp>();
+            auto activity = std::make_unique<SwitchMenuApp>();
             activity->setTutorialStartupFade(fromTutorial);
             return activity;
         };
@@ -241,7 +241,7 @@ int main(int argc, char* argv[]) {
         app.shutdown();
 #else
         auto makeMenuActivity = [sysStatus](bool fromTutorial = false) -> std::unique_ptr<nxui::Activity> {
-            auto activity = std::make_unique<WiiUMenuApp>();
+            auto activity = std::make_unique<SwitchMenuApp>();
             activity->setStartupStatus(sysStatus.suspended_app_id, sysStatus.app_running);
             activity->setTutorialStartupFade(fromTutorial);
             return activity;
@@ -266,11 +266,11 @@ int main(int argc, char* argv[]) {
 
     TTF_Quit();
     SDL_Quit();
-#ifdef SWITCHU_HOMEBREW
+#ifdef QLAUNCHEXT_HOMEBREW
     DebugLog::log("[hb] exit");
     DebugLog::closeFileLog();
 #endif
-#ifdef SWITCHU_MENU
+#ifdef QLAUNCHEXT_MENU
     DebugLog::log("[menu] exit");
 #endif
     return 0;

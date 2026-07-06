@@ -1,8 +1,8 @@
 #include "TabBuilders.hpp"
 #include <nxui/core/I18n.hpp>
 
-#ifndef SWITCHU_VERSION
-#define SWITCHU_VERSION "unknown"
+#ifndef QLAUNCHEXT_VERSION
+#define QLAUNCHEXT_VERSION "unknown"
 #endif
 
 SettingsScreen::Tab settings::tabs::AboutTab::build(SettingsScreen& /* screen */) {
@@ -18,7 +18,7 @@ SettingsScreen::Tab settings::tabs::AboutTab::build(SettingsScreen& /* screen */
         SettingItem it;
         it.label = i18n.tr("settings.about.version", "Version");
         it.type  = ItemType::Info;
-        it.infoText = "SwitchU " SWITCHU_VERSION;
+        it.infoText = "qlaunch-ext " QLAUNCHEXT_VERSION;
         t.items.push_back(std::move(it));
     }
 
@@ -44,7 +44,7 @@ SettingsScreen::Tab settings::tabs::AboutTab::build(SettingsScreen& /* screen */
         SettingItem it;
         it.label = i18n.tr("settings.about.source_code", "Source Code");
         it.type  = ItemType::Info;
-        it.infoText = i18n.tr("settings.about.source_code_value", "github.com/PoloNX/SwitchU");
+        it.infoText = i18n.tr("settings.about.source_code_value", "github.com/PoloNX/qlaunch-ext");
         t.items.push_back(std::move(it));
     }
 

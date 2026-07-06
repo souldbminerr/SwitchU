@@ -5,11 +5,6 @@
 #include "core/DebugLog.hpp"
 
 #include <nxui/core/I18n.hpp>
-#include <curlpp/Easy.hpp>
-#include <curlpp/Exception.hpp>
-#include <curlpp/Infos.hpp>
-#include <curlpp/Options.hpp>
-#include <curlpp/cURLpp.hpp>
 #include <nlohmann/json.hpp>
 #include <switch.h>
 
@@ -588,7 +583,7 @@ void writeFileBinary(const std::string& path, const std::string& data) {
 
 std::string ThemePackageInstaller::destinationRootFor(const std::string& themeId, Mode mode) {
     (void)mode;
-    return "sdmc:/config/SwitchU/themes/" + themeId;
+    return "sdmc:/config/qlaunch-ext/themes/" + themeId;
 }
 
 ThemePackageInstaller::Result ThemePackageInstaller::run(const std::string& catalogUrl,

@@ -2,7 +2,7 @@
 #include "core/DebugLog.hpp"
 #include "settings/SettingsGlassTuning.hpp"
 
-#ifdef SWITCHU_DEBUG_UI
+#ifdef QLAUNCHEXT_DEBUG_UI
 
 #include <algorithm>
 #include <array>
@@ -78,8 +78,8 @@ bool DebugImGuiOverlay::initialize(nxui::GpuDevice& gpu, nxui::Renderer& ren) {
     ImGuiIO& io = ImGui::GetIO();
     io.IniFilename = nullptr;
     io.LogFilename = nullptr;
-    io.BackendRendererName = "switchu_imgui_deko3d";
-    io.BackendPlatformName = "switchu_touch";
+    io.BackendRendererName = "qlaunchext_imgui_deko3d";
+    io.BackendPlatformName = "qlaunchext_touch";
     io.DisplaySize = ImVec2((float)gpu.width(), (float)gpu.height());
 
     ImGui::StyleColorsDark();

@@ -1,6 +1,7 @@
 #pragma once
 #include <nxui/core/Types.hpp>
 #include <nxui/core/Font.hpp>
+#include <nxui/core/Texture.hpp>
 #include <nxui/core/Input.hpp>
 #include <nxui/Theme.hpp>
 #include <nxui/core/Animation.hpp>
@@ -38,6 +39,9 @@ public:
 
     void setFont(nxui::Font* f)      { m_font = f; }
     void setSmallFont(nxui::Font* f)  { m_smallFont = f; }
+    void setIconFont(nxui::Font* f)   { m_iconFont = f; }
+    void setHeaderTitle(const std::string& t) { m_headerTitle = t; }
+    void setHeaderIcon(nxui::Texture* t) { m_headerIcon = t; }
     void setTheme(const nxui::Theme* t);
 
     void show();
@@ -170,13 +174,15 @@ protected:
     bool  m_showing   = false;
     float m_animT     = 0.f;
 
-    static constexpr float kAnimDuration = 0.22f;
+    static constexpr float kAnimDuration = 0.34f;
 
     enum class FocusArea { Tabs, Content };
     FocusArea m_focusArea   = FocusArea::Tabs;
     int       m_tabIndex    = 0;
     int       m_contentIdx  = 0;
     float     m_scrollY     = 0.f;
+    float     m_tabScrollY      = 0.f;
+    float     m_tabScrollTarget = 0.f;
     float     m_scrollTarget = 0.f;
     bool      m_backdropCacheValid = false;
     float     m_cachedPreBlurRadius = -1.f;
@@ -187,16 +193,22 @@ protected:
     bool itemFocusable(const SettingItem& item) const;
     void clampContentIdx();
     float visibilityProgress() const;
+    // qlaunch open/close transition split into background + content phases.
+    float bgOpacity() const;
+    float contentOpacity() const;
     void syncPanelState(float eased);
     void invalidateBackdropCache();
 
     static constexpr float kPanelMargin   = 32.f;
-    static constexpr float kTabWidth      = 260.f;
+    static constexpr float kTabWidth      = 300.f;
     static constexpr float kRowHeight     = 68.f;
     static constexpr float kSectionHeight = 48.f;
-    static constexpr float kTabRowHeight  = 58.f;
+    static constexpr float kTabRowHeight  = 66.f;
     static constexpr float kPanelRadius   = 26.f;
-    static constexpr float kInnerPad      = 30.f;
+    static constexpr float kInnerPad      = 60.f;
+    // qlaunch (System Settings) chrome: full-screen flat with a header + footer.
+    static constexpr float kHeaderH       = 92.f;
+    static constexpr float kFooterH       = 64.f;
 
     nxui::Rect panelRect() const;
     nxui::Rect panelRect(float scale) const;
@@ -207,6 +219,8 @@ protected:
     float      contentTotalHeight() const;
 
     void drawBackground(nxui::Renderer& ren, const nxui::Rect& panel, float opacity);
+    void drawHeader(nxui::Renderer& ren, const nxui::Rect& panel, float opacity);
+    void drawFooter(nxui::Renderer& ren, const nxui::Rect& panel, float opacity);
     void drawTabs(nxui::Renderer& ren, const nxui::Rect& panel, float opacity);
     void drawContent(nxui::Renderer& ren, const nxui::Rect& panel, float opacity);
     void drawDropdown(nxui::Renderer& ren, const nxui::Rect& panel, float opacity);
@@ -219,9 +233,13 @@ protected:
     ScreenMode m_mode = ScreenMode::Settings;
     nxui::Font*       m_font      = nullptr;
     nxui::Font*       m_smallFont = nullptr;
+    nxui::Font*       m_iconFont  = nullptr;
+    nxui::Texture*    m_headerIcon = nullptr;
+    std::string       m_headerTitle;
     const nxui::Theme* m_theme    = nullptr;
 
     SelectionCursor m_focusCursor;
+    int m_focusCursorItem = -1;   // raw item index the cursor currently frames
     nxui::AnimatedFloat m_tabReveal;
     nxui::AnimatedFloat m_dropdownAnim;
     nxui::AnimatedFloat m_trackToastAnim;
@@ -266,6 +284,8 @@ protected:
     float m_touchStartY = 0.f;
     float m_touchStartScroll = 0.f;
     bool  m_touchScrolling = false;
+    float m_touchStartTabScroll = 0.f;
+    bool  m_railTouchScrolling = false;
     bool  m_touchDraggingSlider = false;
     bool  m_ignoreInitialTouchRelease = false;
 };

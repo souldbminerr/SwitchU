@@ -58,6 +58,10 @@ public:
     void setConfig(const Config& config);
     const Config& config() const { return m_config; }
 
+    // Flat mode: draw a solid fill only (no animated gradient, no shapes).
+    void setFlat(bool flat) { m_flat = flat; }
+    bool isFlat() const { return m_flat; }
+
     bool loadImage(nxui::GpuDevice& gpu, nxui::Renderer& ren, const std::string& path);
     void clearImage();
 
@@ -90,6 +94,7 @@ private:
     void drawRoundedShape(nxui::Renderer& ren, const Shape& s, const nxui::Color& c) const;
 
     Config m_config;
+    bool m_flat = false;
     std::vector<Shape> m_shapes;
     nxui::Texture m_backgroundImage;
     float m_time = 0.f;

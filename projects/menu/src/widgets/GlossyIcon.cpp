@@ -1,6 +1,7 @@
 #include "GlossyIcon.hpp"
 #include <nxui/core/Renderer.hpp>
 #include <nxui/core/Font.hpp>
+#include <algorithm>
 #include <cmath>
 
 
@@ -9,9 +10,11 @@ GlossyIcon::GlossyIcon() {
     m_appearOpacity.setImmediate(0.f);
     m_focusScale.setImmediate(1.f);
     m_focusGlow.setImmediate(0.f);
-    setCornerRadius(16.f);
-    setPadding(8.f);
-    setLiquidGlassEnabled(true);
+    // Switch-style flat tile: no liquid-glass gloss, slight rounding, artwork
+    // fills the tile. The flat base colour shows through only for empty slots.
+    setCornerRadius(12.f);
+    setPadding(4.f);
+    setLiquidGlassEnabled(false);
     setBlurEnabled(false);
 }
 
@@ -73,6 +76,17 @@ void GlossyIcon::onRender(nxui::Renderer& ren) {
         drawRect.height = h;
         m_rect = drawRect;
     }
+    // Corner radius by shape: Square = sharp (qlaunch), Rounded = SwitchU style,
+    // Circular = half the (scaled) tile so it renders as a disc. cornerRadius()
+    // flows through to onContentRender() below.
+    float shapeRad = 0.f;
+    switch (m_shape) {
+        case Shape::Circular: shapeRad = std::min(drawRect.width, drawRect.height) * 0.5f; break;
+        case Shape::Rounded:  shapeRad = m_roundedRadius; break;
+        case Shape::Square:
+        default:              shapeRad = 0.f; break;
+    }
+    setCornerRadius(shapeRad);
     setScale(1.f);
     float savedShade = liquidGlassShade();
     setLiquidGlassShade(m_notLaunchable ? 0.58f : 0.0f);
@@ -167,7 +181,7 @@ void GlossyIcon::onContentRender(nxui::Renderer& ren) {
         r.height = h;
     }
 
-    float inset = 8.f * s;
+    float inset = 3.f * s;
     nxui::Rect texRect = r.shrunk(inset);
     nxui::Color iconTint = nxui::Color::white().withAlpha(m_opacity);
     if (m_notLaunchable) {
@@ -175,5 +189,5 @@ void GlossyIcon::onContentRender(nxui::Renderer& ren) {
         iconTint.g = 0.80f;
         iconTint.b = 0.80f;
     }
-    ren.drawTextureRounded(m_tex, texRect, rad - 3.f, iconTint);
+    ren.drawTextureRounded(m_tex, texRect, std::max(0.f, rad - 3.f), iconTint);
 }

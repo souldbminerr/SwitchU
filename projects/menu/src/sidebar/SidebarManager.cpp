@@ -27,14 +27,19 @@ std::string joinPath(const std::string& base, const std::string& name) {
 void SidebarManager::build(nxui::GpuDevice& gpu, nxui::Renderer& ren,
                            const std::string& assetsBase,
                            const Actions& actions) {
-    constexpr float btnSize = 70.f;
-    constexpr float gap     = 16.f;
-    constexpr float marginX = 14.f;
-
-    float leftX  = marginX;
-    float rightX = 1280.f - marginX - btnSize;
-    float totalH = 3 * btnSize + 2.f * gap;
-    float startY = 360.f - totalH * 0.5f;
+    // Switch-style applet dock: a single horizontal row of circular buttons,
+    // centred horizontally just below the game tile strip.
+    // qlaunch applet dock: 90 px buttons, bottom edge 130 px above the screen
+    // bottom (top = 720 - 130 - 90 = 500).
+    constexpr float btnSize   = 90.f;
+    constexpr float gap       = 38.f;
+    constexpr int   dockCount = 5;
+    constexpr float dockY     = 500.f;
+    const float dockW      = dockCount * btnSize + (dockCount - 1) * gap;
+    const float dockStartX = (1280.f - dockW) * 0.5f;
+    auto slotRect = [&](int i) -> nxui::Rect {
+        return {dockStartX + i * (btnSize + gap), dockY, btnSize, btnSize};
+    };
 
     m_leftButtons.clear();
     m_rightButtons.clear();
@@ -59,45 +64,60 @@ void SidebarManager::build(nxui::GpuDevice& gpu, nxui::Renderer& ren,
         return btn;
     };
 
+    // Dock slots left-to-right: News, Controllers, Album, Settings, Power.
+    // (Theme Shop removed from the dock.) Buttons keep their original left/right
+    // vector grouping; only their screen position changes to form one row.
+    // Per-icon tint colours, matching the real dock glyphs.
+    const nxui::Color kGreen(0.30f, 0.72f, 0.38f, 1.f);   // News
+    const nxui::Color kBlue (0.24f, 0.60f, 0.95f, 1.f);   // Album (homebrew)
+    const nxui::Color kLight(0.88f, 0.88f, 0.92f, 1.f);   // Controllers/Settings/Power
+
+    // Dock order left-to-right: News, Album, Controllers, Settings, Sleep.
     {
         auto album = makeBtn(&m_icons[0], "sidebar.album", "Album", actions.onAlbum);
         m_albumButton = album.get();
-        album->setRect({leftX, startY + 0.f * (btnSize + gap), btnSize, btnSize});
+        album->setIconTint(kBlue);
+        album->setRect(slotRect(1));
         m_leftButtons.push_back(std::move(album));
 
-        auto miiEditor = makeBtn(&m_icons[1], "sidebar.mii_editor", "Mii Editor", actions.onMiiEditor);
-        miiEditor->setRect({leftX, startY + 1.f * (btnSize + gap), btnSize, btnSize});
-        m_leftButtons.push_back(std::move(miiEditor));
+        auto news = makeBtn(&m_icons[1], "sidebar.news", "News", actions.onNews);
+        news->setIconTint(kGreen);
+        news->setRect(slotRect(0));
+        m_leftButtons.push_back(std::move(news));
 
         auto settings = makeBtn(&m_icons[5], "sidebar.settings", "Settings", actions.onSettings);
         m_settingsButton = settings.get();
-        settings->setRect({leftX, startY + 2.f * (btnSize + gap), btnSize, btnSize});
+        settings->setIconTint(kLight);
+        settings->setRect(slotRect(3));
         m_leftButtons.push_back(std::move(settings));
     }
 
     {
         auto ctrl = makeBtn(&m_icons[2], "sidebar.controllers", "Controllers", actions.onControllers);
-        ctrl->setRect({rightX, startY + 0.f * (btnSize + gap), btnSize, btnSize});
+        ctrl->setIconTint(kLight);
+        ctrl->setRect(slotRect(2));
         m_rightButtons.push_back(std::move(ctrl));
 
         auto sleep = makeBtn(&m_icons[3], "sidebar.sleep", "Sleep", actions.onSleep);
-        sleep->setRect({rightX, startY + 1.f * (btnSize + gap), btnSize, btnSize});
+        sleep->setIconTint(kLight);
+        sleep->setRect(slotRect(4));
         m_rightButtons.push_back(std::move(sleep));
-
-        auto themeShop = makeBtn(&m_icons[4], "sidebar.theme_shop", "Theme Shop", actions.onMiiverse);
-        m_themeShopButton = themeShop.get();
-        themeShop->setRect({rightX, startY + 2.f * (btnSize + gap), btnSize, btnSize});
-        m_rightButtons.push_back(std::move(themeShop));
     }
 
-    if (!m_leftButtons.empty()) {
-        m_leftButtons.front()->setCustomNavigation(nxui::FocusDirection::UP, m_leftButtons.front().get());
-        m_leftButtons.back()->setCustomNavigation(nxui::FocusDirection::DOWN, m_leftButtons.back().get());
-    }
-    if (!m_rightButtons.empty()) {
-        m_rightButtons.front()->setCustomNavigation(nxui::FocusDirection::UP, m_rightButtons.front().get());
-        m_rightButtons.back()->setCustomNavigation(nxui::FocusDirection::DOWN, m_rightButtons.back().get());
-    }
+    // Horizontal end-stops: leftmost button clamps LEFT to itself, rightmost
+    // clamps RIGHT. DOWN self-loops on every button (nothing below the dock);
+    // UP is left free so it escapes upward to the tile strip via spatial nav.
+    AppletButton* dockOrder[dockCount] = {
+        m_leftButtons[1].get(),  // News        (slot 0)
+        m_leftButtons[0].get(),  // Album       (slot 1)
+        m_rightButtons[0].get(), // Controllers (slot 2)
+        m_leftButtons[2].get(),  // Settings    (slot 3)
+        m_rightButtons[1].get(), // Sleep       (slot 4)
+    };
+    for (AppletButton* btn : dockOrder)
+        btn->setCustomNavigation(nxui::FocusDirection::DOWN, btn);
+    dockOrder[0]->setCustomNavigation(nxui::FocusDirection::LEFT, dockOrder[0]);
+    dockOrder[dockCount - 1]->setCustomNavigation(nxui::FocusDirection::RIGHT, dockOrder[dockCount - 1]);
 
     (void)gpu;
     (void)ren;
@@ -164,7 +184,7 @@ void SidebarManager::loadAssets(nxui::GpuDevice& gpu, nxui::Renderer& ren,
     };
 
     static const char* iconFiles[] = {
-        "album.png", "mii_editor.png", "controller.png", "power.png", "themes.png", "settings.png",
+        "album.png", "news.png", "controller.png", "power.png", "themes.png", "settings.png",
     };
     if ((int)m_icons.size() != kSidebarIconCount)
         m_icons.resize(kSidebarIconCount);
@@ -173,10 +193,9 @@ void SidebarManager::loadAssets(nxui::GpuDevice& gpu, nxui::Renderer& ren,
 
     static const struct { int iconIdx; const char* webpFile; bool useFirstFrame; } animDefs[] = {
         { 0, "album.webp",      false },
-        { 1, "mii_editor.webp", false },
+        { 1, "news.webp",       false },
         { 2, "controller.webp", true  },
         { 3, "power.webp",      false },
-        { 4, "themes.webp",     false },
         { 5, "settings.webp",   false },
     };
 
@@ -192,7 +211,6 @@ void SidebarManager::loadAssets(nxui::GpuDevice& gpu, nxui::Renderer& ren,
         else if (def.iconIdx == 1) btn = m_leftButtons[1].get();
         else if (def.iconIdx == 2) btn = m_rightButtons[0].get();
         else if (def.iconIdx == 3) btn = m_rightButtons[1].get();
-        else if (def.iconIdx == 4) btn = m_rightButtons[2].get();
         else if (def.iconIdx == 5) btn = m_leftButtons[2].get();
         if (!btn)
             continue;
@@ -243,15 +261,30 @@ void SidebarManager::update(float dt, nxui::Widget* focusedWidget) {
 
 
 void SidebarManager::applyTheme(const nxui::Theme& theme) {
+    (void)theme;
+    // Switch-style dock: subtle circle behind a coloured glyph. Circle colour
+    // and neutral glyph colour follow the theme (light vs dark); the coloured
+    // glyphs (News green, Album blue) keep their fixed tint set in build().
+    const bool light = (theme.mode == nxui::ThemeMode::Light);
+    const nxui::Color circle = light ? nxui::Color(0.86f, 0.86f, 0.88f, 1.f)
+                                     : nxui::Color(0.235f, 0.235f, 0.255f, 1.f);
+    const nxui::Color neutral = light ? nxui::Color(0.20f, 0.20f, 0.22f, 1.f)
+                                      : nxui::Color(0.88f, 0.88f, 0.92f, 1.f);
     auto apply = [&](std::shared_ptr<AppletButton>& btn) {
-        btn->setBaseColor(theme.iconDefault);
-        btn->setBorderColor(theme.panelBorder);
-        btn->setHighlightColor(theme.panelHighlight);
-        btn->setLiquidGlassEnabled(true);
-        btn->setForceLiquidGlass(true);
+        btn->setBaseColor(circle);
+        btn->setBorderColor(nxui::Color(0.f, 0.f, 0.f, 0.f));
+        btn->setHighlightColor(nxui::Color(0.f, 0.f, 0.f, 0.f));
+        btn->setLiquidGlassEnabled(false);
+        btn->setForceLiquidGlass(false);
         btn->setBlurEnabled(false);
-        btn->setBorderWidth(2.2f);
+        btn->setBorderWidth(0.f);
+        btn->setIconCircular(false);
     };
     for (auto& btn : m_leftButtons)  apply(btn);
     for (auto& btn : m_rightButtons) apply(btn);
+    // Neutral glyphs (Controllers, Settings, Power) follow the theme; coloured
+    // ones (Album=leftButtons[0], News=leftButtons[1]) keep their tint.
+    if (m_rightButtons.size() > 0) m_rightButtons[0]->setIconTint(neutral); // Controllers
+    if (m_rightButtons.size() > 1) m_rightButtons[1]->setIconTint(neutral); // Power
+    if (m_leftButtons.size()  > 2) m_leftButtons[2]->setIconTint(neutral);  // Settings
 }

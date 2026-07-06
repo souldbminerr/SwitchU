@@ -167,9 +167,29 @@ float TabbedOverlayScreen::visibilityProgress() const {
     return m_showing ? easeOutCubic(t) : 1.f - easeInCubic(t);
 }
 
+// qlaunch-style transition timeline (t = animT, 0..1 over kAnimDuration):
+//   open : bg fades in fast (0..0.10) -> hold -> content fades in (0.58..1)
+//   close: content fades out fast (0..0.42) -> hold -> bg fades out (0.58..1)
+float TabbedOverlayScreen::bgOpacity() const {
+    float t = std::clamp(m_animT, 0.f, 1.f);
+    if (m_showing)
+        return std::clamp(t / 0.10f, 0.f, 1.f);
+    return 1.f - std::clamp((t - 0.58f) / 0.42f, 0.f, 1.f);
+}
+
+float TabbedOverlayScreen::contentOpacity() const {
+    float t = std::clamp(m_animT, 0.f, 1.f);
+    if (m_showing)
+        return std::clamp((t - 0.58f) / 0.42f, 0.f, 1.f);
+    return 1.f - std::clamp(t / 0.42f, 0.f, 1.f);
+}
+
 void TabbedOverlayScreen::syncPanelState(float eased) {
-    setOpacity(std::max(eased, 0.001f));
-    setScale(0.92f + 0.08f * eased);
+    (void)eased;
+    // No scale "pop"; the whole overlay stays full-screen and visible while the
+    // background layer is on.
+    setScale(1.f);
+    setOpacity(std::max(bgOpacity(), 0.001f));
 }
 
 void TabbedOverlayScreen::invalidateBackdropCache() {
@@ -201,7 +221,8 @@ nxui::Rect TabbedOverlayScreen::tabsRect() const {
 }
 
 nxui::Rect TabbedOverlayScreen::tabsRect(const nxui::Rect& panel) const {
-    return { panel.x + kInnerPad, panel.y + kInnerPad, kTabWidth, panel.height - 2 * kInnerPad };
+    return { panel.x + kInnerPad, panel.y + kHeaderH, kTabWidth,
+             panel.height - kHeaderH - kFooterH };
 }
 
 nxui::Rect TabbedOverlayScreen::contentRect() const {
@@ -210,9 +231,9 @@ nxui::Rect TabbedOverlayScreen::contentRect() const {
 }
 
 nxui::Rect TabbedOverlayScreen::contentRect(const nxui::Rect& panel) const {
-    float left = panel.x + kInnerPad + kTabWidth + kInnerPad;
-    return { left, panel.y + kInnerPad,
-             panel.right() - kInnerPad - left, panel.height - 2 * kInnerPad };
+    float left = panel.x + kInnerPad + kTabWidth + kInnerPad * 0.5f;
+    return { left, panel.y + kHeaderH,
+             panel.right() - kInnerPad - left, panel.height - kHeaderH - kFooterH };
 }
 
 float TabbedOverlayScreen::contentTotalHeight() const {

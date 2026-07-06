@@ -58,6 +58,12 @@ public:
     /// Return nullptr to block all input dispatch for this frame.
     virtual Widget* focusRoot() { return m_rootBox.get(); }
 
+    /// Called when a *fresh* directional press could not move focus (i.e. the
+    /// focus is at an edge with no spatial candidate in that direction). Lets a
+    /// screen implement wrap-around. Not called for held key-repeats, so holding
+    /// pauses at the edge. Return true if the edge press was handled.
+    virtual bool onEdgeNavigate(FocusDirection dir) { (void)dir; return false; }
+
 private:
     friend class Application;
     Application* m_app = nullptr;

@@ -2,11 +2,11 @@
 #include <switch.h>
 #include <switch/applets/friends_la.h>
 #include <cstdlib>
-#include <switchu/smi_protocol.hpp>
-#include <switchu/smi_helpers.hpp>
-#include <switchu/control_cache.hpp>
-#include <switchu/ns_ext.hpp>
-#include <switchu/file_log.hpp>
+#include <qlaunchext/smi_protocol.hpp>
+#include <qlaunchext/smi_helpers.hpp>
+#include <qlaunchext/control_cache.hpp>
+#include <qlaunchext/ns_ext.hpp>
+#include <qlaunchext/file_log.hpp>
 #include "app_manager.hpp"
 #include "ecs.hpp"
 #include "menu_launcher.hpp"
@@ -23,7 +23,7 @@
 #include <fstream>
 #include <system_error>
 
-using namespace switchu;
+using namespace qlaunchext;
 
 static bool g_timeReady = false;
 static bool g_setsysReady = false;
@@ -47,42 +47,42 @@ extern "C" {
 extern "C" void __appInit(void) {
     Result rc;
 
-    svcOutputDebugString("[SwitchU-daemon] __appInit start", 34);
+    svcOutputDebugString("[qlaunch-ext-daemon] __appInit start", 34);
     daemon::initializeExternalContentAllocator();
 
     rc = smInitialize();
     if (R_FAILED(rc)) {
-        svcOutputDebugString("[SwitchU-daemon] smInitialize FAIL", 35);
+        svcOutputDebugString("[qlaunch-ext-daemon] smInitialize FAIL", 35);
         diagAbortWithResult(MAKERESULT(Module_Libnx, 500));
     }
 
     rc = fsInitialize();
     if (R_FAILED(rc)) {
-        svcOutputDebugString("[SwitchU-daemon] fsInitialize FAIL", 35);
+        svcOutputDebugString("[qlaunch-ext-daemon] fsInitialize FAIL", 35);
         diagAbortWithResult(MAKERESULT(Module_Libnx, 501));
     }
 
     rc = appletInitialize();
     if (R_FAILED(rc)) {
-        svcOutputDebugString("[SwitchU-daemon] appletInitialize FAIL", 39);
+        svcOutputDebugString("[qlaunch-ext-daemon] appletInitialize FAIL", 39);
         diagAbortWithResult(MAKERESULT(Module_Libnx, 502));
     }
-    svcOutputDebugString("[SwitchU-daemon] appletInitialize OK", 37);
+    svcOutputDebugString("[qlaunch-ext-daemon] appletInitialize OK", 37);
 
     rc = timeInitialize();
     g_timeReady = R_SUCCEEDED(rc);
     if (R_FAILED(rc))
-        svcOutputDebugString("[SwitchU-daemon] timeInitialize FAIL", 37);
+        svcOutputDebugString("[qlaunch-ext-daemon] timeInitialize FAIL", 37);
 
     rc = setsysInitialize();
     g_setsysReady = R_SUCCEEDED(rc);
     if (R_FAILED(rc))
-        svcOutputDebugString("[SwitchU-daemon] setsysInitialize FAIL", 39);
+        svcOutputDebugString("[qlaunch-ext-daemon] setsysInitialize FAIL", 39);
 
     rc = setInitialize();
     g_setReady = R_SUCCEEDED(rc);
     if (R_FAILED(rc))
-        svcOutputDebugString("[SwitchU-daemon] setInitialize FAIL", 36);
+        svcOutputDebugString("[qlaunch-ext-daemon] setInitialize FAIL", 36);
 
     if (g_setsysReady) {
         SetSysFirmwareVersion fw = {};
@@ -92,21 +92,21 @@ extern "C" void __appInit(void) {
 
     rc = nsInitialize();
     if (R_FAILED(rc)) {
-        svcOutputDebugString("[SwitchU-daemon] nsInitialize FAIL", 35);
+        svcOutputDebugString("[qlaunch-ext-daemon] nsInitialize FAIL", 35);
         diagAbortWithResult(rc);
     }
     g_nsReady = true;
 
     rc = ldrShellInitialize();
     if (R_FAILED(rc)) {
-        svcOutputDebugString("[SwitchU-daemon] ldrShellInitialize FAIL", 41);
+        svcOutputDebugString("[qlaunch-ext-daemon] ldrShellInitialize FAIL", 41);
         diagAbortWithResult(rc);
     }
     g_ldrShellReady = true;
 
     rc = accountInitialize(AccountServiceType_System);
     if (R_FAILED(rc)) {
-        svcOutputDebugString("[SwitchU-daemon] accountInitialize FAIL", 40);
+        svcOutputDebugString("[qlaunch-ext-daemon] accountInitialize FAIL", 40);
         diagAbortWithResult(rc);
     }
     g_accountReady = true;
@@ -114,38 +114,38 @@ extern "C" void __appInit(void) {
     rc = nssuInitialize();
     g_nssuReady = R_SUCCEEDED(rc);
     if (R_FAILED(rc))
-        svcOutputDebugString("[SwitchU-daemon] nssuInitialize FAIL", 37);
+        svcOutputDebugString("[qlaunch-ext-daemon] nssuInitialize FAIL", 37);
 
     rc = avmInitialize();
     g_avmReady = R_SUCCEEDED(rc);
     if (R_FAILED(rc))
-        svcOutputDebugString("[SwitchU-daemon] avmInitialize FAIL", 36);
+        svcOutputDebugString("[qlaunch-ext-daemon] avmInitialize FAIL", 36);
 
     rc = psmInitialize();
     g_psmReady = R_SUCCEEDED(rc);
     if (R_FAILED(rc))
-        svcOutputDebugString("[SwitchU-daemon] psmInitialize FAIL", 36);
+        svcOutputDebugString("[qlaunch-ext-daemon] psmInitialize FAIL", 36);
 
     rc = lblInitialize();
     g_lblReady = R_SUCCEEDED(rc);
     if (R_FAILED(rc))
-        svcOutputDebugString("[SwitchU-daemon] lblInitialize FAIL", 36);
+        svcOutputDebugString("[qlaunch-ext-daemon] lblInitialize FAIL", 36);
 
     rc = hidInitialize();
     g_hidReady = R_SUCCEEDED(rc);
     if (R_FAILED(rc))
-        svcOutputDebugString("[SwitchU-daemon] hidInitialize FAIL", 36);
+        svcOutputDebugString("[qlaunch-ext-daemon] hidInitialize FAIL", 36);
 
     rc = fsdevMountSdmc();
     if (R_FAILED(rc)) {
-        svcOutputDebugString("[SwitchU-daemon] fsdevMountSdmc FAIL", 37);
+        svcOutputDebugString("[qlaunch-ext-daemon] fsdevMountSdmc FAIL", 37);
         svcSleepThread(100'000'000ULL);
         rc = fsdevMountSdmc();
     }
 
-    switchu::FileLog::open("daemon");
-    switchu::FileLog::log("[daemon] __appInit complete (sd mount: 0x%X)", rc);
-    switchu::FileLog::log("[daemon] services time=%d setsys=%d set=%d ns=%d ldr=%d account=%d nssu=%d avm=%d psm=%d lbl=%d hid=%d",
+    qlaunchext::FileLog::open("daemon");
+    qlaunchext::FileLog::log("[daemon] __appInit complete (sd mount: 0x%X)", rc);
+    qlaunchext::FileLog::log("[daemon] services time=%d setsys=%d set=%d ns=%d ldr=%d account=%d nssu=%d avm=%d psm=%d lbl=%d hid=%d",
                           g_timeReady ? 1 : 0,
                           g_setsysReady ? 1 : 0,
                           g_setReady ? 1 : 0,
@@ -158,12 +158,12 @@ extern "C" void __appInit(void) {
                           g_lblReady ? 1 : 0,
                           g_hidReady ? 1 : 0);
 
-    svcOutputDebugString("[SwitchU-daemon] __appInit done", 31);
+    svcOutputDebugString("[qlaunch-ext-daemon] __appInit done", 31);
 }
 
 extern "C" void __appExit(void) {
-    switchu::FileLog::log("[daemon] __appExit");
-    switchu::FileLog::close();
+    qlaunchext::FileLog::log("[daemon] __appExit");
+    qlaunchext::FileLog::close();
 
     if (g_hidReady) hidExit();
     if (g_lblReady) lblExit();
@@ -212,8 +212,8 @@ struct DaemonAppCatalogEntry {
 static std::vector<DaemonAppCatalogEntry> g_appCatalog;
 static std::atomic<bool> g_appCatalogRefreshPending{false};
 static int g_appCatalogRefreshDelay = 0;
-static constexpr const char* kAppCatalogPath = "sdmc:/config/SwitchU/applist.bin";
-static constexpr const char* kAppCatalogTmpPath = "sdmc:/config/SwitchU/applist.tmp";
+static constexpr const char* kAppCatalogPath = "sdmc:/config/qlaunch-ext/applist.bin";
+static constexpr const char* kAppCatalogTmpPath = "sdmc:/config/qlaunch-ext/applist.tmp";
 static std::mutex g_controlCacheQueueMutex;
 static std::vector<uint64_t> g_controlCacheQueue;
 static std::atomic<bool> g_controlCacheRefreshPending{false};
@@ -249,11 +249,11 @@ static bool shouldDeferViewPolling() {
            !g_foregroundAppletActive;
 }
 
-static bool listApplicationRecords(std::vector<switchu::ns::ExtApplicationRecord>& records,
+static bool listApplicationRecords(std::vector<qlaunchext::ns::ExtApplicationRecord>& records,
                                    const char* tag) {
     records.clear();
 
-    switchu::ns::ExtApplicationRecord chunk[kApplicationRecordChunkCount] = {};
+    qlaunchext::ns::ExtApplicationRecord chunk[kApplicationRecordChunkCount] = {};
     s32 offset = 0;
     while (offset < kMaxTrackedApplicationRecords) {
         s32 readCount = 0;
@@ -263,7 +263,7 @@ static bool listApplicationRecords(std::vector<switchu::ns::ExtApplicationRecord
             offset,
             &readCount);
         if (R_FAILED(rc)) {
-            switchu::FileLog::log("[%s] nsListApplicationRecord FAIL: 0x%X offset=%d",
+            qlaunchext::FileLog::log("[%s] nsListApplicationRecord FAIL: 0x%X offset=%d",
                                   tag, rc, offset);
             records.clear();
             return false;
@@ -281,15 +281,15 @@ static bool listApplicationRecords(std::vector<switchu::ns::ExtApplicationRecord
     }
 
     std::sort(records.begin(), records.end(),
-              [](const switchu::ns::ExtApplicationRecord& a,
-                 const switchu::ns::ExtApplicationRecord& b) {
+              [](const qlaunchext::ns::ExtApplicationRecord& a,
+                 const qlaunchext::ns::ExtApplicationRecord& b) {
                   return a.id < b.id;
               });
     return true;
 }
 
-static bool queryApplicationViews(const std::vector<switchu::ns::ExtApplicationRecord>& records,
-                                  std::vector<switchu::ns::ExtApplicationView>& views,
+static bool queryApplicationViews(const std::vector<qlaunchext::ns::ExtApplicationRecord>& records,
+                                  std::vector<qlaunchext::ns::ExtApplicationView>& views,
                                   const char* tag) {
     views.clear();
     if (records.empty())
@@ -300,23 +300,23 @@ static bool queryApplicationViews(const std::vector<switchu::ns::ExtApplicationR
         tids[i] = records[i].id;
 
     views.resize(records.size());
-    Result rc = switchu::ns::queryApplicationViews(
+    Result rc = qlaunchext::ns::queryApplicationViews(
         tids.data(),
         static_cast<int>(tids.size()),
         views.data());
     if (R_FAILED(rc)) {
-        switchu::FileLog::log("[%s] queryApplicationViews FAIL: 0x%X", tag, rc);
-        std::fill(views.begin(), views.end(), switchu::ns::ExtApplicationView{});
+        qlaunchext::FileLog::log("[%s] queryApplicationViews FAIL: 0x%X", tag, rc);
+        std::fill(views.begin(), views.end(), qlaunchext::ns::ExtApplicationView{});
         return false;
     }
 
     return true;
 }
 
-static void enqueueControlCacheRecords(const std::vector<switchu::ns::ExtApplicationRecord>& records) {
+static void enqueueControlCacheRecords(const std::vector<qlaunchext::ns::ExtApplicationRecord>& records) {
     std::lock_guard<std::mutex> lock(g_controlCacheQueueMutex);
     for (const auto& record : records) {
-        if (record.id == 0 || switchu::control_cache::hasMeta(record.id))
+        if (record.id == 0 || qlaunchext::control_cache::hasMeta(record.id))
             continue;
         if (std::find(g_controlCacheQueue.begin(), g_controlCacheQueue.end(), record.id) ==
             g_controlCacheQueue.end()) {
@@ -339,11 +339,11 @@ static bool writeAppCatalogFile() {
     std::error_code fsEc;
     std::filesystem::create_directory("sdmc:/config", fsEc);
     fsEc.clear();
-    std::filesystem::create_directory("sdmc:/config/SwitchU", fsEc);
+    std::filesystem::create_directory("sdmc:/config/qlaunch-ext", fsEc);
 
     std::ofstream f(kAppCatalogTmpPath, std::ios::binary | std::ios::trunc);
     if (!f.is_open()) {
-        switchu::FileLog::log("[catalog] fopen tmp FAIL");
+        qlaunchext::FileLog::log("[catalog] fopen tmp FAIL");
         return false;
     }
 
@@ -371,7 +371,7 @@ static bool writeAppCatalogFile() {
     if (!ok) {
         fsEc.clear();
         std::filesystem::remove(kAppCatalogTmpPath, fsEc);
-        switchu::FileLog::log("[catalog] write FAIL");
+        qlaunchext::FileLog::log("[catalog] write FAIL");
         return false;
     }
 
@@ -382,7 +382,7 @@ static bool writeAppCatalogFile() {
     if (fsEc) {
         fsEc.clear();
         std::filesystem::remove(kAppCatalogTmpPath, fsEc);
-        switchu::FileLog::log("[catalog] rename FAIL");
+        qlaunchext::FileLog::log("[catalog] rename FAIL");
         return false;
     }
 
@@ -390,11 +390,11 @@ static bool writeAppCatalogFile() {
 }
 
 static bool rebuildAppCatalog(const char* reason, bool* outChanged = nullptr) {
-    std::vector<switchu::ns::ExtApplicationRecord> records;
+    std::vector<qlaunchext::ns::ExtApplicationRecord> records;
     if (!listApplicationRecords(records, "catalog"))
         return false;
 
-    std::vector<switchu::ns::ExtApplicationView> views;
+    std::vector<qlaunchext::ns::ExtApplicationView> views;
     queryApplicationViews(records, views, "catalog");
     enqueueControlCacheRecords(records);
 
@@ -435,7 +435,7 @@ static bool rebuildAppCatalog(const char* reason, bool* outChanged = nullptr) {
     }
 
     const bool ok = writeAppCatalogFile();
-    switchu::FileLog::log("[catalog] rebuilt %d/%d apps reason=%s write=%d",
+    qlaunchext::FileLog::log("[catalog] rebuilt %d/%d apps reason=%s write=%d",
                           (int)g_appCatalog.size(), (int)count, reason, ok ? 1 : 0);
     g_appCatalog.clear();
     g_appCatalog.shrink_to_fit();
@@ -447,7 +447,7 @@ static bool rebuildAppCatalog(const char* reason, bool* outChanged = nullptr) {
 static void cancelViewPolling(const char* reason) {
     const bool hadPendingEvent = g_eventRefreshPending.exchange(false);
     if (hadPendingEvent || g_eventPollsRemaining > 0) {
-        switchu::FileLog::log("[views] cancelling background poll (%s) pending=%d remaining=%d",
+        qlaunchext::FileLog::log("[views] cancelling background poll (%s) pending=%d remaining=%d",
                               reason,
                               hadPendingEvent ? 1 : 0,
                               g_eventPollsRemaining);
@@ -476,14 +476,14 @@ static void pushNotification(smi::MenuMessage msg,
     if (R_SUCCEEDED(appletCreateStorage(&st, sizeof(notif)))) {
         Result rc = appletStorageWrite(&st, 0, &notif, sizeof(notif));
         if (R_SUCCEEDED(rc)) {
-            switchu::FileLog::log("[notify] push msg=%u", (unsigned)msg);
+            qlaunchext::FileLog::log("[notify] push msg=%u", (unsigned)msg);
             daemon::menu_la::pushStorage(&st);
         } else {
             appletStorageClose(&st);
-            switchu::FileLog::log("[notify] write FAIL: 0x%X msg=%u", rc, (unsigned)msg);
+            qlaunchext::FileLog::log("[notify] write FAIL: 0x%X msg=%u", rc, (unsigned)msg);
         }
     } else {
-        switchu::FileLog::log("[notify] push FAIL (alloc) msg=%u", (unsigned)msg);
+        qlaunchext::FileLog::log("[notify] push FAIL (alloc) msg=%u", (unsigned)msg);
     }
 }
 
@@ -494,14 +494,14 @@ static bool queryBatteryStatus(uint8_t& percent, PsmChargerType& chargerType) {
     u32 charge = 100;
     Result chargeRc = psmGetBatteryChargePercentage(&charge);
     if (R_FAILED(chargeRc)) {
-        switchu::FileLog::log("[battery] psmGetBatteryChargePercentage FAIL: 0x%X", chargeRc);
+        qlaunchext::FileLog::log("[battery] psmGetBatteryChargePercentage FAIL: 0x%X", chargeRc);
         return false;
     }
 
     PsmChargerType ct = PsmChargerType_Unconnected;
     Result chargerRc = psmGetChargerType(&ct);
     if (R_FAILED(chargerRc)) {
-        switchu::FileLog::log("[battery] psmGetChargerType FAIL: 0x%X", chargerRc);
+        qlaunchext::FileLog::log("[battery] psmGetChargerType FAIL: 0x%X", chargerRc);
         ct = PsmChargerType_Unconnected;
     }
 
@@ -528,14 +528,14 @@ static void pushBatteryStatusNotification(bool force) {
     g_lastChargerType = chargerType;
 
     const uint32_t payload = smi::makeBatteryPayload(percent, static_cast<uint32_t>(chargerType));
-    switchu::FileLog::log("[battery] notify percent=%u charger=%u",
+    qlaunchext::FileLog::log("[battery] notify percent=%u charger=%u",
                           (unsigned)percent,
                           (unsigned)chargerType);
     pushNotification(smi::MenuMessage::BatteryStatusChanged, 0, payload);
 }
 
 static void logHomeState(const char* source, const char* stage) {
-    switchu::FileLog::log("[%s] HOME %s: appRunning=%d appFg=%d suspended=0x%016lX menuHolder=%d menuActive=%d fgApplet=%d",
+    qlaunchext::FileLog::log("[%s] HOME %s: appRunning=%d appFg=%d suspended=0x%016lX menuHolder=%d menuActive=%d fgApplet=%d",
                           source, stage,
                           daemon::app::isRunning() ? 1 : 0,
                           daemon::app::hasForeground() ? 1 : 0,
@@ -550,9 +550,9 @@ static bool takeForegroundFromRunningApp(const char* source) {
         return true;
 
     Result unlockRc = appletUnlockForeground();
-    switchu::FileLog::log("[%s] UnlockForeground rc=0x%X", source, unlockRc);
+    qlaunchext::FileLog::log("[%s] UnlockForeground rc=0x%X", source, unlockRc);
     Result fgRc = appletRequestToGetForeground();
-    switchu::FileLog::log("[%s] RequestToGetForeground rc=0x%X", source, fgRc);
+    qlaunchext::FileLog::log("[%s] RequestToGetForeground rc=0x%X", source, fgRc);
     if (R_FAILED(fgRc))
         return false;
 
@@ -585,14 +585,14 @@ static void openMenuFromHome(const char* source) {
 
     if (daemon::app::isRunning() && daemon::app::hasForeground()) {
         if (!takeForegroundFromRunningApp(source)) {
-            switchu::FileLog::log("[%s] HOME aborted: foreground request failed", source);
+            qlaunchext::FileLog::log("[%s] HOME aborted: foreground request failed", source);
             return;
         }
         const auto status = buildSystemStatus();
-        switchu::FileLog::log("[%s] HOME launching MainMenu status.running=%d suspended=0x%016lX",
+        qlaunchext::FileLog::log("[%s] HOME launching MainMenu status.running=%d suspended=0x%016lX",
                               source, status.app_running ? 1 : 0, status.suspended_app_id);
         Result menuRc = daemon::menu_la::launch(smi::MenuStartMode::MainMenu, status);
-        switchu::FileLog::log("[%s] HOME MainMenu launch rc=0x%X", source, menuRc);
+        qlaunchext::FileLog::log("[%s] HOME MainMenu launch rc=0x%X", source, menuRc);
         if (R_SUCCEEDED(menuRc))
             g_appCatalogRefreshDelay = 200;
         logHomeState(source, "after");
@@ -600,33 +600,33 @@ static void openMenuFromHome(const char* source) {
     }
 
     if (daemon::menu_la::isActive()) {
-        switchu::FileLog::log("[%s] HOME forwarding HomeRequest to active menu", source);
+        qlaunchext::FileLog::log("[%s] HOME forwarding HomeRequest to active menu", source);
         pushNotification(smi::MenuMessage::HomeRequest);
     } else if (g_foregroundAppletActive) {
-        switchu::FileLog::log("[%s] HOME requested while foreground applet active", source);
+        qlaunchext::FileLog::log("[%s] HOME requested while foreground applet active", source);
         g_pendingForegroundAppletHome = true;
     } else {
-        switchu::FileLog::log("[%s] HOME no app/menu active; launching MainMenu", source);
+        qlaunchext::FileLog::log("[%s] HOME no app/menu active; launching MainMenu", source);
         Result menuRc = daemon::menu_la::launch(smi::MenuStartMode::MainMenu, buildSystemStatus());
-        switchu::FileLog::log("[%s] HOME MainMenu launch rc=0x%X", source, menuRc);
+        qlaunchext::FileLog::log("[%s] HOME MainMenu launch rc=0x%X", source, menuRc);
         if (R_SUCCEEDED(menuRc))
             g_appCatalogRefreshDelay = 80;
     }
 }
 
 static bool sendViewFlagsUpdates() {
-    std::vector<switchu::ns::ExtApplicationRecord> records;
+    std::vector<qlaunchext::ns::ExtApplicationRecord> records;
     if (!listApplicationRecords(records, "views"))
         return false;
 
-    std::vector<switchu::ns::ExtApplicationView> views;
+    std::vector<qlaunchext::ns::ExtApplicationView> views;
     queryApplicationViews(records, views, "views");
 
     const s32 count = static_cast<s32>(records.size());
 
     if (count != g_lastRecordCount) {
         const s32 prevCount = g_lastRecordCount;
-        switchu::FileLog::log("[views] title count changed %d -> %d, full reload needed",
+        qlaunchext::FileLog::log("[views] title count changed %d -> %d, full reload needed",
                               g_lastRecordCount, count);
 
         for (s32 i = 0; i < count; ++i) {
@@ -662,7 +662,7 @@ static bool sendViewFlagsUpdates() {
     }
     g_lastRecordCount = count;
 
-    switchu::FileLog::log("[views] checked %d titles, pushed %d flag updates",
+    qlaunchext::FileLog::log("[views] checked %d titles, pushed %d flag updates",
                           count, pushed);
     return false;
 }
@@ -686,22 +686,22 @@ static void handleGeneralChannel() {
 
     if (hdr.magic != 0x534D4153) return;
 
-    switchu::FileLog::log("[sams] msg=%u", hdr.msg);
+    qlaunchext::FileLog::log("[sams] msg=%u", hdr.msg);
     switch (hdr.msg) {
         case 2:
-        switchu::FileLog::log("[sams] -> Home");
+        qlaunchext::FileLog::log("[sams] -> Home");
         openMenuFromHome("sams");
         break;
         case 3:
-        switchu::FileLog::log("[sams] -> Sleep");
+        qlaunchext::FileLog::log("[sams] -> Sleep");
         startPowerSequence("sams-sleep", smi::SystemMessage::EnterSleep);
         break;
         case 5:
-        switchu::FileLog::log("[sams] -> Shutdown");
+        qlaunchext::FileLog::log("[sams] -> Shutdown");
         startPowerSequence("sams-shutdown", smi::SystemMessage::Shutdown);
         break;
         case 6:
-        switchu::FileLog::log("[sams] -> Reboot");
+        qlaunchext::FileLog::log("[sams] -> Reboot");
         startPowerSequence("sams-reboot", smi::SystemMessage::Reboot);
         break;
     }
@@ -713,17 +713,17 @@ static void handleAppletMessages() {
     if (R_FAILED(rc))
         return;
 
-    switchu::FileLog::log("[ae] msg=%u", msg);
+    qlaunchext::FileLog::log("[ae] msg=%u", msg);
     switch (msg) {
         case 1:
-        switchu::FileLog::log("[ae] -> ChangeIntoForeground");
+        qlaunchext::FileLog::log("[ae] -> ChangeIntoForeground");
         break;
 
         case 2:
         // AppletMessage_ChangeIntoBackground: another foreground participant is
         // taking over. The menu no longer stays alive in a hidden suspended
         // state, so there is no extra holder to clean up here.
-        switchu::FileLog::log("[ae] -> ChangeIntoBackground");
+        qlaunchext::FileLog::log("[ae] -> ChangeIntoBackground");
         break;
 
         case 20:
@@ -733,17 +733,17 @@ static void handleAppletMessages() {
         case 22:
         case 29:
         case 32:
-        switchu::FileLog::log("[ae] -> Sleep (msg=%u)", msg);
+        qlaunchext::FileLog::log("[ae] -> Sleep (msg=%u)", msg);
         appletStartSleepSequence(true);
         break;
 
         case 26:
-        switchu::FileLog::log("[ae] -> Wakeup");
+        qlaunchext::FileLog::log("[ae] -> Wakeup");
         g_batteryRefreshPending.store(true);
         if (daemon::app::isRunning() && !daemon::menu_la::isActive()) {
             Result rc = daemon::app::resume();
             if (R_FAILED(rc)) {
-                switchu::FileLog::log("[ae] wake resume FAIL: 0x%X", rc);
+                qlaunchext::FileLog::log("[ae] wake resume FAIL: 0x%X", rc);
                 appletRequestToGetForeground();
             }
         } else {
@@ -762,19 +762,19 @@ static void handleAppletMessages() {
 static Result launchLibraryApplet(AppletId id, const char* name,
                                   const void* inData = nullptr, size_t inDataSize = 0,
                                   u32 libAppletVersion = 0) {
-    switchu::FileLog::log("[applet] launching %s id=0x%X version=0x%X in=%zu",
+    qlaunchext::FileLog::log("[applet] launching %s id=0x%X version=0x%X in=%zu",
                           name, (u32)id, libAppletVersion, inDataSize);
     Result fgRc = appletRequestToGetForeground();
-    switchu::FileLog::log("[applet] %s RequestToGetForeground rc=0x%X", name, fgRc);
+    qlaunchext::FileLog::log("[applet] %s RequestToGetForeground rc=0x%X", name, fgRc);
 
     AppletHolder holder;
-    switchu::FileLog::log("[applet] %s create call", name);
+    qlaunchext::FileLog::log("[applet] %s create call", name);
     Result rc = appletCreateLibraryApplet(&holder, id, LibAppletMode_AllForeground);
     if (R_FAILED(rc)) {
-        switchu::FileLog::log("[applet] %s create FAIL: 0x%X", name, rc);
+        qlaunchext::FileLog::log("[applet] %s create FAIL: 0x%X", name, rc);
         return rc;
     }
-    switchu::FileLog::log("[applet] %s create ok", name);
+    qlaunchext::FileLog::log("[applet] %s create ok", name);
 
     if (libAppletVersion != 0) {
         LibAppletArgs args;
@@ -782,47 +782,47 @@ static Result launchLibraryApplet(AppletId id, const char* name,
         libappletArgsSetPlayStartupSound(&args, true);
         rc = libappletArgsPush(&args, &holder);
         if (R_FAILED(rc)) {
-            switchu::FileLog::log("[applet] %s args FAIL: 0x%X", name, rc);
+            qlaunchext::FileLog::log("[applet] %s args FAIL: 0x%X", name, rc);
             appletHolderClose(&holder);
             return rc;
         }
-        switchu::FileLog::log("[applet] %s args ok", name);
+        qlaunchext::FileLog::log("[applet] %s args ok", name);
     }
 
     if (inData && inDataSize > 0) {
         AppletStorage inStor;
         rc = appletCreateStorage(&inStor, inDataSize);
         if (R_FAILED(rc)) {
-            switchu::FileLog::log("[applet] %s in storage FAIL: 0x%X", name, rc);
+            qlaunchext::FileLog::log("[applet] %s in storage FAIL: 0x%X", name, rc);
             appletHolderClose(&holder);
             return rc;
         }
         rc = appletStorageWrite(&inStor, 0, inData, inDataSize);
         if (R_FAILED(rc)) {
-            switchu::FileLog::log("[applet] %s in data write FAIL: 0x%X", name, rc);
+            qlaunchext::FileLog::log("[applet] %s in data write FAIL: 0x%X", name, rc);
             appletStorageClose(&inStor);
             appletHolderClose(&holder);
             return rc;
         }
         rc = appletHolderPushInData(&holder, &inStor);
         if (R_FAILED(rc)) {
-            switchu::FileLog::log("[applet] %s in data push FAIL: 0x%X", name, rc);
+            qlaunchext::FileLog::log("[applet] %s in data push FAIL: 0x%X", name, rc);
             appletStorageClose(&inStor);
             appletHolderClose(&holder);
             return rc;
         }
-        switchu::FileLog::log("[applet] %s in data ok", name);
+        qlaunchext::FileLog::log("[applet] %s in data ok", name);
         appletStorageClose(&inStor);
     }
 
-    switchu::FileLog::log("[applet] %s start call", name);
+    qlaunchext::FileLog::log("[applet] %s start call", name);
     rc = appletHolderStart(&holder);
     if (R_FAILED(rc)) {
-        switchu::FileLog::log("[applet] %s start FAIL: 0x%X", name, rc);
+        qlaunchext::FileLog::log("[applet] %s start FAIL: 0x%X", name, rc);
         appletHolderClose(&holder);
         return rc;
     }
-    switchu::FileLog::log("[applet] %s start ok", name);
+    qlaunchext::FileLog::log("[applet] %s start ok", name);
 
     g_foregroundAppletActive = true;
     g_pendingForegroundAppletHome = false;
@@ -833,7 +833,7 @@ static Result launchLibraryApplet(AppletId id, const char* name,
 
         if (g_pendingForegroundAppletHome) {
             g_pendingForegroundAppletHome = false;
-            switchu::FileLog::log("[applet] %s exiting on HOME request", name);
+            qlaunchext::FileLog::log("[applet] %s exiting on HOME request", name);
             appletHolderRequestExitOrTerminate(&holder, 5'000'000'000ULL);
         }
 
@@ -843,21 +843,21 @@ static Result launchLibraryApplet(AppletId id, const char* name,
     g_foregroundAppletActive = false;
     appletHolderJoin(&holder);
     appletHolderClose(&holder);
-    switchu::FileLog::log("[applet] %s closed", name);
+    qlaunchext::FileLog::log("[applet] %s closed", name);
     return 0;
 }
 
 static Result launchControllerPairing() {
-    switchu::FileLog::log("[applet] launching Controller pairing");
+    qlaunchext::FileLog::log("[applet] launching Controller pairing");
     HidLaControllerSupportArg arg;
     hidLaCreateControllerSupportArg(&arg);
     arg.hdr.player_count_max = 8;
     arg.hdr.enable_single_mode = false;
     Result rc = hidLaShowControllerSupportForSystem(nullptr, &arg, true);
     if (R_FAILED(rc))
-        switchu::FileLog::log("[applet] Controller FAIL: 0x%X", rc);
+        qlaunchext::FileLog::log("[applet] Controller FAIL: 0x%X", rc);
     else
-        switchu::FileLog::log("[applet] Controller pairing done");
+        qlaunchext::FileLog::log("[applet] Controller pairing done");
     return rc;
 }
 
@@ -871,7 +871,7 @@ static void handleMenuCommand() {
     if (!reader.valid()) return;
 
     auto msg = reader.systemMessage();
-    switchu::FileLog::log("[smi] command=%u", (u32)msg);
+    qlaunchext::FileLog::log("[smi] command=%u", (u32)msg);
 
     Result result = 0;
 
@@ -883,7 +883,7 @@ static void handleMenuCommand() {
         action.title_id = args.title_id;
         std::memcpy(&action.uid, args.user_uid, sizeof(action.uid));
         g_actionQueue.push_back(action);
-        switchu::FileLog::log("[smi] queued launch 0x%016lX (actions=%zu)", args.title_id, g_actionQueue.size());
+        qlaunchext::FileLog::log("[smi] queued launch 0x%016lX (actions=%zu)", args.title_id, g_actionQueue.size());
         break;
     }
 
@@ -893,7 +893,7 @@ static void handleMenuCommand() {
             action.type = ActionType::ResumeApplication;
             g_actionQueue.push_back(action);
         }
-        switchu::FileLog::log("[smi] queued resume (actions=%zu)", g_actionQueue.size());
+        qlaunchext::FileLog::log("[smi] queued resume (actions=%zu)", g_actionQueue.size());
         break;
 
     case smi::SystemMessage::TerminateApplication:
@@ -909,7 +909,7 @@ static void handleMenuCommand() {
             action.type = ActionType::OpenAlbum;
             g_actionQueue.push_back(action);
         }
-        switchu::FileLog::log("[smi] queued album launch (actions=%zu)", g_actionQueue.size());
+        qlaunchext::FileLog::log("[smi] queued album launch (actions=%zu)", g_actionQueue.size());
         break;
 
     case smi::SystemMessage::LaunchMiiEditor:
@@ -918,7 +918,7 @@ static void handleMenuCommand() {
             action.type = ActionType::OpenMiiEditor;
             g_actionQueue.push_back(action);
         }
-        switchu::FileLog::log("[smi] queued Mii Editor launch (actions=%zu)", g_actionQueue.size());
+        qlaunchext::FileLog::log("[smi] queued Mii Editor launch (actions=%zu)", g_actionQueue.size());
         break;
 
     case smi::SystemMessage::LaunchNetConnect:
@@ -927,7 +927,7 @@ static void handleMenuCommand() {
             action.type = ActionType::OpenNetConnect;
             g_actionQueue.push_back(action);
         }
-        switchu::FileLog::log("[smi] queued NetConnect launch (actions=%zu)", g_actionQueue.size());
+        qlaunchext::FileLog::log("[smi] queued NetConnect launch (actions=%zu)", g_actionQueue.size());
         break;
 
     case smi::SystemMessage::LaunchUserPage: {
@@ -936,7 +936,7 @@ static void handleMenuCommand() {
         action.type = ActionType::OpenUserPage;
         std::memcpy(&action.uid, args.user_uid, sizeof(action.uid));
         g_actionQueue.push_back(action);
-        switchu::FileLog::log("[smi] queued User Page launch (actions=%zu)", g_actionQueue.size());
+        qlaunchext::FileLog::log("[smi] queued User Page launch (actions=%zu)", g_actionQueue.size());
         break;
     }
 
@@ -946,7 +946,7 @@ static void handleMenuCommand() {
             action.type = ActionType::OpenControllers;
             g_actionQueue.push_back(action);
         }
-        switchu::FileLog::log("[smi] queued Controller launch (actions=%zu)", g_actionQueue.size());
+        qlaunchext::FileLog::log("[smi] queued Controller launch (actions=%zu)", g_actionQueue.size());
         break;
 
     case smi::SystemMessage::EnterSleep:
@@ -978,17 +978,17 @@ static void handleMenuCommand() {
         if (R_SUCCEEDED(respRc))
             daemon::menu_la::pushStorage(&respSt);
         else
-            switchu::FileLog::log("[smi] GetSystemStatus response create FAIL: 0x%X", respRc);
+            qlaunchext::FileLog::log("[smi] GetSystemStatus response create FAIL: 0x%X", respRc);
         return;
     }
 
     case smi::SystemMessage::MenuReady:
-        switchu::FileLog::log("[smi] menu ready");
+        qlaunchext::FileLog::log("[smi] menu ready");
         g_batteryRefreshPending.store(true);
         break;
 
     case smi::SystemMessage::MenuClosing:
-        switchu::FileLog::log("[smi] menu closing");
+        qlaunchext::FileLog::log("[smi] menu closing");
         break;
 
     }
@@ -1000,7 +1000,7 @@ static void handleMenuCommand() {
         if (R_SUCCEEDED(respRc))
             daemon::menu_la::pushStorage(&respSt);
         else
-            switchu::FileLog::log("[smi] response create FAIL: 0x%X", respRc);
+            qlaunchext::FileLog::log("[smi] response create FAIL: 0x%X", respRc);
     }
 }
 
@@ -1008,19 +1008,19 @@ static bool handleAction(Action& action) {
     if (daemon::menu_la::hasHolder() || g_foregroundAppletActive)
         return false;
 
-    switchu::FileLog::log("[action] handling type=%u", (u32)action.type);
+    qlaunchext::FileLog::log("[action] handling type=%u", (u32)action.type);
     switch (action.type) {
         case ActionType::LaunchApplication: {
             Result rc = daemon::app::launch(action.title_id, action.uid);
             if (R_FAILED(rc))
-                switchu::FileLog::log("[action] launch 0x%016lX FAIL: 0x%X", action.title_id, rc);
+                qlaunchext::FileLog::log("[action] launch 0x%016lX FAIL: 0x%X", action.title_id, rc);
             return true;
         }
 
         case ActionType::ResumeApplication: {
             Result rc = daemon::app::resume();
             if (R_FAILED(rc))
-                switchu::FileLog::log("[action] resume FAIL: 0x%X", rc);
+                qlaunchext::FileLog::log("[action] resume FAIL: 0x%X", rc);
             return true;
         }
 
@@ -1032,8 +1032,8 @@ static bool handleAction(Action& action) {
                                             sizeof(albumArg),
                                             0x10000);
             if (R_FAILED(rc))
-                switchu::FileLog::log("[action] album FAIL: 0x%X", rc);
-            switchu::FileLog::log("[action] relaunching menu after album");
+                qlaunchext::FileLog::log("[action] album FAIL: 0x%X", rc);
+            qlaunchext::FileLog::log("[action] relaunching menu after album");
             daemon::menu_la::launch(smi::MenuStartMode::MainMenu, buildSystemStatus());
             return true;
         }
@@ -1048,8 +1048,8 @@ static bool handleAction(Action& action) {
             Result rc = launchLibraryApplet(AppletId_LibraryAppletMiiEdit,
                                             "MiiEditor", &in, sizeof(in));
             if (R_FAILED(rc))
-                switchu::FileLog::log("[action] Mii Editor FAIL: 0x%X", rc);
-            switchu::FileLog::log("[action] relaunching menu after Mii Editor");
+                qlaunchext::FileLog::log("[action] Mii Editor FAIL: 0x%X", rc);
+            qlaunchext::FileLog::log("[action] relaunching menu after Mii Editor");
             daemon::menu_la::launch(smi::MenuStartMode::MainMenu, buildSystemStatus());
             return true;
         }
@@ -1057,8 +1057,8 @@ static bool handleAction(Action& action) {
         case ActionType::OpenControllers: {
             Result rc = launchControllerPairing();
             if (R_FAILED(rc))
-                switchu::FileLog::log("[action] Controllers FAIL: 0x%X", rc);
-            switchu::FileLog::log("[action] relaunching menu after Controllers");
+                qlaunchext::FileLog::log("[action] Controllers FAIL: 0x%X", rc);
+            qlaunchext::FileLog::log("[action] relaunching menu after Controllers");
             daemon::menu_la::launch(smi::MenuStartMode::MainMenu, buildSystemStatus());
             return true;
         }
@@ -1069,8 +1069,8 @@ static bool handleAction(Action& action) {
                                             "NetConnect", &netType,
                                             sizeof(netType), 1);
             if (R_FAILED(rc))
-                switchu::FileLog::log("[action] NetConnect FAIL: 0x%X", rc);
-            switchu::FileLog::log("[action] relaunching menu after NetConnect");
+                qlaunchext::FileLog::log("[action] NetConnect FAIL: 0x%X", rc);
+            qlaunchext::FileLog::log("[action] relaunching menu after NetConnect");
             daemon::menu_la::launch(smi::MenuStartMode::MainMenu, buildSystemStatus());
             return true;
         }
@@ -1078,8 +1078,8 @@ static bool handleAction(Action& action) {
         case ActionType::OpenUserPage: {
             Result rc = friendsLaShowMyProfileForHomeMenu(action.uid);
             if (R_FAILED(rc))
-                switchu::FileLog::log("[action] User Page FAIL: 0x%X", rc);
-            switchu::FileLog::log("[action] relaunching menu after User Page");
+                qlaunchext::FileLog::log("[action] User Page FAIL: 0x%X", rc);
+            qlaunchext::FileLog::log("[action] relaunching menu after User Page");
             daemon::menu_la::launch(smi::MenuStartMode::MainMenu, buildSystemStatus());
             return true;
         }
@@ -1115,9 +1115,9 @@ static void mainLoop() {
         if (!g_initialEventSkipped) {
             g_initialEventSkipped = true;
             g_appCatalogRefreshPending.store(false);
-            switchu::FileLog::log("[views] skipping initial catch-up event");
+            qlaunchext::FileLog::log("[views] skipping initial catch-up event");
         } else {
-            switchu::FileLog::log("[views] app record event — starting poll");
+            qlaunchext::FileLog::log("[views] app record event — starting poll");
             g_eventPollCountdown  = 10;
             g_eventPollsRemaining = 50;
         }
@@ -1178,12 +1178,12 @@ static void mainLoop() {
         --g_menuRelaunchCooldown;
 
     if (daemon::menu_la::checkFinished()) {
-        switchu::FileLog::log("[main] menu exited (reason=%d)",
+        qlaunchext::FileLog::log("[main] menu exited (reason=%d)",
             (int)daemon::menu_la::exitReason());
         ++g_menuFastExitCount;
         if (g_menuFastExitCount >= 3) {
             g_menuRelaunchCooldown = 500;
-            switchu::FileLog::log("[main] menu fast-exit guard active count=%d cooldown=%d",
+            qlaunchext::FileLog::log("[main] menu fast-exit guard active count=%d cooldown=%d",
                                   g_menuFastExitCount, g_menuRelaunchCooldown);
         }
         didWork = true;
@@ -1192,7 +1192,7 @@ static void mainLoop() {
     didWork |= consumeOneAction();
 
     if (daemon::app::checkFinished()) {
-        switchu::FileLog::log("[main] app exited");
+        qlaunchext::FileLog::log("[main] app exited");
         if (daemon::menu_la::isActive()) {
             pushNotification(smi::MenuMessage::ApplicationExited);
         } else {
@@ -1204,7 +1204,7 @@ static void mainLoop() {
     if (!didWork && g_menuRelaunchCooldown <= 0 && g_actionQueue.empty() &&
         !daemon::app::isRunning() && !daemon::menu_la::hasHolder() &&
         !g_foregroundAppletActive) {
-        switchu::FileLog::log("[main] no app/menu active; relaunching menu");
+        qlaunchext::FileLog::log("[main] no app/menu active; relaunching menu");
         daemon::menu_la::launch(smi::MenuStartMode::MainMenu, buildSystemStatus());
     }
 }
@@ -1215,15 +1215,15 @@ static std::atomic<bool> g_eventRunning{false};
 
 static void eventManagerThreadFunc(void* arg) {
     (void)arg;
-    switchu::FileLog::log("[event] thread alive");
+    qlaunchext::FileLog::log("[event] thread alive");
 
     Event recordEvent = {};
     Result rc = nsGetApplicationRecordUpdateSystemEvent(&recordEvent);
     if (R_FAILED(rc)) {
-        switchu::FileLog::log("[event] nsGetApplicationRecordUpdateSystemEvent FAIL: 0x%X", rc);
+        qlaunchext::FileLog::log("[event] nsGetApplicationRecordUpdateSystemEvent FAIL: 0x%X", rc);
         return;
     }
-    switchu::FileLog::log("[event] registered ApplicationRecordUpdateSystemEvent");
+    qlaunchext::FileLog::log("[event] registered ApplicationRecordUpdateSystemEvent");
 
     Event gcMountFailEvent = {};
     bool hasGcEvent = false;
@@ -1231,12 +1231,12 @@ static void eventManagerThreadFunc(void* arg) {
         rc = nsGetGameCardMountFailureEvent(&gcMountFailEvent);
         if (R_SUCCEEDED(rc)) {
             hasGcEvent = true;
-            switchu::FileLog::log("[event] registered GameCardMountFailureEvent");
+            qlaunchext::FileLog::log("[event] registered GameCardMountFailureEvent");
         } else {
-            switchu::FileLog::log("[event] nsGetGameCardMountFailureEvent FAIL: 0x%X", rc);
+            qlaunchext::FileLog::log("[event] nsGetGameCardMountFailureEvent FAIL: 0x%X", rc);
         }
     } else {
-        switchu::FileLog::log("[event] GameCardMountFailureEvent not supported on this firmware");
+        qlaunchext::FileLog::log("[event] GameCardMountFailureEvent not supported on this firmware");
     }
 
     PsmSession psmSession{};
@@ -1245,12 +1245,12 @@ static void eventManagerThreadFunc(void* arg) {
         rc = psmBindStateChangeEvent(&psmSession, true, true, true);
         if (R_SUCCEEDED(rc)) {
             hasPsmEvent = true;
-            switchu::FileLog::log("[event] registered PSM state change event");
+            qlaunchext::FileLog::log("[event] registered PSM state change event");
         } else {
-            switchu::FileLog::log("[event] psmBindStateChangeEvent FAIL: 0x%X", rc);
+            qlaunchext::FileLog::log("[event] psmBindStateChangeEvent FAIL: 0x%X", rc);
         }
     } else {
-        switchu::FileLog::log("[event] PSM unavailable; battery events disabled");
+        qlaunchext::FileLog::log("[event] PSM unavailable; battery events disabled");
     }
 
     while (g_eventRunning.load()) {
@@ -1279,22 +1279,22 @@ static void eventManagerThreadFunc(void* arg) {
 
         if (evIdx == 0) {
             eventClear(&recordEvent);
-            switchu::FileLog::log("[event] ApplicationRecordUpdateSystemEvent fired");
+            qlaunchext::FileLog::log("[event] ApplicationRecordUpdateSystemEvent fired");
 
             g_appCatalogRefreshPending.store(true);
             g_eventRefreshPending.store(true);
         } else if (evIdx == 1 && hasGcEvent) {
             eventClear(&gcMountFailEvent);
 
-            Result failRc = switchu::ns::getLastGameCardMountFailure();
-            switchu::FileLog::log("[event] GameCardMountFailure rc=0x%X", failRc);
+            Result failRc = qlaunchext::ns::getLastGameCardMountFailure();
+            qlaunchext::FileLog::log("[event] GameCardMountFailure rc=0x%X", failRc);
 
             g_eventGcMountRc.store(failRc);
             g_eventGcMountFailure.store(true);
         } else if ((hasGcEvent && hasPsmEvent && evIdx == 2) ||
                    (!hasGcEvent && hasPsmEvent && evIdx == 1)) {
             eventClear(&psmSession.StateChangeEvent);
-            switchu::FileLog::log("[event] PSM state change fired");
+            qlaunchext::FileLog::log("[event] PSM state change fired");
             g_batteryRefreshPending.store(true);
         }
 
@@ -1304,7 +1304,7 @@ static void eventManagerThreadFunc(void* arg) {
     eventClose(&recordEvent);
     if (hasGcEvent) eventClose(&gcMountFailEvent);
     if (hasPsmEvent) psmUnbindStateChangeEvent(&psmSession);
-    switchu::FileLog::log("[event] thread exiting");
+    qlaunchext::FileLog::log("[event] thread exiting");
 }
 
 static Result startEventManager() {
@@ -1312,16 +1312,16 @@ static Result startEventManager() {
     Result rc = threadCreate(&g_eventThread, eventManagerThreadFunc, nullptr,
                              nullptr, 0x4000, 0x2C, -2);
     if (R_FAILED(rc)) {
-        switchu::FileLog::log("[event] threadCreate FAIL: 0x%X", rc);
+        qlaunchext::FileLog::log("[event] threadCreate FAIL: 0x%X", rc);
         return rc;
     }
     rc = threadStart(&g_eventThread);
     if (R_FAILED(rc)) {
-        switchu::FileLog::log("[event] threadStart FAIL: 0x%X", rc);
+        qlaunchext::FileLog::log("[event] threadStart FAIL: 0x%X", rc);
         threadClose(&g_eventThread);
         return rc;
     }
-    switchu::FileLog::log("[event] thread started");
+    qlaunchext::FileLog::log("[event] thread started");
     return 0;
 }
 
@@ -1329,7 +1329,7 @@ static void stopEventManager() {
     g_eventRunning.store(false);
     threadWaitForExit(&g_eventThread);
     threadClose(&g_eventThread);
-    switchu::FileLog::log("[event] thread stopped");
+    qlaunchext::FileLog::log("[event] thread stopped");
 }
 
 static Thread g_controlCacheThread = {};
@@ -1338,8 +1338,8 @@ static bool g_controlCacheStarted = false;
 
 static void controlCacheThreadFunc(void* arg) {
     (void)arg;
-    switchu::FileLog::log("[control-cache] thread alive");
-    switchu::control_cache::ensureDirectory();
+    qlaunchext::FileLog::log("[control-cache] thread alive");
+    qlaunchext::control_cache::ensureDirectory();
 
     while (g_controlCacheRunning.load()) {
         uint64_t titleId = 0;
@@ -1348,12 +1348,12 @@ static void controlCacheThreadFunc(void* arg) {
             continue;
         }
 
-        if (titleId == 0 || switchu::control_cache::hasMeta(titleId))
+        if (titleId == 0 || qlaunchext::control_cache::hasMeta(titleId))
             continue;
 
         auto* controlData = new NsApplicationControlData();
         if (!controlData) {
-            switchu::FileLog::log("[control-cache] alloc FAIL title=0x%016lX", titleId);
+            qlaunchext::FileLog::log("[control-cache] alloc FAIL title=0x%016lX", titleId);
             svcSleepThread(250'000'000ULL);
             continue;
         }
@@ -1367,11 +1367,11 @@ static void controlCacheThreadFunc(void* arg) {
                                                 &controlSize);
         const uint64_t elapsedMs = armTicksToNs(armGetSystemTick() - startTick) / 1'000'000ULL;
         if (R_SUCCEEDED(rc) && controlSize >= sizeof(NacpStruct)) {
-            const bool ok = switchu::control_cache::writeFromControlData(
+            const bool ok = qlaunchext::control_cache::writeFromControlData(
                 titleId,
                 *controlData,
                 controlSize);
-            switchu::FileLog::log("[control-cache] cached 0x%016lX size=%zu elapsed=%lums ok=%d",
+            qlaunchext::FileLog::log("[control-cache] cached 0x%016lX size=%zu elapsed=%lums ok=%d",
                                   titleId,
                                   controlSize,
                                   static_cast<unsigned long>(elapsedMs),
@@ -1381,7 +1381,7 @@ static void controlCacheThreadFunc(void* arg) {
                 g_controlCacheRefreshDelay.store(60);
             }
         } else {
-            switchu::FileLog::log("[control-cache] GetControlData FAIL title=0x%016lX rc=0x%X size=%zu elapsed=%lums",
+            qlaunchext::FileLog::log("[control-cache] GetControlData FAIL title=0x%016lX rc=0x%X size=%zu elapsed=%lums",
                                   titleId,
                                   rc,
                                   controlSize,
@@ -1392,7 +1392,7 @@ static void controlCacheThreadFunc(void* arg) {
         svcSleepThread(10'000'000ULL);
     }
 
-    switchu::FileLog::log("[control-cache] thread exiting");
+    qlaunchext::FileLog::log("[control-cache] thread exiting");
 }
 
 static Result startControlCacheWorker() {
@@ -1400,18 +1400,18 @@ static Result startControlCacheWorker() {
     Result rc = threadCreate(&g_controlCacheThread, controlCacheThreadFunc, nullptr,
                              nullptr, 0x10000, 0x2D, -2);
     if (R_FAILED(rc)) {
-        switchu::FileLog::log("[control-cache] threadCreate FAIL: 0x%X", rc);
+        qlaunchext::FileLog::log("[control-cache] threadCreate FAIL: 0x%X", rc);
         return rc;
     }
 
     rc = threadStart(&g_controlCacheThread);
     if (R_FAILED(rc)) {
-        switchu::FileLog::log("[control-cache] threadStart FAIL: 0x%X", rc);
+        qlaunchext::FileLog::log("[control-cache] threadStart FAIL: 0x%X", rc);
         threadClose(&g_controlCacheThread);
         return rc;
     }
 
-    switchu::FileLog::log("[control-cache] thread started");
+    qlaunchext::FileLog::log("[control-cache] thread started");
     g_controlCacheStarted = true;
     return 0;
 }
@@ -1423,11 +1423,11 @@ static void stopControlCacheWorker() {
     threadWaitForExit(&g_controlCacheThread);
     threadClose(&g_controlCacheThread);
     g_controlCacheStarted = false;
-    switchu::FileLog::log("[control-cache] thread stopped");
+    qlaunchext::FileLog::log("[control-cache] thread stopped");
 }
 
 int main(int argc, char* argv[]) {
-    switchu::FileLog::log("[daemon] main() entry");
+    qlaunchext::FileLog::log("[daemon] main() entry");
 
     appletLoadAndApplyIdlePolicySettings();
 
@@ -1435,16 +1435,16 @@ int main(int argc, char* argv[]) {
 
     Result rc = startControlCacheWorker();
     if (R_FAILED(rc))
-        switchu::FileLog::log("[daemon] control cache worker failed: 0x%X (non-fatal)", rc);
+        qlaunchext::FileLog::log("[daemon] control cache worker failed: 0x%X (non-fatal)", rc);
 
     rc = startEventManager();
     if (R_FAILED(rc))
-        switchu::FileLog::log("[daemon] event manager failed: 0x%X (non-fatal)", rc);
+        qlaunchext::FileLog::log("[daemon] event manager failed: 0x%X (non-fatal)", rc);
 
-    switchu::FileLog::log("[daemon] launching menu...");
+    qlaunchext::FileLog::log("[daemon] launching menu...");
     rc = daemon::menu_la::launch(smi::MenuStartMode::StartupBoot, buildSystemStatus());
     if (R_FAILED(rc))
-        switchu::FileLog::log("[daemon] menu launch failed: 0x%X", rc);
+        qlaunchext::FileLog::log("[daemon] menu launch failed: 0x%X", rc);
 
     while (g_running.load()) {
         mainLoop();
@@ -1455,6 +1455,6 @@ int main(int argc, char* argv[]) {
     stopControlCacheWorker();
     daemon::menu_la::terminate();
     daemon::app::cleanup();
-    switchu::FileLog::log("[daemon] shutdown complete");
+    qlaunchext::FileLog::log("[daemon] shutdown complete");
     return 0;
 }

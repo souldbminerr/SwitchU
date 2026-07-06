@@ -1,17 +1,17 @@
 <div align="center">
-    <h1>SwitchU</h1>
+    <h1>qlaunch-ext</h1>
     <p>A Wii U-style custom home menu replacement for Nintendo Switch</p>
 </div>
 
 <p align="center">
-  <a rel="LICENSE" href="https://github.com/PoloNX/SwitchU/blob/master/LICENSE">
+  <a rel="LICENSE" href="https://github.com/PoloNX/qlaunch-ext/blob/master/LICENSE">
     <img src="https://img.shields.io/static/v1?label=license&message=GPLV3&labelColor=111111&color=0057da&style=for-the-badge" alt="License">
   </a>
-  <a rel="VERSION" href="https://github.com/PoloNX/SwitchU/releases">
+  <a rel="VERSION" href="https://github.com/PoloNX/qlaunch-ext/releases">
     <img src="https://img.shields.io/static/v1?label=version&message=1.1.0&labelColor=111111&color=06f&style=for-the-badge" alt="Version">
   </a>
-  <a rel="BUILD" href="https://github.com/PoloNX/SwitchU/actions">
-      <img src="https://img.shields.io/github/actions/workflow/status/PoloNX/SwitchU/switch.yml?branch=master &labelColor=111111&color=06f&style=for-the-badge" alt=Build>
+  <a rel="BUILD" href="https://github.com/PoloNX/qlaunch-ext/actions">
+      <img src="https://img.shields.io/github/actions/workflow/status/PoloNX/qlaunch-ext/switch.yml?branch=master &labelColor=111111&color=06f&style=for-the-badge" alt=Build>
   </a>
 </p>
 
@@ -49,8 +49,8 @@
 ### Clone
 
 ```bash
-git clone --recursive https://github.com/PoloNX/SwitchU
-cd SwitchU
+git clone --recursive https://github.com/PoloNX/qlaunch-ext
+cd qlaunch-ext
 ```
 
 ### Build (production daemon + external menu mode)
@@ -95,4 +95,4 @@ If you want to help, open an issue when you find a bug and open a pull request i
 
 ## License
 
-This project is licensed under the GNU General Public License v3.0. See the [LICENSE](https://github.com/PoloNX/SwitchU/blob/master/LICENSE) file for details.
+This project is licensed under the GNU General Public License v3.0. See the [LICENSE](https://github.com/PoloNX/qlaunch-ext/blob/master/LICENSE) file for details.

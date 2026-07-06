@@ -263,6 +263,16 @@ nxui::Rect WaraWaraBackground::backgroundImageRect() const {
 }
 
 void WaraWaraBackground::onRender(nxui::Renderer& ren) {
+    if (m_flat) {
+        // Solid fill, no animated gradient or floating shapes.
+        ren.drawRect(m_rect, m_accent);
+        if (m_backgroundImage.valid() && m_config.imageOpacity > 0.f) {
+            ren.drawTexture(&m_backgroundImage, backgroundImageRect(),
+                            nxui::Color::white().withAlpha(m_config.imageOpacity * m_opacity));
+        }
+        return;
+    }
+
     ren.useShader(nxui::ShaderProgram::Gradient);
     nxui::FsUniforms fs = {};
     fs.useTexture = 0;
