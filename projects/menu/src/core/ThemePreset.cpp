@@ -623,7 +623,7 @@ nxui::Theme ThemePreset::toTheme() const {
     float glowAlpha    = (mode == nxui::ThemeMode::Dark) ? 0.12f : 0.15f;
     t.cursorGlow       = t.cursorNormal.withAlpha(glowAlpha);
 
-    t.background       = nxui::Color::fromHSL(colors.bgH, colors.bgS, colors.bgL, 1.f);
+    t.primary       = nxui::Color::fromHSL(colors.bgH, colors.bgS, colors.bgL, 1.f);
     t.backgroundAccent = nxui::Color::fromHSL(colors.bgAccH, colors.bgAccS, colors.bgAccL, 1.f);
     t.shapeColor       = nxui::Color::fromHSL(colors.shapeH, colors.shapeS, colors.shapeL, 0.10f);
 
@@ -634,7 +634,7 @@ ThemeColorSet ThemePreset::extractColors(const nxui::Theme& theme) {
     ThemeColorSet c;
     theme.cursorNormal.toHSL(c.cursorH, c.cursorS, c.cursorL);
     theme.cursorNormal.toHSL(c.accentH, c.accentS, c.accentL);
-    theme.background.toHSL(c.bgH, c.bgS, c.bgL);
+    theme.primary.toHSL(c.bgH, c.bgS, c.bgL);
     theme.backgroundAccent.toHSL(c.bgAccH, c.bgAccS, c.bgAccL);
     theme.shapeColor.toHSL(c.shapeH, c.shapeS, c.shapeL);
     return c;

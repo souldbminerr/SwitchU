@@ -58,6 +58,11 @@ public:
     // Radius used by the original SwitchU "Rounded" style (from the theme).
     void setRoundedRadius(float r) { m_roundedRadius = r; }
 
+    // Pulsing focus glow (drop shadow) toggle, and the accent colour used for the
+    // 4 px selection gap drawn around the tile when focused.
+    void setGlowEnabled(bool e)            { m_glowEnabled = e; }
+    void setSelectionColor(const nxui::Color& c) { m_selectionColor = c; }
+
     // Effective corner radius for a selection cursor framing this icon.
     float cursorRadius(const nxui::Rect& cursorRect) const {
         switch (m_shape) {
@@ -87,6 +92,8 @@ private:
     bool        m_focusable = true;
     Shape       m_shape = Shape::Square;   // qlaunch square (no rounding) by default
     float       m_roundedRadius = 12.f;    // radius for the "Rounded" (SwitchU) style
+    bool        m_glowEnabled = false;     // pulsing drop-shadow glow on selection
+    nxui::Color m_selectionColor {0.f, 0.f, 0.f, 0.f};   // accent gap colour
     bool        m_suspended = false;
     bool        m_isGameCard = false;
     bool        m_notLaunchable = false;

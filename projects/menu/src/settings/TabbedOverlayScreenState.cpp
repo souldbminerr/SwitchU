@@ -231,7 +231,8 @@ nxui::Rect TabbedOverlayScreen::contentRect() const {
 }
 
 nxui::Rect TabbedOverlayScreen::contentRect(const nxui::Rect& panel) const {
-    float left = panel.x + kInnerPad + kTabWidth + kInnerPad * 0.5f;
+    // Content sits just to the right of the rail/content divider (410 px).
+    float left = panel.x + kRailDividerX + 30.f;
     return { left, panel.y + kHeaderH,
              panel.right() - kInnerPad - left, panel.height - kHeaderH - kFooterH };
 }

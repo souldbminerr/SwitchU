@@ -65,6 +65,23 @@ SettingsScreen::Tab settings::tabs::ThemesTab::build(SettingsScreen& screen) {
         t.items.push_back(std::move(it));
     }
 
+    // Pulsing drop-shadow glow on the selected app.
+    {
+        SettingItem it;
+        it.label = i18n.tr("settings.themes.selection_glow", "Selection Glow");
+        it.description = i18n.tr("settings.themes.selection_glow_desc",
+                                 "Pulsing drop shadow around the selected app.");
+        it.type = ItemType::Toggle;
+        it.boolVal = screen.m_selectionGlow;
+        it.anim01 = it.boolVal ? 1.f : 0.f;
+        it.onChange = [&screen](SettingItem& self) {
+            screen.m_selectionGlow = self.boolVal;
+            if (screen.m_selectionGlowCb)
+                screen.m_selectionGlowCb(self.boolVal);
+        };
+        t.items.push_back(std::move(it));
+    }
+
     // ---- Custom theme colour picker ----
     {
         SettingItem it;
@@ -115,11 +132,11 @@ SettingsScreen::Tab settings::tabs::ThemesTab::build(SettingsScreen& screen) {
         }
     };
 
-    addColor(i18n.tr("settings.themes.color.background", "Background").c_str(), &SettingsScreen::m_customBg);
-    addColor(i18n.tr("settings.themes.color.text", "Text").c_str(),            &SettingsScreen::m_customText);
-    addColor(i18n.tr("settings.themes.color.highlight", "Highlight").c_str(),  &SettingsScreen::m_customHighlight);
-    addColor(i18n.tr("settings.themes.color.enabled", "Enabled").c_str(),      &SettingsScreen::m_customEnabled);
-    addColor(i18n.tr("settings.themes.color.disabled", "Disabled").c_str(),    &SettingsScreen::m_customDisabled);
+    addColor(i18n.tr("settings.themes.color.primary", "Primary").c_str(),     &SettingsScreen::m_customPrimary);
+    addColor(i18n.tr("settings.themes.color.text", "Text").c_str(),           &SettingsScreen::m_customText);
+    addColor(i18n.tr("settings.themes.color.highlight", "Highlight").c_str(), &SettingsScreen::m_customHighlight);
+    addColor(i18n.tr("settings.themes.color.accent", "Accent").c_str(),       &SettingsScreen::m_customAccent);
+    addColor(i18n.tr("settings.themes.color.secondary", "Secondary").c_str(), &SettingsScreen::m_customSecondary);
 
     return t;
 }

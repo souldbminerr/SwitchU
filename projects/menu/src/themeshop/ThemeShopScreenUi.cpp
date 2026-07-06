@@ -452,7 +452,7 @@ void drawPreviewPlaceholder(nxui::Renderer& ren,
     ren.drawRoundedRectOutline(rect, theme->panelBorder.withAlpha(0.18f * opacity), 14.f, 1.f);
 
     nxui::Rect inner = {rect.x + 4.f, rect.y + 4.f, rect.width - 8.f, rect.height - 8.f};
-    ren.drawRoundedRect(inner, theme->background.withAlpha(0.22f * opacity), 12.f);
+    ren.drawRoundedRect(inner, theme->primary.withAlpha(0.22f * opacity), 12.f);
 
     nxui::Vec2 center = {inner.x + inner.width * 0.5f, inner.y + inner.height * 0.5f};
     if (loading) {

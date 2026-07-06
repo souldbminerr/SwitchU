@@ -709,6 +709,8 @@ std::shared_ptr<GlossyIcon> SwitchMenuApp::makeIcon(const AppEntry& entry) {
     auto icon = std::make_shared<GlossyIcon>();
     icon->setShape(GlossyIcon::shapeFromString(m_config.appIconShape));
     icon->setRoundedRadius(m_theme.iconCornerRadius);
+    icon->setSelectionColor(m_theme.accent);
+    icon->setGlowEnabled(m_config.appSelectionGlow);
     if (entry.titleId == 0) {
         icon->setTag("glossy_icon");
         icon->setTitle("");
@@ -1818,9 +1820,9 @@ void SwitchMenuApp::renderActionHintBar(nxui::Renderer& ren) {
     constexpr float kIconGap    = 6.f;     // icon -> label
     constexpr float kItemGap    = 26.f;    // between hint items
 
-    // Full-width separator line spanning the whole screen.
-    ren.drawRect({0.f, kSepY, 1280.f, 1.f},
-                 m_theme.textSecondary.withAlpha(0.28f));
+    // Separator line with 30 px padding on each side, in #757575.
+    ren.drawRect({30.f, kSepY, 1280.f - 60.f, 1.f},
+                 nxui::Color(0.459f, 0.459f, 0.459f, 1.f));
 
     std::vector<ActionHint> hints = buildActionHints();
     if (hints.empty())

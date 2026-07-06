@@ -330,11 +330,11 @@ protected:
     // "Enabled"/"Disabled" colours come from the theme (customizable).
     nxui::Color onColor() const {
         const nxui::Theme* th = theme();
-        return th ? th->enabledColor : nxui::Color(0.027f, 0.992f, 0.800f, 1.f);
+        return th ? th->accent : nxui::Color(0.027f, 0.992f, 0.800f, 1.f);
     }
     nxui::Color offColor() const {
         const nxui::Theme* th = theme();
-        return th ? th->disabledColor : nxui::Color(0.220f, 0.224f, 0.231f, 1.f);
+        return th ? th->secondary : nxui::Color(0.220f, 0.224f, 0.231f, 1.f);
     }
 
     float preferredRightWidth(float rowWidth) const override {
@@ -542,7 +542,7 @@ protected:
 
         if (rowTheme) {
             m_track->setBaseColor(nxui::Color(0.3f, 0.3f, 0.35f, 0.5f * opacity()));
-            m_fill->setBaseColor(rowTheme->cursorNormal.withAlpha(0.9f * opacity()));
+            m_fill->setBaseColor(rowTheme->accent.withAlpha(0.9f * opacity()));
             m_pct->setTextColor(rowTheme->textPrimary);
         }
 
@@ -601,7 +601,7 @@ protected:
         m_value->setScale(0.9f);
         if (text != m_cachedValueText) { m_cachedValueText = text; m_value->setText(text); }
         // Editable values use the theme "Enabled" colour (same teal as "On").
-        m_value->setTextColor(th ? th->enabledColor : nxui::Color(0.027f, 0.992f, 0.800f, 1.f));
+        m_value->setTextColor(th ? th->accent : nxui::Color(0.027f, 0.992f, 0.800f, 1.f));
         m_value->setOpacity(opacity());
         m_value->setRect(rightRect);
     }

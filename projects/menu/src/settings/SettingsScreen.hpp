@@ -34,19 +34,20 @@ public:
     void onThemeChange(IntCb cb)             { m_themeChangeCb = std::move(cb); }
     void onBackgroundEffectChange(BoolCb cb) { m_bgEffectCb = std::move(cb); }
     void onIconShapeChange(IntCb cb)         { m_iconShapeCb = std::move(cb); }
+    void onSelectionGlowChange(BoolCb cb)    { m_selectionGlowCb = std::move(cb); }
     using CustomColorsCb = std::function<void(bool light, unsigned bg, unsigned text,
                                               unsigned highlight, unsigned enabled, unsigned disabled)>;
     void onCustomColorsChange(CustomColorsCb cb) { m_customColorsCb = std::move(cb); }
     void setCustomThemeState(bool active, bool light, unsigned bg, unsigned text,
                              unsigned highlight, unsigned enabled, unsigned disabled) {
         m_customActive = active; m_customLight = light;
-        m_customBg = bg; m_customText = text; m_customHighlight = highlight;
-        m_customEnabled = enabled; m_customDisabled = disabled;
+        m_customPrimary = bg; m_customText = text; m_customHighlight = highlight;
+        m_customAccent = enabled; m_customSecondary = disabled;
     }
     void fireCustomColors() {
         if (m_customColorsCb)
-            m_customColorsCb(m_customLight, m_customBg, m_customText,
-                             m_customHighlight, m_customEnabled, m_customDisabled);
+            m_customColorsCb(m_customLight, m_customPrimary, m_customText,
+                             m_customHighlight, m_customAccent, m_customSecondary);
     }
     void onMusicEnabledChange(BoolCb cb)     { m_musicEnabledCb = std::move(cb); }
     void onNetConnect(VoidCb cb)        { m_netConnectCb = std::move(cb); }
@@ -78,6 +79,7 @@ public:
         m_iconShapeNames = std::move(names);
         m_iconShapeIndex = index;
     }
+    void setSelectionGlowState(bool enabled) { m_selectionGlow = enabled; }
     void setAccessibilityEnabledState(bool enabled) {
         m_accessibilityEnabled = enabled;
         setAccessibilityVoiceEnabled(enabled);
@@ -115,6 +117,7 @@ private:
     IntCb  m_themeChangeCb;
     BoolCb m_bgEffectCb;
     IntCb  m_iconShapeCb;
+    BoolCb m_selectionGlowCb;
     BoolCb m_musicEnabledCb;
     CustomColorsCb m_customColorsCb;
     BoolCb m_accessibilityEnabledCb;
@@ -138,11 +141,12 @@ private:
     bool m_bgEffectEnabled = false;
     std::vector<std::string> m_iconShapeNames;
     int  m_iconShapeIndex = 1;   // default: Square
+    bool m_selectionGlow = false;
     bool m_musicEnabled = false;
     bool m_customActive = false;
     bool m_customLight = false;
-    unsigned m_customBg = 0x2D2D2D, m_customText = 0xFFFFFF, m_customHighlight = 0x00C3E3;
-    unsigned m_customEnabled = 0x07FDCC, m_customDisabled = 0x38393B;
+    unsigned m_customPrimary = 0x2D2D2D, m_customText = 0xFFFFFF, m_customHighlight = 0x00C3E3;
+    unsigned m_customAccent = 0x07FDCC, m_customSecondary = 0x38393B;
     bool m_accessibilityEnabled = true;
     bool m_accessibilitySpeakHints = true;
     bool m_accessibilitySpeakContextEveryFocus = false;

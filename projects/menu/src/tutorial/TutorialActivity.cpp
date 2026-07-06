@@ -201,7 +201,7 @@ void TutorialActivity::buildUi() {
     m_background = std::make_shared<WaraWaraBackground>();
     m_background->setRect({0, 0, 1280.f, 720.f});
     m_background->setAccentColor(m_theme.backgroundAccent);
-    m_background->setSecondaryColor(m_theme.background);
+    m_background->setSecondaryColor(m_theme.primary);
     m_background->setShapeColor(m_theme.shapeColor);
     WaraWaraBackground::Config bgConfig;
     bgConfig.layout = WaraWaraBackground::Layout::Floating;
@@ -675,6 +675,6 @@ void TutorialActivity::onRender(nxui::Renderer& ren) {
 
     if (m_transitionAlpha > 0.001f) {
         float eased = nxui::Easing::outCubic(std::clamp(m_transitionAlpha, 0.f, 1.f));
-        ren.drawRect({0.f, 0.f, 1280.f, 720.f}, m_theme.background.withAlpha(eased));
+        ren.drawRect({0.f, 0.f, 1280.f, 720.f}, m_theme.primary.withAlpha(eased));
     }
 }

@@ -104,11 +104,22 @@ void GlossyIcon::onRender(nxui::Renderer& ren) {
     nxui::Rect r = drawRect;
     float rad = cornerRadius();
 
+    // 4 px accent gap surrounding the selected tile (the selection cursor wraps
+    // the tile + this gap).
+    if (m_focused && m_selectionColor.a > 0.f && s > 0.5f) {
+        ren.drawRoundedRectOutline(r.expanded(2.f),
+                                   m_selectionColor.withAlpha(m_selectionColor.a * a),
+                                   rad + 2.f, 4.f);
+    }
+
+    // Optional pulsing drop-shadow glow (config-gated; off by default like qlaunch).
     float focusGlow = m_focusGlow.value();
-    if (focusGlow > 0.01f && s > 0.5f) {
+    if (m_glowEnabled && focusGlow > 0.01f && s > 0.5f) {
         float breathe = 0.5f + 0.5f * std::sin(m_suspendPulse * 1.8f + 0.4f);
-        nxui::Color focusColor = nxui::Color(0.65f, 0.90f, 1.f, (0.08f + 0.04f * breathe) * focusGlow * a);
-        ren.drawRoundedRect(r.expanded(7.f * focusGlow), focusColor, rad + 7.f);
+        nxui::Color glowBase = (m_selectionColor.a > 0.f)
+            ? m_selectionColor : nxui::Color(0.65f, 0.90f, 1.f, 1.f);
+        nxui::Color focusColor = glowBase.withAlpha((0.10f + 0.06f * breathe) * focusGlow * a);
+        ren.drawRoundedRect(r.expanded(10.f * focusGlow), focusColor, rad + 10.f);
     }
 
     if (m_isGameCard && !m_notLaunchable && s > 0.5f) {

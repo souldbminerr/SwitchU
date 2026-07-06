@@ -50,12 +50,13 @@ bool AppConfig::load() {
     readJsonOpt(j, "themePreset", themePreset);
     readJsonOpt(j, "backgroundEffectEnabled", backgroundEffectEnabled);
     readJsonOpt(j, "appIconShape", appIconShape);
+    readJsonOpt(j, "appSelectionGlow", appSelectionGlow);
     readJsonOpt(j, "customThemeLight", customThemeLight);
-    readJsonOpt(j, "customBg", customBg);
+    readJsonOpt(j, "customPrimary", customPrimary);
     readJsonOpt(j, "customText", customText);
     readJsonOpt(j, "customHighlight", customHighlight);
-    readJsonOpt(j, "customEnabled", customEnabled);
-    readJsonOpt(j, "customDisabled", customDisabled);
+    readJsonOpt(j, "customAccent", customAccent);
+    readJsonOpt(j, "customSecondary", customSecondary);
 
     if (musicVolume < 0.f) musicVolume = 0.f;
     if (musicVolume > 1.f) musicVolume = 1.f;
@@ -100,12 +101,13 @@ bool AppConfig::save() const {
     j["themePreset"] = themePreset;
     j["backgroundEffectEnabled"] = backgroundEffectEnabled;
     j["appIconShape"] = appIconShape;
+    j["appSelectionGlow"] = appSelectionGlow;
     j["customThemeLight"] = customThemeLight;
-    j["customBg"] = customBg;
+    j["customPrimary"] = customPrimary;
     j["customText"] = customText;
     j["customHighlight"] = customHighlight;
-    j["customEnabled"] = customEnabled;
-    j["customDisabled"] = customDisabled;
+    j["customAccent"] = customAccent;
+    j["customSecondary"] = customSecondary;
 
     std::ofstream f(kConfigPath, std::ios::trunc);
     if (!f.is_open()) return false;

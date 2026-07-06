@@ -23,14 +23,15 @@ struct AppConfig {
     std::string themePreset = "builtin:Basic Dark";
     bool  backgroundEffectEnabled = false;
     std::string appIconShape = "square";   // "square" (qlaunch) | "rounded" (SwitchU) | "circular"
+    bool  appSelectionGlow = false;        // pulsing drop-shadow glow on selected apps
 
     // "Custom" theme colours (0xRRGGBB), edited via the Themes color picker.
     bool     customThemeLight = false;          // light vs dark base (text/panels)
-    uint32_t customBg        = 0x2D2D2D;
+    uint32_t customPrimary        = 0x2D2D2D;
     uint32_t customText      = 0xFFFFFF;
     uint32_t customHighlight = 0x00C3E3;
-    uint32_t customEnabled   = 0x07FDCC;
-    uint32_t customDisabled  = 0x38393B;
+    uint32_t customAccent   = 0x07FDCC;
+    uint32_t customSecondary  = 0x38393B;
 
     bool load();
 

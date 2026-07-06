@@ -162,10 +162,8 @@ void SelectionCursor::onRender(nxui::Renderer& ren) {
     nxui::Rect r = {x, y, w, h};
     float cr = m_cornerRadius.value();
 
-    // Transparent-centre outline (qlaunch): a crisp accent border with a faint
-    // outer ring for a subtle glow. Nothing fills the middle.
-    ren.drawRoundedRectOutline(r.expanded(1.5f), m_color.withAlpha(0.30f * a),
-                               cr + 1.5f, 1.5f);
+    // Single transparent-centre outline (qlaunch): one crisp accent border,
+    // nothing fills the middle.
     ren.drawRoundedRectOutline(r, m_color.withAlpha(a), cr, m_borderWidth);
 }
 

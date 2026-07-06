@@ -274,21 +274,22 @@ void SwitchMenuApp::createSettings() {
         };
         m_settings->setIconShapeState(shapeNames, iconShapeStrToIndex(m_config.appIconShape));
     }
+    m_settings->setSelectionGlowState(m_config.appSelectionGlow);
     m_settings->setCustomThemeState(isCustomThemeActive(), m_config.customThemeLight,
-                                    m_config.customBg, m_config.customText,
-                                    m_config.customHighlight, m_config.customEnabled,
-                                    m_config.customDisabled);
+                                    m_config.customPrimary, m_config.customText,
+                                    m_config.customHighlight, m_config.customAccent,
+                                    m_config.customSecondary);
     m_settings->onCustomColorsChange([this](bool light, unsigned bg, unsigned text,
                                             unsigned hl, unsigned en, unsigned dis) {
         m_config.customThemeLight = light;
-        m_config.customBg = bg;   m_config.customText = text;
-        m_config.customHighlight = hl; m_config.customEnabled = en;
-        m_config.customDisabled = dis;
+        m_config.customPrimary = bg;   m_config.customText = text;
+        m_config.customHighlight = hl; m_config.customAccent = en;
+        m_config.customSecondary = dis;
         if (isCustomThemeActive()) {
             applyCustomThemeColors();
             applyTheme();
             if (m_background) {
-                m_background->setAccentColor(m_theme.background);
+                m_background->setAccentColor(m_theme.primary);
                 m_background->setSecondaryColor(m_theme.backgroundAccent);
                 m_background->setFlat(!m_config.backgroundEffectEnabled);
             }
@@ -321,6 +322,13 @@ void SwitchMenuApp::createSettings() {
         if (m_grid)
             for (auto& icon : m_grid->allIcons())
                 if (icon) icon->setShape(shape);
+        m_config.save();
+    });
+    m_settings->onSelectionGlowChange([this](bool on) {
+        m_config.appSelectionGlow = on;
+        if (m_grid)
+            for (auto& icon : m_grid->allIcons())
+                if (icon) icon->setGlowEnabled(on);
         m_config.save();
     });
 
@@ -1140,7 +1148,7 @@ void SwitchMenuApp::applyThemeResources(const ThemePreset& preset) {
 void SwitchMenuApp::applyTheme() {
     DebugLog::log("[theme-apply] widget recolor start");
     m_background->setAccentColor(m_theme.backgroundAccent);
-    m_background->setSecondaryColor(m_theme.background);
+    m_background->setSecondaryColor(m_theme.primary);
     m_background->setShapeColor(m_theme.shapeColor);
     DebugLog::log("[theme-apply] widget recolor background done");
 
@@ -1149,10 +1157,12 @@ void SwitchMenuApp::applyTheme() {
         icon->setBorderColor(m_theme.panelBorder);
         icon->setHighlightColor(m_theme.panelHighlight);
         icon->setCornerRadius(m_theme.iconCornerRadius);
+        icon->setSelectionColor(m_theme.accent);
+        icon->setGlowEnabled(m_config.appSelectionGlow);
     }
     DebugLog::log("[theme-apply] widget recolor grid icons done");
 
-    m_cursor->setColor(m_theme.cursorNormal);
+    m_cursor->setColor(m_theme.accent);   // green ON/Accent selection ring
     m_cursor->setCornerRadius(m_theme.cursorCornerRadius);
     m_cursor->setBorderWidth(4.f);   // 4 px selection outline
     if (m_pointerCursor) {
@@ -1232,15 +1242,15 @@ void SwitchMenuApp::applyCustomThemeColors() {
     // then override with the user's custom colours.
     m_theme = m_config.customThemeLight ? nxui::Theme::light() : nxui::Theme::dark();
     m_theme.mode = m_config.customThemeLight ? nxui::ThemeMode::Light : nxui::ThemeMode::Dark;
-    const nxui::Color bg = rgb(m_config.customBg);
-    m_theme.background = bg;
+    const nxui::Color bg = rgb(m_config.customPrimary);
+    m_theme.primary = bg;
     m_theme.backgroundAccent = bg;
     m_theme.shapeColor = bg.withAlpha(0.10f);
     m_theme.textPrimary = rgb(m_config.customText);
     m_theme.cursorNormal = rgb(m_config.customHighlight);
     m_theme.cursorGlow = m_theme.cursorNormal.withAlpha(0.12f);
-    m_theme.enabledColor = rgb(m_config.customEnabled);
-    m_theme.disabledColor = rgb(m_config.customDisabled);
+    m_theme.accent = rgb(m_config.customAccent);
+    m_theme.secondary = rgb(m_config.customSecondary);
     m_activeMode = m_theme.mode;
 }
 

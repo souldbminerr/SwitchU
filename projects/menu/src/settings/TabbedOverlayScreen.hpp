@@ -203,12 +203,14 @@ protected:
     static constexpr float kTabWidth      = 300.f;
     static constexpr float kRowHeight     = 68.f;
     static constexpr float kSectionHeight = 48.f;
-    static constexpr float kTabRowHeight  = 66.f;
+    static constexpr float kTabRowHeight  = 62.f;   // 52 px tab + 10 px gap
     static constexpr float kPanelRadius   = 26.f;
     static constexpr float kInnerPad      = 60.f;
     // qlaunch (System Settings) chrome: full-screen flat with a header + footer.
     static constexpr float kHeaderH       = 92.f;
     static constexpr float kFooterH       = 64.f;
+    // Vertical rail/content divider, measured from the panel's left edge.
+    static constexpr float kRailDividerX  = 410.f;
 
     nxui::Rect panelRect() const;
     nxui::Rect panelRect(float scale) const;

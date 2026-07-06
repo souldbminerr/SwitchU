@@ -67,7 +67,7 @@ public:
         m_selected = selected;
         m_focused = focused;
         m_accentWidth = accentWidth;
-        m_accentColor = theme ? theme->cursorNormal : nxui::Color::white();
+        m_accentColor = theme ? theme->accent : nxui::Color::white();
 
         if (font != m_cachedFont) {
             m_cachedFont = font;
@@ -92,7 +92,7 @@ public:
         if (theme) {
             // qlaunch category rail: flat (no card). Selected = accent text +
             // accent left bar; others = secondary text.
-            nxui::Color textColor = selected ? theme->cursorNormal : theme->textSecondary;
+            nxui::Color textColor = selected ? theme->accent : theme->textSecondary;
 
             setBaseColor(nxui::Color(0.f, 0.f, 0.f, 0.f));
             setBorderColor(nxui::Color(0.f, 0.f, 0.f, 0.f));
@@ -112,11 +112,10 @@ protected:
             return;
 
         nxui::Rect r = rect();
-        // Cyan vertical bar on the left of the selected category (qlaunch style).
-        float accentH = std::max(20.f, r.height * 0.62f);
-        float accentY = r.y + (r.height - accentH) * 0.5f;
-        nxui::Rect accent = {r.x, accentY, 4.f, accentH};
-        ren.drawRoundedRect(accent, m_accentColor.withAlpha(0.95f * opacity()), 2.f);
+        // Selected category indicator: a 4x52 accent bar sitting 9 px to the left
+        // of the label's first letter (the label starts at r.x + 22).
+        nxui::Rect accent = {r.x + 9.f, r.y, 4.f, r.height};
+        ren.drawRect(accent, m_accentColor.withAlpha(0.95f * opacity()));
     }
 
 private:
@@ -406,8 +405,10 @@ void TabbedOverlayScreen::onRender(nxui::Renderer& ren) {
     nxui::Rect p = panelRect(scale());
 
     if (m_theme)
-        m_focusCursor.setColor(m_theme->cursorNormal);
-    m_focusCursor.setOpacity(contentOpacity());
+        m_focusCursor.setColor(m_theme->cursorNormal);   // entry highlight keeps the normal color
+    // No selection outline on the category rail — the selected tab shows only its
+    // accent bar. The cursor is used for content items only.
+    m_focusCursor.setOpacity(m_focusArea == FocusArea::Tabs ? 0.f : contentOpacity());
 
     if (m_tabBar) m_tabBar->setRect(tabsRect(p));
     if (m_tabContent) m_tabContent->setRect(contentRect(p));
@@ -434,6 +435,18 @@ void TabbedOverlayScreen::onContentRender(nxui::Renderer& ren) {
     ren.pushClipRect(p);
     drawHeader(ren, p, textOp);
     drawTabs(ren, p, textOp);
+
+    // Vertical rail/content divider: a 1 px line 410 px from the left edge,
+    // spanning between the header and footer separators, in the Off/disabled
+    // colour used for toggle "Off" text.
+    if (m_theme && textOp > 0.01f) {
+        float dx = p.x + kRailDividerX;
+        float top = p.y + kHeaderH;
+        float bot = p.bottom() - kFooterH;
+        ren.drawRect({dx, top, 1.f, std::max(0.f, bot - top)},
+                     m_theme->secondary.withAlpha(textOp));
+    }
+
     drawContent(ren, p, textOp);
     drawFooter(ren, p, textOp);
     drawDropdown(ren, p, textOp);
@@ -557,7 +570,7 @@ void TabbedOverlayScreen::drawBackground(nxui::Renderer& ren, const nxui::Rect& 
     (void)panel;
     // Flat, full-screen System-Settings background.
     nxui::Rect screen = {0.f, 0.f, (float)ren.width(), (float)ren.height()};
-    ren.drawRect(screen, m_theme->background.withAlpha(opacity));
+    ren.drawRect(screen, m_theme->primary.withAlpha(opacity));
 }
 
 void TabbedOverlayScreen::drawTabs(nxui::Renderer& ren, const nxui::Rect& panel, float opacity) {
@@ -602,9 +615,8 @@ void TabbedOverlayScreen::drawTabs(nxui::Renderer& ren, const nxui::Rect& panel,
         tabY += rowPitch;
     }
 
-    if (m_focusArea == FocusArea::Tabs && m_tabIndex >= 0 && m_tabIndex < (int)tabChildren.size()) {
-        m_focusCursor.moveTo(tabChildren[m_tabIndex]->rect().expanded(1.f), 8.f, 0.08f);
-    }
+    // (No focus-cursor outline on the rail: the selected tab is shown by its
+    //  accent bar only.)
 
     // Clip the rail so nothing bleeds into the header/footer bands.
     ren.pushClipRect(tr);
@@ -713,7 +725,7 @@ void TabbedOverlayScreen::drawContent(nxui::Renderer& ren, const nxui::Rect& pan
         nxui::Rect rail = {trackX, trackY, 3.f, trackAreaH};
         nxui::Rect thumb = {trackX - 0.5f, thumbY, 4.f, trackH};
         ren.drawRoundedRect(rail, m_theme->panelBorder.withAlpha(0.16f * opacity), 1.5f);
-        ren.drawRoundedRect(thumb, m_theme->cursorNormal.withAlpha(0.46f * opacity), 2.f);
+        ren.drawRoundedRect(thumb, m_theme->accent.withAlpha(0.46f * opacity), 2.f);
     }
 }
 
@@ -848,7 +860,7 @@ void TabbedOverlayScreen::drawDropdown(nxui::Renderer& ren, const nxui::Rect& pa
         nxui::Rect rail = {pop.right() - 10.f, pop.y + 12.f, 3.f, railH};
         nxui::Rect thumb = {pop.right() - 10.5f, thumbY, 4.f, thumbH};
         ren.drawRoundedRect(rail, m_theme->panelBorder.withAlpha(0.22f * a), 1.5f);
-        ren.drawRoundedRect(thumb, m_theme->cursorNormal.withAlpha(0.56f * a), 2.f);
+        ren.drawRoundedRect(thumb, m_theme->accent.withAlpha(0.56f * a), 2.f);
     }
 }
 
