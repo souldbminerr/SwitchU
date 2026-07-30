@@ -50,8 +50,9 @@ void OverlayDialog::buildWidgetTree() {
     m_messageLabel.reset();
     m_buttonRow.reset();
 
+    // qlaunch dialog text is udsgr_24 for both the message and the buttons.
     nxui::Font* titleFont = m_font;
-    nxui::Font* bodyFont  = m_smallFont ? m_smallFont : m_font;
+    nxui::Font* bodyFont  = m_font ? m_font : m_smallFont;
 
     nxui::Color textPrimary   = m_theme ? m_theme->textPrimary   : nxui::Color::white();
     nxui::Color textSecondary = m_theme ? m_theme->textSecondary
@@ -639,8 +640,11 @@ void OverlayDialog::syncCursor() {
         nxui::Rect br = scaledRect(m_btnWidgets[m_selected]->rect(), m_panelScale.value());
         m_cursor.moveTo(br.expanded(3.f), kButtonRadius, 0.16f);
     }
+    // qlaunch selection cyan (same as the home app selection).
     if (m_theme)
-        m_cursor.setColor(m_theme->cursorNormal);
+        m_cursor.setColor(m_theme->mode == nxui::ThemeMode::Light
+                          ? nxui::Color(0.047f, 0.816f, 0.773f, 1.f)   // #0cd0c5
+                          : nxui::Color(0.039f, 0.725f, 0.902f, 1.f)); // #0AB9E6
     m_cursor.setOpacity(m_overlayAlpha.value());
 }
 
@@ -650,7 +654,9 @@ void OverlayDialog::syncUserCursor() {
         m_cursor.moveTo(r.expanded(4.f), r.width * 0.5f, 0.16f);
     }
     if (m_theme)
-        m_cursor.setColor(m_theme->cursorNormal);
+        m_cursor.setColor(m_theme->mode == nxui::ThemeMode::Light
+                          ? nxui::Color(0.047f, 0.816f, 0.773f, 1.f)   // #0cd0c5
+                          : nxui::Color(0.039f, 0.725f, 0.902f, 1.f)); // #0AB9E6
     m_cursor.setOpacity(m_overlayAlpha.value());
 }
 
@@ -859,24 +865,27 @@ void OverlayDialog::render(nxui::Renderer& ren) {
     if (alpha < 0.01f) return;
 
     nxui::Rect panel = scaledRect(rect(), scale());
-    const auto& tuning = settings::debug::settingsGlassTuning();
-    bool needsBackdropRefresh = !m_backdropCacheValid
-        || std::abs(m_cachedPreBlurRadius - tuning.preBlurRadius) > 0.001f
-        || m_cachedBlurIterations != tuning.blurIterations;
 
-    if (needsBackdropRefresh) {
-        ren.captureToOffscreen(false);
-        if (tuning.blurIterations > 0 && tuning.preBlurRadius > 0.001f) {
-            ren.applyBlur(tuning.preBlurRadius, tuning.blurIterations);
-        }
-        ren.copyOffscreen(0, kBackdropCacheTarget);
-        m_backdropCacheValid = true;
-        m_cachedPreBlurRadius = tuning.preBlurRadius;
-        m_cachedBlurIterations = tuning.blurIterations;
+    // qlaunch dialog: flat panel over a dimmed backdrop (DBaseMask), not glass.
+    const bool light = m_theme && m_theme->mode == nxui::ThemeMode::Light;
+    const nxui::Color panelCol = light ? nxui::Color(0.965f, 0.965f, 0.973f, alpha)
+                                       : nxui::Color(0.176f, 0.176f, 0.188f, alpha);
+    const nxui::Color lineCol  = (light ? nxui::Color(0.459f, 0.459f, 0.459f, 1.f)
+                                        : nxui::Color(1.f, 1.f, 1.f, 1.f)).withAlpha(0.45f * alpha);
+
+    ren.drawRect({0.f, 0.f, (float)ren.width(), (float)ren.height()},
+                 nxui::Color(0.f, 0.f, 0.f, 0.55f * alpha));
+    ren.drawRoundedRect(panel, panelCol, kPanelRadius);
+
+    // 2 px dividers under the title and above the button row (qlaunch LinePlateDlg).
+    if (m_mode == DialogMode::Buttons) {
+        const float lx = panel.x + kPanelPadX;
+        const float lw = panel.width - kPanelPadX * 2.f;
+        if (m_titleLabel)
+            ren.drawRect({lx, m_titleLabel->rect().bottom() + kTitleMsgGap * 0.5f - 1.f, lw, 2.f}, lineCol);
+        if (m_buttonRow)
+            ren.drawRect({lx, m_buttonRow->rect().y - kMsgBtnGap * 0.5f - 1.f, lw, 2.f}, lineCol);
     }
-
-    renderGlassPanel(ren, m_theme, panel, kPanelRadius, m_base, m_border, m_highlight,
-                     alpha, kBackdropCacheTarget);
 
     if (m_mode == DialogMode::UserSelect) {
         renderUserContent(ren, alpha);

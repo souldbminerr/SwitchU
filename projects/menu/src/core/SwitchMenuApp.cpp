@@ -42,9 +42,11 @@ static constexpr float kGridRectH = 300.f;
 
 // qlaunch tile: large square game icons (~256 px) with a small gap, matching the
 // home-screen "few games" layout. Selection ring sits ~2 px outside the tile.
+// qlaunch resident row: 256 px icon art on a 270 px pitch -> 14 px gap.
+// Focus/cursor box is 264 (art + 4 px each side). Row vertical centre = py 322.
 static constexpr float kGridBaseCellW = 256.f;
 static constexpr float kGridBaseCellH = 256.f;
-static constexpr float kGridBasePadX  = 24.f;
+static constexpr float kGridBasePadX  = 14.f;
 static constexpr float kGridBasePadY  = 24.f;
 
 bool isPackageSoundPreset(const std::string& preset) {
@@ -229,10 +231,6 @@ SwitchMenuApp::~SwitchMenuApp() {
     rootBox().clearChildren();
 }
 
-void SwitchMenuApp::setTutorialStartupFade(bool enabled) {
-    m_tutorialStartupFade = enabled;
-}
-
 #ifdef QLAUNCHEXT_MENU
 void SwitchMenuApp::setStartupStatus(uint64_t suspendedTitleId, bool appRunning) {
     m_launcher.setStartupStatus(suspendedTitleId, appRunning);
@@ -342,8 +340,15 @@ void SwitchMenuApp::loadResources() {
     if (m_gameCardTex.loadFromFile(app().gpu(), app().renderer(), gameCardPath))
         m_loadedGameCardPath = gameCardPath;
 
+    // "No game card inserted" indicator (tinted to the title text colour).
+    m_gameCardNotInsertTex.loadFromFile(app().gpu(), app().renderer(),
+                                        std::string(SD_ASSETS) + "/icons/GameCardNotInsert.png");
+
     m_settingsGearTex.loadFromFile(app().gpu(), app().renderer(),
                                    std::string(SD_ASSETS) + "/icons/settings.png");
+
+    // Real qlaunch HUD glyph/icon textures (OceanFont digits, wifi, battery).
+    m_hudAssets.load(app().gpu(), app().renderer(), SD_ASSETS);
 
     m_appLoader.load(m_model, m_iconStreamer);
 }
@@ -932,18 +937,25 @@ void SwitchMenuApp::buildGrid() {
     // Switch-style flat header: clock and battery sit together at the top-right
     // with no glass pill background.
     m_clock = std::make_shared<DateTimeWidget>();
-    m_clock->setSize(150, 62);
-    m_clock->setMarginTop(14.f);
+    m_clock->setSize(120, 46);
+    m_clock->setMarginTop(40.f);
     m_clock->setFont(&m_fontNormal);
     m_clock->setSmallFont(&m_fontSmall);
     m_clock->setUse12HourClock(m_config.clockUse12Hour);
+    m_clock->setAssets(&m_hudAssets);
     m_clock->setCornerRadius(m_theme.cellCornerRadius);
     m_clock->setForceLiquidGlass(false);
     m_clock->setBlurEnabled(false);
 
+    m_wifi = std::make_shared<WifiWidget>();
+    m_wifi->setSize(36, 46);
+    m_wifi->setMarginTop(40.f);
+    m_wifi->setAssets(&m_hudAssets);
+
     m_battery = std::make_shared<BatteryWidget>();
-    m_battery->setMarginTop(14.f);
-    m_battery->setSize(150, 62);
+    m_battery->setMarginTop(40.f);
+    m_battery->setSize(120, 46);
+    m_battery->setAssets(&m_hudAssets);
     m_battery->setFont(&m_fontSmall);
     m_battery->setCornerRadius(m_theme.cellCornerRadius);
     m_battery->setForceLiquidGlass(false);
@@ -1030,8 +1042,6 @@ void SwitchMenuApp::buildGrid() {
     } else {
         m_grid->startAppearAnimation();
     }
-    if (m_tutorialStartupFade)
-        m_tutorialStartupFadeTimer = kTutorialStartupFadeDur;
 
     SidebarManager::Actions sidebarActions;
 #ifdef QLAUNCHEXT_MENU
@@ -1145,9 +1155,14 @@ void SwitchMenuApp::buildGrid() {
     rightHud->setTag("rightHud");
     rightHud->setWireframeEnabled(false);
     rightHud->setShrink(0.f);
-    rightHud->setGap(8.f);
-    rightHud->setSize(316.f, 62.f);
+    rightHud->setGap(0.f);   // qlaunch gaps are asymmetric -> per-child margins
+    rightHud->setMarginRight(30.f);
+    rightHud->setSize(316.f, 90.f);
+    // qlaunch Hud.bflyt order (L->R): Time . 20px . WiFi . 16px . Battery.
+    m_clock->setMarginRight(20.f);
+    m_wifi->setMarginRight(16.f);
     rightHud->addChild(m_clock);
+    rightHud->addChild(m_wifi);
     rightHud->addChild(m_battery);
     m_topHud->addChild(rightHud);
     m_topHud->layout();
@@ -1474,8 +1489,6 @@ void SwitchMenuApp::onUpdate(float dt) {
 
     if (m_returnFadeTimer > 0.f)
         m_returnFadeTimer = std::max(0.f, m_returnFadeTimer - dt);
-    if (m_tutorialStartupFadeTimer > 0.f)
-        m_tutorialStartupFadeTimer = std::max(0.f, m_tutorialStartupFadeTimer - dt);
 
     updateSettingsGearAnim(dt);
 
@@ -1819,14 +1832,36 @@ void SwitchMenuApp::renderActionHintBar(nxui::Renderer& ren) {
     constexpr float kSideMargin = 30.f;
     constexpr float kBaselineY  = 686.f;   // vertical centre of the hint row
     constexpr float kSepY       = 645.f;   // separator line: 75 px above bottom
-    constexpr float kIconScale  = 0.62f;
-    constexpr float kTextScale  = 0.52f;
+    constexpr float kTextScale  = 0.58f;
     constexpr float kIconGap    = 6.f;     // icon -> label
-    constexpr float kItemGap    = 26.f;    // between hint items
+    constexpr float kItemGap    = 28.f;    // between hint items
 
-    // Separator line with 30 px padding on each side, in #757575.
-    ren.drawRect({30.f, kSepY, 1280.f - 60.f, 1.f},
-                 nxui::Color(0.459f, 0.459f, 0.459f, 1.f));
+    // qlaunch button-icon pixel sizes: ABXY/L/R = 32 px, +/- = 24 px. The icon
+    // font glyphs are 24 px wide at the 24 pt load size, so scale = target / 24.
+    const std::string kPlusGlyph  = utf8Codepoint(0xE0F1);
+    const std::string kMinusGlyph = utf8Codepoint(0xE0F2);
+    auto iconScaleFor = [&](const std::string& ic) {
+        return (ic == kPlusGlyph || ic == kMinusGlyph) ? (24.f / 24.f)
+                                                       : (32.f / 24.f);
+    };
+
+    // Separator line, 30 px padding each side. #ffffff on dark/black, #757575 light.
+    const nxui::Color lineColor = (m_theme.mode == nxui::ThemeMode::Light)
+        ? nxui::Color(0.459f, 0.459f, 0.459f, 1.f)   // #757575
+        : nxui::Color(1.f, 1.f, 1.f, 1.f);           // #ffffff
+    ren.drawRect({30.f, kSepY, 1280.f - 60.f, 2.f}, lineColor);   // qlaunch line = 2 px
+
+    // Bottom-left: current play-mode indicator, drawn from the icon font.
+    //  handheld -> console glyph (0xE121); docked -> Pro Controller (0xE12C).
+    {
+        uint32_t cp = (appletGetOperationMode() == AppletOperationMode_Console)
+                          ? 0xE12C : 0xE121;
+        std::string g = utf8Codepoint(cp);
+        const float gs = 48.f / 24.f;   // qlaunch controller indicator ~48 px
+        nxui::Vec2 gsz = m_fontIcons.measure(g);
+        ren.drawText(g, {kSideMargin + 22.f, kBaselineY - gsz.y * gs * 0.5f},
+                     &m_fontIcons, m_theme.textPrimary.withAlpha(0.92f), gs);
+    }
 
     std::vector<ActionHint> hints = buildActionHints();
     if (hints.empty())
@@ -1837,7 +1872,7 @@ void SwitchMenuApp::renderActionHintBar(nxui::Renderer& ren) {
     for (size_t i = 0; i < hints.size(); ++i) {
         nxui::Vec2 is = m_fontIcons.measure(hints[i].icon);
         nxui::Vec2 ls = m_fontSmall.measure(hints[i].label);
-        totalW += is.x * kIconScale + kIconGap + ls.x * kTextScale;
+        totalW += is.x * iconScaleFor(hints[i].icon) + kIconGap + ls.x * kTextScale;
         if (i + 1 < hints.size())
             totalW += kItemGap;
     }
@@ -1845,13 +1880,14 @@ void SwitchMenuApp::renderActionHintBar(nxui::Renderer& ren) {
     float x = 1280.f - kSideMargin - totalW;
     for (const auto& hint : hints) {
         const float a = hint.enabled ? 0.92f : 0.30f;
+        const float iconScale = iconScaleFor(hint.icon);
         nxui::Vec2 is = m_fontIcons.measure(hint.icon);
         nxui::Vec2 ls = m_fontSmall.measure(hint.label);
-        float iconY = kBaselineY - (is.y * kIconScale) * 0.5f;
+        float iconY = kBaselineY - (is.y * iconScale) * 0.5f;
         float labelY = kBaselineY - (ls.y * kTextScale) * 0.5f;
         ren.drawText(hint.icon, {x, iconY}, &m_fontIcons,
-                     m_theme.textPrimary.withAlpha(a), kIconScale);
-        x += is.x * kIconScale + kIconGap;
+                     m_theme.textPrimary.withAlpha(a), iconScale);
+        x += is.x * iconScale + kIconGap;
         ren.drawText(hint.label, {x, labelY}, &m_fontSmall,
                      m_theme.textPrimary.withAlpha(a), kTextScale);
         x += ls.x * kTextScale + kItemGap;
@@ -1862,11 +1898,6 @@ void SwitchMenuApp::onRender(nxui::Renderer& ren) {
     if (m_returnFadeTimer > 0.f) {
         float alpha = m_returnFadeTimer / kReturnFadeInDur;
         ren.drawRect({0, 0, 1280, 720}, nxui::Color(0, 0, 0, alpha));
-    }
-    if (m_tutorialStartupFadeTimer > 0.f) {
-        float t = std::clamp(m_tutorialStartupFadeTimer / kTutorialStartupFadeDur, 0.f, 1.f);
-        float alpha = nxui::Easing::outCubic(t);
-        ren.drawRect({0, 0, 1280, 720}, nxui::Color(1.f, 1.f, 1.f, alpha));
     }
 
     if (m_touchHitIndex >= 0 && !m_touchOnFocused && app().input().isTouching()) {

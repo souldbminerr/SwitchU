@@ -1,4 +1,5 @@
 #include "DateTimeWidget.hpp"
+#include "HudAssets.hpp"
 #include <nxui/core/Renderer.hpp>
 #include <ctime>
 #include <cstdio>
@@ -36,30 +37,50 @@ void DateTimeWidget::onContentUpdate(float dt) {
     m_dateStr = buf;
 }
 
+namespace {
+// Per-glyph metrics for the qlaunch clock, keyed by the character in m_timeStr
+// ("6:04 PM"). digits 14x24, colon 8x28, A/P/M 16x16, space advances 5 px.
+struct Glyph { const nxui::Texture* tex; float w, h, yoff; };
+
+// AM/PM letters sit ~5 px lower than the digit centre (baseline-aligned).
+constexpr float kAmpmDrop = 3.f;
+
+Glyph glyphFor(char c, const HudAssets& a) {
+    if (c >= '0' && c <= '9') return {&a.digit[c - '0'], 14.f, 24.f, 0.f};
+    switch (c) {
+        case ':': return {&a.colon, 8.f, 28.f, 0.f};
+        case 'A': return {&a.am, 16.f, 16.f, kAmpmDrop};
+        case 'P': return {&a.pm, 16.f, 16.f, kAmpmDrop};
+        case 'M': return {&a.mm, 16.f, 16.f, kAmpmDrop};
+        case ' ': return {nullptr, 5.f, 0.f, 0.f};
+        default:  return {nullptr, 0.f, 0.f, 0.f};
+    }
+}
+constexpr float kKern = 1.f;   // spacing between adjacent glyphs
+}
+
 void DateTimeWidget::onContentRender(nxui::Renderer& ren) {
-    if (!m_font) return;
+    if (!m_assets || !m_assets->loaded || m_timeStr.empty()) return;
 
     nxui::Rect cr = contentRect();
-    nxui::Font* sf = m_smallFont ? m_smallFont : m_font;
+    const nxui::Color tint = m_textColor.withAlpha(m_textColor.a * m_opacity);
 
-    nxui::Vec2 timeSz = m_font->measure(m_timeStr);
-    nxui::Vec2 dateSz = sf->measure(m_dateStr);
-    float contentH = timeSz.y + 2.f + dateSz.y * 0.7f;
-    float tx = cr.x + (cr.width - timeSz.x) * 0.5f;
-    float ty = cr.y + (cr.height - contentH) * 0.5f;
-    ren.drawText(m_timeStr, {tx, ty}, m_font, m_textColor.withAlpha(m_opacity), 1.f);
+    // Total advance width (right-align toward the wifi icon).
+    float totalW = 0.f;
+    for (char c : m_timeStr) totalW += glyphFor(c, *m_assets).w + kKern;
+    if (totalW > 0.f) totalW -= kKern;
 
-    float dx = cr.x + (cr.width - dateSz.x * 0.7f) * 0.5f;
-    float dy = ty + timeSz.y + 2.f;
-    ren.drawText(m_dateStr, {dx, dy}, sf, m_secondaryColor.withAlpha(m_opacity), 0.7f);
+    float x  = cr.right() - totalW;
+    float cy = cr.y + cr.height * 0.5f;
+    for (char c : m_timeStr) {
+        Glyph g = glyphFor(c, *m_assets);
+        if (g.tex && g.tex->valid() && g.h > 0.f)
+            ren.drawTexture(g.tex, {x, cy - g.h * 0.5f + g.yoff, g.w, g.h}, tint);
+        x += g.w + kKern;
+    }
 }
 
 nxui::Vec2 DateTimeWidget::computeContentSize() const {
-    if (!m_font) return {130.f, 46.f};
-    nxui::Vec2 timeSz = m_font->measure(m_use12HourClock ? "12:00 PM" : "00:00");
-    nxui::Font* sf = m_smallFont ? m_smallFont : m_font;
-    nxui::Vec2 dateSz = sf->measure("00/00/0000");
-    float w = std::max(timeSz.x, dateSz.x * 0.7f);
-    float h = timeSz.y + 2.f + dateSz.y * 0.7f;
-    return {w, h};
+    // "12:00 PM" worst case ~ 5 digits(14) + colon(8) + space(5) + 2 letters(16).
+    return {m_use12HourClock ? 118.f : 66.f, 28.f};
 }

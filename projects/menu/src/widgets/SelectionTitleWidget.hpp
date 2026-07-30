@@ -20,8 +20,12 @@ public:
 
     // Called every frame with the current selection. Position/anchor updates
     // immediately; changing the text/mode/game-card triggers the fade.
+    // gamecardTinted: true tints the glyph in the text colour (the "no card
+    // inserted" indicator); false draws it in its natural colours (an inserted
+    // game card, so it isn't recoloured blue).
     void showGame(const std::string& text, const nxui::Rect& iconRect,
-                  float outlineOffset, nxui::Texture* gamecard);
+                  float outlineOffset, nxui::Texture* gamecard,
+                  bool gamecardTinted = true);
     void showBubble(const std::string& text, const nxui::Rect& bubbleRect);
     void hide();
 
@@ -31,7 +35,7 @@ protected:
 
 private:
     void requestContent(Mode mode, const std::string& text, nxui::Texture* gamecard,
-                        const nxui::Rect& anchor, float outlineOffset);
+                        bool gamecardTinted, const nxui::Rect& anchor, float outlineOffset);
     float textScale() const { return 1.0f; }
 
     nxui::Font*  m_font = nullptr;
@@ -42,10 +46,12 @@ private:
     Mode         m_mode = Mode::None;
     std::string  m_text;
     nxui::Texture* m_gamecard = nullptr;
+    bool         m_gamecardTinted = true;
 
     Mode         m_pendingMode = Mode::None;
     std::string  m_pendingText;
     nxui::Texture* m_pendingGamecard = nullptr;
+    bool         m_pendingGamecardTinted = true;
     bool         m_hasPending = false;
 
     // Anchor (updates live so the title tracks a scrolling tile). While fading

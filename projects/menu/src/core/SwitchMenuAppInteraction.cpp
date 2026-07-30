@@ -851,8 +851,16 @@ void SwitchMenuApp::updateSelectionTitle() {
             return;
         }
         if (icon->titleId() == 0) { m_titlePill->hide(); return; }
-        nxui::Texture* gc = icon->isGameCard() ? icon->gameCardTexture() : nullptr;
-        m_titlePill->showGame(icon->title(), icon->focusRect(), 6.f, gc);
+        // Game-card indicator beside the title: the card icon (natural colours)
+        // when inserted, or the text-coloured "no card inserted" icon when out.
+        nxui::Texture* gc = nullptr;
+        bool gcTinted = true;
+        if (icon->isGameCard()) {
+            const bool inserted = !icon->isNotLaunchable();
+            gc = inserted ? &m_gameCardTex : &m_gameCardNotInsertTex;
+            gcTinted = !inserted;
+        }
+        m_titlePill->showGame(icon->title(), icon->focusRect(), 6.f, gc, gcTinted);
         return;
     }
 

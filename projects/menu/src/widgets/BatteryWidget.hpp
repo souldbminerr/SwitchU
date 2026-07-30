@@ -3,12 +3,14 @@
 #include <nxui/core/Font.hpp>
 #include <nxui/core/Types.hpp>
 
+struct HudAssets;
 
 class BatteryWidget : public nxui::GlassWidget {
 public:
     BatteryWidget() = default;
     void setFont(nxui::Font* f) { m_font = f; }
     void setTextColor(const nxui::Color& c) { m_textColor = c; }
+    void setAssets(const HudAssets* a) { m_assets = a; }
     void setBatteryStatus(uint32_t percentage, bool charging);
 
 protected:
@@ -18,6 +20,7 @@ protected:
 
 private:
     nxui::Font* m_font = nullptr;
+    const HudAssets* m_assets = nullptr;
     float m_level   = -1.f;
     bool  m_charging = false;
     float m_timer    = 0.f;

@@ -1,0 +1,24 @@
+{
+  "id": "builtin:Basic Dark",
+  "name": "Basic Dark",
+  "author": "SwitchU",
+  "version": "1.0.0",
+  "theme": {
+    "mode": "dark",
+    "colors": {
+      "accent":           [0.524, 1.00, 0.45],
+      "cursor":           [0.524, 1.00, 0.45],
+      "background":       [0.0,   0.0,  0.1765],
+      "backgroundAccent": [0.0,   0.0,  0.1765],
+      "shapes":           [0.0,   0.0,  0.1765]
+    },
+    "background": {
+      "opacity": 0.0,
+      "imageOpacity": 0.0,
+      "shapeCount": 1
+    }
+  },
+  "audio": {
+    "preset": "wiiu"
+  }
+}

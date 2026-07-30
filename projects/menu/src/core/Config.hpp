@@ -12,7 +12,6 @@ struct AppConfig {
     std::string soundPreset = "nx";
     bool  defaultProfileEnabled = false;
     std::string defaultProfileUid;
-    bool  tutorialCompleted = false;
     bool  clockUse12Hour = false;
     bool  accessibilityEnabled = true;
     bool  accessibilitySpeakHints = true;

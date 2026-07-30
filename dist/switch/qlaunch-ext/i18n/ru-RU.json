@@ -1,0 +1,518 @@
+{
+  "common": {
+    "auto": "Авто",
+    "na": "Н/Д",
+    "active": "Активно",
+    "disabled": "Выключено"
+  },
+  "sidebar": {
+    "album": "Альбом",
+    "mii_editor": "Редактор Mii",
+    "settings": "Настройки",
+    "controllers": "Контроллеры",
+    "sleep": "Сон",
+    "music": "Музыка",
+    "theme_shop": "Магазин тем"
+  },
+  "settings": {
+    "tabs": {
+      "system": "Система",
+      "audio": "Аудио",
+      "display": "Экран",
+      "internet": "Интернет",
+      "controllers": "Контроллеры",
+      "bluetooth": "Bluetooth",
+      "sleep": "Сон",
+      "music": "Музыка",
+      "theme": "Тема",
+      "storage": "Хранилище",
+      "about": "О программе",
+      "accessibility": "Доступность"
+    },
+    "system": {
+      "firmware": "Версия прошивки",
+      "custom_firmware": "Custom Firmware",
+      "not_detected": "Не обнаружено",
+      "emunand": "EmuNAND",
+      "inactive_sysnand": "Неактивно / SysNAND",
+      "console_nickname": "Имя консоли",
+      "serial_number": "Серийный номер",
+      "timezone": "Часовой пояс",
+      "usb30": "USB 3.0",
+      "usb30_desc": "Включить USB 3.0 для более быстрой передачи данных.",
+      "battery_lot": "Партия батареи",
+      "ui_language": "Язык интерфейса",
+      "console_language": "Язык консоли",
+      "region": "Регион",
+      "region_japan": "Япония",
+      "region_usa": "США",
+      "region_europe": "Европа",
+      "region_australia": "Австралия",
+      "region_hong_kong": "Гонконг",
+      "region_taiwan": "Тайвань",
+      "region_south_korea": "Южная Корея",
+      "auto_update": "Автообновление",
+      "error_reporting": "Отправка ошибок",
+      "default_profile": "Default Profile",
+      "default_profile_desc": "Launch games with this profile when possible.",
+      "default_profile_ask": "Ask each time",
+      "clock_12h": "12-часовой формат",
+      "clock_12h_desc": "Показывать время в 12-часовом формате."
+    },
+    "audio": {
+      "speaker_auto_mute": "Автоматическое отключение динамиков",
+      "speaker_auto_mute_desc": "Автоматически отключать динамики при подключении наушников.",
+      "headphone_warning": "Предупреждение о громкости наушников",
+      "acknowledged": "Принято",
+      "tv_audio_output": "Аудиовыход TV",
+      "tv_audio_output_desc": "Выберите формат аудио для вывода на TV через HDMI.",
+      "mono": "Моно",
+      "stereo": "Стерео",
+      "surround": "Surround",
+      "tv_resolution": "Разрешение TV",
+      "tv_resolution_desc": "Настройте разрешение HDMI. Auto использует рекомендуемое значение.",
+      "res_720p": "720p",
+      "res_1080p": "1080p",
+      "hdmi_rgb_range": "Диапазон RGB HDMI",
+      "hdmi_rgb_range_desc": "Полный для мониторов ПК, Ограниченный для большинства TV.",
+      "full": "Полный",
+      "limited": "Ограниченный"
+    },
+    "display": {
+      "brightness": "Яркость",
+      "auto_brightness": "Автояркость",
+      "auto_brightness_desc": "Автоматически регулирует яркость в зависимости от освещения.",
+      "burn_in": "Снижение выгорания экрана",
+      "burn_in_desc": "Снижает выгорание экрана при длительном использовании.",
+      "tv_screen_size": "Размер экрана TV",
+      "tv_screen_size_desc": "Настройте overscan, чтобы видеть всё изображение.",
+      "album_storage": "Хранилище альбома",
+      "album_storage_desc": "Где сохраняются скриншоты и видео.",
+      "album_sd": "SD-карта",
+      "album_nand": "NAND",
+      "ui_wireframe": "Каркас интерфейса",
+      "ui_wireframe_desc": "Показывает контуры всех Box для отладки макета."
+    },
+    "internet": {
+      "wifi_ssid": "WiFi-сеть",
+      "ip_address": "IP-адрес",
+      "not_connected": "Не подключено",
+      "wifi": "WiFi",
+      "wifi_desc": "Включить или выключить WiFi.",
+      "auto_app_download": "Автоматическая загрузка приложений",
+      "auto_app_download_desc": "Автоматически загружать обновления для установленных игр.",
+      "mac_address": "MAC-адрес",
+      "dns": "DNS",
+      "dns_auto": "Авто (DHCP)"
+    },
+    "controllers": {
+      "vibration": "Вибрация",
+      "usb_wired": "Проводное USB-соединение",
+      "usb_wired_desc": "Использовать проводной режим для снижения задержки на совместимых контроллерах.",
+      "nfc": "NFC (amiibo)"
+    },
+    "bluetooth": {
+      "bluetooth": "Bluetooth",
+      "afh": "Bluetooth AFH",
+      "general": "Общее",
+      "connected_device": "Подключенное устройство",
+      "no_device_connected": "Нет подключённых устройств",
+      "disconnect": "Отключить",
+      "paired_devices": "Сопряжённые устройства",
+      "no_paired_devices": "Нет сопряжённых устройств",
+      "discover_devices": "Поиск устройств",
+      "start_search": "Поиск устройств...",
+      "stop_search": "Остановить поиск",
+      "connect": "Подключить",
+      "unpair": "Разорвать связь",
+      "pair_connect": "Сопрячь и подключить",
+      "device_actions": "Действия с устройством",
+      "connected": "Connected",
+      "not_connected": "Not connected"
+    },
+    "sleep": {
+      "1min": "1 мин",
+      "3min": "3 мин",
+      "5min": "5 мин",
+      "10min": "10 мин",
+      "30min": "30 мин",
+      "1h": "1 час",
+      "2h": "2 часа",
+      "3h": "3 часа",
+      "6h": "6 часов",
+      "12h": "12 часов",
+      "never": "Никогда",
+      "handheld": "Автосон в портативном режиме",
+      "handheld_desc": "Время до автосна в портативном режиме.",
+      "docked": "Автосон в доке",
+      "docked_desc": "Время до автосна в доке.",
+      "media_sleep": "Сон при воспроизведении медиа",
+      "media_sleep_desc": "Разрешить автосон во время воспроизведения медиа.",
+      "wake_power": "Пробуждение при питании",
+      "wake_power_desc": "Пробуждать консоль при подключении или отключении адаптера питания."
+    },
+    "theme": {
+      "preset": "Пресет",
+      "menu_mode": "Режим меню",
+      "mode_dark": "Тёмный",
+      "mode_light": "Светлый",
+      "accent": "Акцент",
+      "background": "Фон",
+      "bg_accent": "Фоновый акцент",
+      "shapes": "Плавающие формы",
+      "delete_preset": "Удалить пресет",
+      "save_preset": "Сохранить как пресет",
+      "reset_defaults": "Сбросить настройки",
+      "builtin_readonly": "Встроенные пресеты нельзя удалить."
+    },
+    "music": {
+      "sound_preset": "Звуковой пресет",
+      "menu_music": "Музыка меню",
+      "music_volume": "Громкость музыки",
+      "sfx_volume": "Громкость эффектов",
+      "next_track": "Следующий трек",
+      "track_changed": "Трек изменён"
+    },
+    "storage": {
+      "internal": "Системная память",
+      "internal_desc": "Показывает используемую системную память и свободное место.",
+      "internal_unavailable": "Не удалось получить данные о внутреннем хранилище.",
+      "sd": "microSD-карта",
+      "sd_desc": "Показывает используемое хранилище microSD и свободное место.",
+      "sd_unavailable": "microSD-карта не найдена или доступ запрещён.",
+      "available": "Доступно",
+      "state_installed": "Установлено",
+      "state_corrupt": "Испорчено",
+      "state_unknown": "Неизвестно",
+      "installed_section": "Установленное ПО",
+      "empty_library": "Установленные игры не найдены",
+      "select_game": "Установленная игра",
+      "select_game_desc": "Выберите игру для просмотра сведений или удаления.",
+      "uninstall_game": "Удалить выбранную игру",
+      "uninstall_game_desc": "Безвозвратно удаляет выбранную игру из системы.",
+      "uninstall_confirm_title": "Удалить игру",
+      "uninstall_confirm_msg": "Удалить %s из системы?",
+      "uninstall_success_title": "Удаление завершено",
+      "uninstall_success": "Успешно удалено.",
+      "uninstall_failed_title": "Не удалось удалить",
+      "uninstall_failed": "Не удалось удалить выбранную игру.",
+      "location_internal": "Внутренняя",
+      "location_sd": "microSD",
+      "location_system": "Система",
+      "size_unknown": "Неизвестный размер",
+      "capacity": "Ёмкость",
+      "used": "Использовано",
+      "summary": "Сводка",
+      "details": "Подробности",
+      "delete": "Удалить"
+    },
+    "about": {
+      "version": "Версия",
+      "author": "Автор",
+      "license": "Лицензия",
+      "license_value": "GPL-2.0",
+      "acknowledgements": "Благодарности",
+      "acknowledgements_desc": "Спасибо xortroll за помощь с проектом uLaunch и за поддержку и советы во время разработки.",
+      "source_code": "Исходный код",
+      "source_code_value": "github.com/PoloNX/SwitchU"
+    },
+    "accessibility": {
+      "voice": "Озвучивание",
+      "voice_desc": "Читает выбранный элемент и доступные действия.",
+      "voice_language": "Язык голоса",
+      "voice_language_desc": "Следует языку системы или интерфейса.",
+      "speech_rate": "Скорость речи",
+      "speech_rate_desc": "Меняет скорость озвучивания.",
+      "words_per_minute": "сл/мин",
+      "speak_hints": "Читать подсказки",
+      "speak_hints_desc": "Читает доступные действия после выбранного элемента.",
+      "repeat_context": "Всегда повторять место",
+      "repeat_context_desc": "Повторяет текущую область при каждом смещении фокуса.",
+      "speak_position": "Читать позицию",
+      "speak_position_desc": "Читает строку, столбец и позицию, если доступно."
+    }
+  },
+  "userselect": {
+    "title": "Кто играет?"
+  },
+  "game": {
+    "move": "Переместить",
+    "move_prefix": "Переместить: ",
+    "close_title": "Закрыть игру",
+    "close_prefix": "Закрыть",
+    "close_suffix": "?\nНесохраненный прогресс будет потерян."
+  },
+  "power": {
+    "title": "Питание",
+    "choose_action": "Выберите действие питания.",
+    "sleep": "Сон",
+    "shutdown": "Выключить",
+    "reboot": "Перезагрузить"
+  },
+  "languages": {
+    "ja-JP": "Японский",
+    "en-US": "Английский (США)",
+    "fr-FR": "Французский",
+    "de-DE": "Немецкий",
+    "it-IT": "Итальянский",
+    "es-ES": "Испанский",
+    "zh-CN": "Китайский",
+    "ko-KR": "Корейский",
+    "nl-NL": "Нидерландский",
+    "pt-PT": "Португальский",
+    "ru-RU": "Русский",
+    "zh-TW": "Традиционный китайский",
+    "en-GB": "Английский (Великобритания)",
+    "fr-CA": "Французский (Канада)",
+    "es-419": "Испанский (Латинская Америка)",
+    "pt-BR": "Португальский (Бразилия)"
+  },
+  "error": {
+    "title": "Невозможно запустить",
+    "gamecard_not_inserted": "Карта игры не вставлена.",
+    "needs_verify": "Данные игры требуют проверки.",
+    "needs_update": "Доступно обязательное обновление.",
+    "no_contents": "Данные игры отсутствуют.",
+    "cannot_launch": "Эту игру невозможно запустить."
+  },
+  "button": {
+    "ok": "OK",
+    "cancel": "Отмена",
+    "delete": "Удалить",
+    "close": "Close",
+    "replace": "Replace"
+  },
+  "themeshop": {
+    "source": {
+      "builtin": "Встроенный",
+      "custom": "Свой",
+      "community": "Сообщество",
+      "options": "Опции",
+      "unknown": "Неизвестно"
+    },
+    "tabs": {
+      "installed": "Установленные",
+      "community": "Сообщество",
+      "options": "Опции"
+    },
+    "search": {
+      "button": "Поиск",
+      "guide": "Искать темы",
+      "unavailable": "Клавиатура поиска недоступна.",
+      "no_results": "Темы не найдены.",
+      "no_results_hint": "Нажмите X или Поиск, чтобы изменить или очистить фильтр."
+    },
+    "installed": {
+      "title": "Установленные темы",
+      "subtitle": "Ваши локальные темы в виде галереи.",
+      "empty": "Установленных тем нет.",
+      "status": "Статус",
+      "status_active": "Активна",
+      "status_available": "Доступна",
+      "sound": "Встроенный набор звуков",
+      "sound_none": "Нет",
+      "remove_hint": "Эту тему можно удалить с консоли.",
+      "builtin_hint": "Эта тема входит в приложение.",
+      "apply": "Применить тему",
+      "remove": "Удалить тему"
+    },
+    "community": {
+      "title": "Темы сообщества",
+      "subtitle": "Визуальный каталог, не страница настроек.",
+      "counter_loading": "Загрузка",
+      "refresh": "Обновить",
+      "refreshing": "Обновление",
+      "loading": "Загрузка каталога тем...",
+      "catalog_empty": "В каталоге нет опубликованных тем.",
+      "catalog_failed": "Не удалось загрузить каталог. Попробуйте Обновить.",
+      "empty_hint": "Добавьте темы в репозиторий, и они появятся здесь.",
+      "author_unknown": "Неизвестно",
+      "version": "Версия",
+      "version_unknown": "Неизвестно",
+      "manifest": "Манифест",
+      "manifest_missing": "Не указано",
+      "cover_missing": "Для этой темы нет скриншота.",
+      "cover_present": "Влево/вправо для скриншотов, A для полного экрана.",
+      "cover_single": "A открывает скриншот на весь экран.",
+      "cover_loading": "Загрузка скриншота темы...",
+      "cover_unavailable": "Скриншот не загружен. Показана заглушка.",
+      "install": "Установить",
+      "download_apply": "Скачать + применить",
+      "transfer_busy": "Передача темы уже идет.",
+      "install_pending": "Установка еще не подключена.",
+      "download_apply_pending": "Скачать + применить еще не подключено.",
+      "selected_missing": "Выбранной темы больше нет в каталоге.",
+      "overwrite_apply_title": "Заменить и применить тему",
+      "overwrite_apply_message": "Пакет с этим ID темы уже установлен. Заменить версией с GitHub и применить?",
+      "overwrite_install_title": "Заменить установленную тему",
+      "overwrite_install_message": "Пакет с этим ID темы уже установлен. Заменить версией с GitHub?"
+    },
+    "transfer": {
+      "prepare_apply": "Подготовка скачать + применить...",
+      "prepare_install": "Подготовка скачать + установить...",
+      "unknown_error": "Неизвестная ошибка передачи",
+      "dialog_title": "Скачивание темы",
+      "downloading": "Скачивание темы...",
+      "downloading_file": "Скачивание",
+      "finalize_apply": "Завершение установки перед применением...",
+      "finalize_install": "Завершение установки...",
+      "installed_applying": "Тема установлена. Применение...",
+      "installed": "Тема установлена.",
+      "installed_applied": "Тема установлена и применена.",
+      "installed_apply_failed": "Тема установлена, но не применена автоматически."
+    },
+    "preview": {
+      "loading": "Загрузка скриншота...",
+      "unavailable": "Скриншот недоступен",
+      "missing": "Нет скриншота",
+      "prev": "Назад",
+      "next": "Далее"
+    },
+    "accessibility": {
+      "fullscreen_preview": "Полноэкранный просмотр",
+      "fullscreen_actions": "B, закрыть просмотр.",
+      "preview_area": "Просмотр",
+      "actions_area": "Действия",
+      "detail": "Детали",
+      "author": "Автор",
+      "detail_actions": "Влево и вправо меняют управление. A, подтвердить. B, назад.",
+      "search_refresh": "Поиск и обновление",
+      "search_bar": "Поиск",
+      "header_actions": "Влево и вправо для выбора. A, подтвердить. Вниз к сетке.",
+      "search_actions": "A, искать. Вниз к сетке.",
+      "pagination": "Страницы",
+      "pagination_actions": "Влево и вправо меняют кнопку. A, сменить страницу. Вверх к сетке.",
+      "no_theme": "Нет темы",
+      "grid_actions": "Крестовина для навигации. A, открыть детали. B, назад к вкладкам."
+    }
+  },
+  "hint": {
+    "repeat": "Повтор",
+    "voice": "Голос"
+  },
+  "accessibility": {
+    "speech": {
+      "enabled": "Озвучивание включено.",
+      "disabled": "Озвучивание выключено. Голосовая помощь завершена."
+    },
+    "context": {
+      "dialog": "Диалог",
+      "profile_selection": "Выбор профиля",
+      "settings": "Настройки",
+      "themes": "Темы",
+      "main_menu": "Главное меню",
+      "page": "страница",
+      "of": "из",
+      "left_sidebar": "Левая панель",
+      "right_sidebar": "Правая панель",
+      "user_profiles": "Профили пользователей"
+    },
+    "roles": {
+      "button": "кнопка",
+      "game": "игра",
+      "game_card": "игровая карта",
+      "slot": "ячейка",
+      "profile": "профиль",
+      "toggle": "переключатель",
+      "slider": "ползунок",
+      "selector": "выбор",
+      "progress": "прогресс",
+      "info": "информация",
+      "section": "раздел"
+    },
+    "hints": {
+      "open": "A, открыть.",
+      "open_user_page": "A, открыть страницу пользователя.",
+      "grid_empty": "Используйте крестовину, чтобы перейти к другой ячейке.",
+      "game_launchable": "A, запустить. X, опции. Y, переместить. ZL или ZR, сменить страницу.",
+      "game_blocked": "A, показать причину блокировки."
+    },
+    "actions": {
+      "edit_mode": "Крестовина выбирает новую позицию. Y, поставить. B, отмена.",
+      "empty_slot": "Крестовина для навигации. ZL или ZR, сменить страницу.",
+      "game_blocked": "A, показать причину. Y, переместить. ZL или ZR, сменить страницу.",
+      "game_launchable": "A, запустить. X, опции. Y, переместить. ZL или ZR, сменить страницу.",
+      "settings": "Вверх и вниз выбирают категорию. A или вправо, войти. B, закрыть.",
+      "themes": "Вверх и вниз для навигации. A, выбрать. B, закрыть.",
+      "dialog": "Влево и вправо меняют выбор. A, подтвердить. B, отмена."
+    },
+    "settings": {
+      "tab_prefix": "Вкладка",
+      "tab_actions": "A или вправо, войти. Вверх и вниз меняют вкладку. B, закрыть.",
+      "list_prefix": "Список",
+      "list_actions": "Вверх и вниз для выбора. A, подтвердить. B, закрыть список.",
+      "toggle_actions": "A, переключить. Влево, назад к вкладкам.",
+      "slider_actions": "Влево или вправо для настройки. B, назад к вкладкам.",
+      "selector_actions": "A или вправо открывает список. B, назад к вкладкам.",
+      "action_actions": "A выполняет действие. B, назад к вкладкам."
+    },
+    "value": {
+      "label": "Значение",
+      "percent": "процентов"
+    },
+    "position": {
+      "row": "строка",
+      "column": "столбец"
+    },
+    "move_mode": {
+      "enter": "Перемещение игры: ",
+      "placed": "Игра перемещена: ",
+      "cancelled": "Перемещение отменено: "
+    },
+    "grid": {
+      "empty_slot": "Пустая ячейка"
+    },
+    "user_profile": "Профиль пользователя"
+  },
+  "tutorial": {
+    "accessibility": {
+      "title": "Озвучивание",
+      "body": "Озвучивание доступно в этом меню. Оно может читать выбранный элемент и доступные действия.",
+      "objective": "Нажмите X, чтобы включить озвучивание на будущее. Нажмите A, чтобы продолжить без него.",
+      "enabled_announcement": "Озвучивание включено на будущее. Нажмите A, чтобы продолжить.",
+      "already_enabled_announcement": "Озвучивание уже включено на будущее.",
+      "disabled_announcement": "Озвучивание выключено. Звуки Animalese активны.",
+      "text_actions": "A, продолжить. B, пропустить."
+    },
+    "accessibility_settings": {
+      "title": "Доступность",
+      "body": "Параметры доступности находятся в Настройках, затем Доступность. Там можно настроить скорость, подсказки, место и позицию."
+    },
+    "welcome": {
+      "title": "Добро пожаловать в SwitchU",
+      "body": "Это короткое обучение покажет основные кнопки."
+    },
+    "navigation": {
+      "title": "Навигация",
+      "body": "Используйте крестовину или левый стик, чтобы перемещать фокус.",
+      "objective": "Переместите фокус на другой элемент."
+    },
+    "cursor": {
+      "title": "Фокус",
+      "body": "Светлая рамка показывает выбранный элемент."
+    },
+    "themes": {
+      "title": "Темы",
+      "body": "Темы меняют цвета, изображения и звуки. Откройте Темы на боковой панели, чтобы установить или применить стиль."
+    },
+    "support": {
+      "title": "Помощь",
+      "body": "Внизу слева показаны полезные кнопки для текущего экрана."
+    },
+    "confirm": {
+      "title": "Готово",
+      "body": "Можно начинать.",
+      "objective": "Нажмите A, чтобы подтвердить этот шаг."
+    },
+    "hints": {
+      "enable_voice": "Включить голос",
+      "disable_voice": "Выключить голос",
+      "voice_enabled": "Голос включен",
+      "continue": "Далее",
+      "reveal": "Показать",
+      "skip_step": "Пропустить шаг",
+      "skip_all": "Пропустить всё",
+      "test": "Тест"
+    }
+  }
+}

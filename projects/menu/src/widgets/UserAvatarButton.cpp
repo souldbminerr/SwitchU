@@ -45,10 +45,15 @@ void UserAvatarButton::onContentRender(nxui::Renderer& ren) {
                                avatarRect,
                                radius,
                                nxui::Color::white().withAlpha(alpha));
-        return;
+    } else {
+        ren.drawRoundedRect(avatarRect,
+                            nxui::Color(0.42f, 0.42f, 0.50f, 0.42f * alpha),
+                            radius);
     }
 
-    ren.drawRoundedRect(avatarRect,
-                        nxui::Color(0.42f, 0.42f, 0.50f, 0.42f * alpha),
-                        radius);
+    // 2 px theme-coloured ring around the avatar.
+    if (m_ringColor.a > 0.f) {
+        ren.drawRoundedRectOutline(avatarRect, m_ringColor.withAlpha(m_ringColor.a * alpha),
+                                   radius, 2.f);
+    }
 }

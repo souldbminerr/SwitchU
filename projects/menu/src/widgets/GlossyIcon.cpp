@@ -21,13 +21,17 @@ GlossyIcon::GlossyIcon() {
 void GlossyIcon::onFocusGained() {
     m_focused = true;
     m_focusScale.set(m_expandOnSelect ? 1.075f : 1.f, 0.18f, nxui::Easing::outBack);
-    m_focusGlow.set(1.f, 0.16f, nxui::Easing::outCubic);
+    // Snap the accent frame to full instantly. A timed fade-in is shorter than a
+    // held-scroll key repeat, so the frame would never finish fading before focus
+    // jumps on -> the tile flickers dark->blue mid-scroll. Snapping keeps the
+    // selected tile solidly framed and ensures only one tile is ever highlighted.
+    m_focusGlow.setImmediate(1.f);
 }
 
 void GlossyIcon::onFocusLost() {
     m_focused = false;
     m_focusScale.set(1.f, 0.20f, nxui::Easing::outCubic);
-    m_focusGlow.set(0.f, 0.16f, nxui::Easing::outCubic);
+    m_focusGlow.setImmediate(0.f);
 }
 
 void GlossyIcon::startAppear(float delay) {
@@ -131,35 +135,8 @@ void GlossyIcon::onRender(nxui::Renderer& ren) {
         ren.drawRoundedRect(r.expanded(10.f * focusGlow), focusColor, rad + 10.f);
     }
 
-    if (m_isGameCard && !m_notLaunchable && s > 0.5f) {
-        float badgeW = 66.f * s;
-        float badgeH = 48.f * s;
-        float badgeX = r.x + 1.f * s;
-        float badgeY = r.y + 6.f * s;
-
-        if (m_gameCardTex && m_gameCardTex->valid()) {
-            float cardInset = 1.f * s;
-            float maxW = badgeW - cardInset * 2;
-            float maxH = badgeH - cardInset * 2;
-            float aspect = (float)m_gameCardTex->width() / (float)m_gameCardTex->height();
-            float texW = maxW;
-            float texH = maxH;
-            if (aspect > maxW / maxH) {
-                texH = maxW / aspect;
-            } else {
-                texW = maxH * aspect;
-            }
-            float texX = badgeX + (badgeW - texW) * 0.5f;
-            float texY = badgeY + (badgeH - texH) * 0.5f;
-            ren.drawTextureRounded(m_gameCardTex, {texX, texY, texW, texH}, 2.f * s,
-                                   nxui::Color::white().withAlpha(0.98f * a));
-        } else {
-            float cardInset = 4.f * s;
-            ren.drawRoundedRect({badgeX + cardInset, badgeY + cardInset,
-                                 badgeW - cardInset*2, badgeH - cardInset*2},
-                                nxui::Color(0.95f, 0.75f, 0.2f, 0.9f * a), 2.f * s);
-        }
-    }
+    // Game-card indicator is shown only in the selected-item title, never on
+    // the tile itself.
 
     if (m_suspended && s > 0.5f) {
         float pulse = 0.5f + 0.5f * std::sin(m_suspendPulse);

@@ -2,7 +2,6 @@
 #include "core/SwitchMenuApp.hpp"
 #include "core/DebugLog.hpp"
 #include "core/Config.hpp"
-#include "tutorial/TutorialActivity.hpp"
 #include <nxui/Application.hpp>
 #include <fmt/format.h>
 #ifdef QLAUNCHEXT_MENU
@@ -219,17 +218,7 @@ int main(int argc, char* argv[]) {
     {
         nxui::Application app;
 #ifdef QLAUNCHEXT_HOMEBREW
-        auto makeMenuActivity = [](bool fromTutorial = false) -> std::unique_ptr<nxui::Activity> {
-            auto activity = std::make_unique<SwitchMenuApp>();
-            activity->setTutorialStartupFade(fromTutorial);
-            return activity;
-        };
-        AppConfig startupConfig;
-        startupConfig.load();
-        if (startupConfig.tutorialCompleted)
-            app.setActivity(makeMenuActivity(false));
-        else
-            app.setActivity(std::make_unique<TutorialActivity>(makeMenuActivity));
+        app.setActivity(std::make_unique<SwitchMenuApp>());
         DebugLog::log("[hb] app.initialize...");
         if (app.initialize()) {
             DebugLog::log("[hb] app.run...");
@@ -240,18 +229,11 @@ int main(int argc, char* argv[]) {
         DebugLog::log("[hb] app.shutdown...");
         app.shutdown();
 #else
-        auto makeMenuActivity = [sysStatus](bool fromTutorial = false) -> std::unique_ptr<nxui::Activity> {
+        {
             auto activity = std::make_unique<SwitchMenuApp>();
             activity->setStartupStatus(sysStatus.suspended_app_id, sysStatus.app_running);
-            activity->setTutorialStartupFade(fromTutorial);
-            return activity;
-        };
-        AppConfig startupConfig;
-        startupConfig.load();
-        if (startupConfig.tutorialCompleted)
-            app.setActivity(makeMenuActivity(false));
-        else
-            app.setActivity(std::make_unique<TutorialActivity>(makeMenuActivity));
+            app.setActivity(std::move(activity));
+        }
         DebugLog::log("[menu] app.initialize...");
         if (app.initialize()) {
             DebugLog::log("[menu] app.run...");

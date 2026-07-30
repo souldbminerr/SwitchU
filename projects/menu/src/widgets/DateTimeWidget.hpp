@@ -4,6 +4,7 @@
 #include <nxui/core/Types.hpp>
 #include <string>
 
+struct HudAssets;
 
 class DateTimeWidget : public nxui::GlassWidget {
 public:
@@ -12,6 +13,7 @@ public:
     void setSmallFont(nxui::Font* sf) { m_smallFont = sf; }
     void setTextColor(const nxui::Color& c) { m_textColor = c; }
     void setSecondaryTextColor(const nxui::Color& c) { m_secondaryColor = c; }
+    void setAssets(const HudAssets* a) { m_assets = a; }
     void setUse12HourClock(bool enabled);
 
 protected:
@@ -22,6 +24,7 @@ protected:
 private:
     nxui::Font* m_font = nullptr;
     nxui::Font* m_smallFont = nullptr;
+    const HudAssets* m_assets = nullptr;
     float m_timer = 0.f;
     std::string m_timeStr;
     std::string m_dateStr;

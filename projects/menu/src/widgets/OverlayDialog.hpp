@@ -167,8 +167,8 @@ private:
     static constexpr float kPanelPadX    = 40.f;
     static constexpr float kPanelPadY    = 34.f;
     static constexpr float kPanelRadius  = 26.f;
-    static constexpr float kButtonH      = 50.f;
-    static constexpr float kButtonRadius = 16.f;
+    static constexpr float kButtonH      = 60.f;   // qlaunch BtnDialogNml row = 60
+    static constexpr float kButtonRadius = 8.f;    // flatter, qlaunch-style
     static constexpr float kButtonGap    = 14.f;
     static constexpr float kTitleMsgGap  = 14.f;
     static constexpr float kMsgBtnGap    = 24.f;

@@ -11,6 +11,8 @@
 #include "widgets/WaraWaraBackground.hpp"
 #include "widgets/DateTimeWidget.hpp"
 #include "widgets/BatteryWidget.hpp"
+#include "widgets/WifiWidget.hpp"
+#include "widgets/HudAssets.hpp"
 #include "widgets/SelectionTitleWidget.hpp"
 #include "core/AudioManager.hpp"
 #include "widgets/LaunchAnimation.hpp"
@@ -55,8 +57,6 @@ class SwitchMenuApp : public nxui::Activity {
 public:
     SwitchMenuApp();
     ~SwitchMenuApp();
-
-    void setTutorialStartupFade(bool enabled);
 
 #ifdef QLAUNCHEXT_MENU
     void setStartupStatus(uint64_t suspendedTitleId, bool appRunning);
@@ -168,6 +168,7 @@ private:
     std::shared_ptr<SelectionCursor>   m_pointerCursor;
     std::shared_ptr<DateTimeWidget>    m_clock;
     std::shared_ptr<BatteryWidget>     m_battery;
+    std::shared_ptr<WifiWidget>        m_wifi;
     std::shared_ptr<SelectionTitleWidget> m_titlePill;
     std::shared_ptr<PageIndicator>     m_pageIndicator;
     std::shared_ptr<LaunchAnimation>   m_launchAnim;
@@ -178,7 +179,9 @@ private:
     std::shared_ptr<ThemeShopScreen>   m_themeShop;
 
     nxui::Texture m_gameCardTex;
+    nxui::Texture m_gameCardNotInsertTex;
     nxui::Texture m_settingsGearTex;
+    HudAssets     m_hudAssets;
 
     std::shared_ptr<nxui::Box> m_bgLayer;
     std::shared_ptr<nxui::Box> m_contentLayer;
@@ -270,8 +273,6 @@ private:
     int m_themeRenderDebugFrames = 0;
 
     float m_returnFadeTimer = 0.f;
-    float m_tutorialStartupFadeTimer = 0.f;
-    bool  m_tutorialStartupFade = false;
     bool m_hintPanelInitialized = false;
     bool m_plusExitPending = false;
     float m_plusExitPendingTimer = 0.f;
@@ -280,5 +281,4 @@ private:
     nxui::AnimatedFloat m_hintContentReveal{1.f};
     std::string m_hintSignature;
     static constexpr float kReturnFadeInDur = 0.22f;
-    static constexpr float kTutorialStartupFadeDur = 0.34f;
 };

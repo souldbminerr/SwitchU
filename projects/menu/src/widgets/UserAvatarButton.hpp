@@ -37,6 +37,8 @@ public:
     void setChromeEnabled(bool enabled);
 
     void setOnActivate(ActivateCallback cb) { m_onActivate = std::move(cb); }
+    // 2 px ring drawn around the avatar (theme-coloured).
+    void setRingColor(const nxui::Color& c) { m_ringColor = c; }
 
     bool isFocusable() const override { return m_focusable; }
     void setFocusable(bool focusable) { m_focusable = focusable; }
@@ -60,4 +62,5 @@ private:
     bool m_focusable = true;
     bool m_focused = false;
     bool m_chromeEnabled = true;
+    nxui::Color m_ringColor {0.f, 0.f, 0.f, 0.f};
 };

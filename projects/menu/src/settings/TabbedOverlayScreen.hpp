@@ -201,9 +201,9 @@ protected:
 
     static constexpr float kPanelMargin   = 32.f;
     static constexpr float kTabWidth      = 300.f;
-    static constexpr float kRowHeight     = 68.f;
+    static constexpr float kRowHeight     = 60.f;   // qlaunch BtnListNml row = 840x60
     static constexpr float kSectionHeight = 48.f;
-    static constexpr float kTabRowHeight  = 62.f;   // 52 px tab + 10 px gap
+    static constexpr float kTabRowHeight  = 70.f;   // qlaunch SetBaseNav category = 70
     static constexpr float kPanelRadius   = 26.f;
     static constexpr float kInnerPad      = 60.f;
     // qlaunch (System Settings) chrome: full-screen flat with a header + footer.

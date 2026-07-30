@@ -1198,6 +1198,15 @@ void SwitchMenuApp::applyTheme() {
     }
     DebugLog::log("[theme-apply] widget recolor grid icons done");
 
+    // Avatar ring: #ffffff (light) / #757575 (dark & black).
+    {
+        const nxui::Color avatarRing = (m_theme.mode == nxui::ThemeMode::Light)
+            ? nxui::Color(1.f, 1.f, 1.f, 1.f)            // #ffffff
+            : nxui::Color(0.459f, 0.459f, 0.459f, 1.f);  // #757575
+        for (auto& av : m_userAvatarButtons)
+            if (av) av->setRingColor(avatarRing);
+    }
+
     m_cursor->setColor(selectionColor);   // blue (dark) / accent selection ring
     m_cursor->setCornerRadius(m_theme.cursorCornerRadius);
     m_cursor->setBorderWidth(4.f);   // 4 px selection outline
@@ -1222,6 +1231,7 @@ void SwitchMenuApp::applyTheme() {
     m_battery->setBorderColor(kTransparent);
     m_battery->setHighlightColor(kTransparent);
     m_battery->setTextColor(m_theme.textPrimary);
+    if (m_wifi) m_wifi->setColor(m_theme.textPrimary);
 
     // Selected-item title colour: cyan (#0cd0c7 light / #0fc4f9 dark & black).
     m_titlePill->setTextColor(m_theme.mode == nxui::ThemeMode::Light

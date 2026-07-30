@@ -169,9 +169,11 @@ void AppListLoader::fetchApps() {
 
 #ifdef QLAUNCHEXT_HOMEBREW
     static const char* dummyNames[] = {
-        "The Legend of Zelda: TotK",
+        "The Legend of Zelda: Tears of the Kingdom",
+        "The Legend of Zelda: Breath of the Wild",
+        "A game with a very very very very very very very very very very very very long name",
         "Super Mario Odyssey",
-        "Animal Crossing: NH",
+        "Animal Crossing: New Horizons",
         "Splatoon 3",
         "Mario Kart 8 Deluxe",
         "Super Smash Bros. Ultimate",

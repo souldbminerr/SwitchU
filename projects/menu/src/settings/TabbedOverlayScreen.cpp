@@ -465,29 +465,32 @@ void TabbedOverlayScreen::drawHeader(nxui::Renderer& ren, const nxui::Rect& pane
     if (!m_font || !m_theme || opacity <= 0.01f)
         return;
     const float margin = 30.f;
-    float x = panel.x + margin;
     const float cy = panel.y + kHeaderH * 0.5f;
 
-    // Gear icon to the left of the title.
-    if (m_headerIcon && m_headerIcon->valid()) {
-        const float sz = 40.f;
-        ren.drawTexture(m_headerIcon, {x, cy - sz * 0.5f, sz, sz},
-                        m_theme->textPrimary.withAlpha(opacity));
-        x += sz + 16.f;
-    }
-
+    // Left-aligned gear + title at the top-left. Title is half the gear's size
+    // and vertically centred on the gear's middle (cy).
     const std::string title = m_headerTitle.empty() ? "Settings" : m_headerTitle;
+    const float gearSz = 40.f, gearGap = 16.f;
+    const float scale = (gearSz * 0.5f) / 24.f;   // text height ~= half the gear
+    const bool hasGear = (m_headerIcon && m_headerIcon->valid());
+
+    float x = panel.x + margin;
+    if (hasGear) {
+        ren.drawTexture(m_headerIcon, {x, cy - gearSz * 0.5f, gearSz, gearSz},
+                        m_theme->textPrimary.withAlpha(opacity));
+        x += gearSz + gearGap;
+    }
+    // Optically centre the caps on cy (measured box includes the font's descent).
     nxui::Vec2 ts = m_font->measure(title);
-    const float scale = 1.35f;
-    // Optically centre the caps on the gear (the measured box sits low because
-    // it includes the font's descent).
-    ren.drawText(title, {x, cy - ts.y * scale * 0.62f}, m_font,
+    ren.drawText(title, {x, cy - ts.y * scale * 0.40f}, m_font,
                  m_theme->textPrimary.withAlpha(opacity), scale);
 
-    // Full-width separator under the header.
-    ren.drawRect({panel.x + margin, panel.y + kHeaderH - 1.f,
-                  panel.width - margin * 2.f, 1.f},
-                 m_theme->textSecondary.withAlpha(0.30f * opacity));
+    // Full-width separator under the header. #ffffff dark/black, #757575 light.
+    const nxui::Color lineColor = (m_theme->mode == nxui::ThemeMode::Light)
+        ? nxui::Color(0.459f, 0.459f, 0.459f, opacity)   // #757575
+        : nxui::Color(1.f, 1.f, 1.f, opacity);           // #ffffff
+    ren.drawRect({panel.x + margin, panel.y + kHeaderH - 2.f,
+                  panel.width - margin * 2.f, 2.f}, lineColor);   // qlaunch line = 2 px
 }
 
 void TabbedOverlayScreen::drawFooter(nxui::Renderer& ren, const nxui::Rect& panel, float opacity) {
@@ -495,8 +498,10 @@ void TabbedOverlayScreen::drawFooter(nxui::Renderer& ren, const nxui::Rect& pane
         return;
     const float margin = 30.f;
     float sepY = panel.bottom() - kFooterH + 1.f;
-    ren.drawRect({panel.x + margin, sepY, panel.width - margin * 2.f, 1.f},
-                 m_theme->textSecondary.withAlpha(0.30f * opacity));
+    const nxui::Color lineColor = (m_theme->mode == nxui::ThemeMode::Light)
+        ? nxui::Color(0.459f, 0.459f, 0.459f, opacity)   // #757575
+        : nxui::Color(1.f, 1.f, 1.f, opacity);           // #ffffff
+    ren.drawRect({panel.x + margin, sepY, panel.width - margin * 2.f, 2.f}, lineColor);
 
     const float cy = panel.bottom() - kFooterH * 0.5f;
     const nxui::Color tc = m_theme->textPrimary.withAlpha(0.92f * opacity);
@@ -702,9 +707,9 @@ void TabbedOverlayScreen::drawContent(nxui::Renderer& ren, const nxui::Rect& pan
 
         // qlaunch draws a thin separator under each non-section row.
         if (items[i].type != ItemType::Section) {
-            float sy = y + h - 1.f;
+            float sy = y + h - 2.f;
             if (sy >= cr.y && sy <= cr.bottom()) {
-                ren.drawRect({cr.x, sy, cr.width, 1.f},
+                ren.drawRect({cr.x, sy, cr.width, 2.f},
                              m_theme->textSecondary.withAlpha(0.20f * slideOpacity));
             }
         }

@@ -1,0 +1,518 @@
+{
+  "common": {
+    "auto": "Auto",
+    "na": "N/A",
+    "active": "Actif",
+    "disabled": "Désactivé"
+  },
+  "accessibility": {
+    "speech": {
+      "enabled": "Lecture vocale activée.",
+      "disabled": "Lecture vocale désactivée. Fin de l’aide vocale."
+    },
+    "context": {
+      "dialog": "Dialogue",
+      "profile_selection": "Sélection du profil",
+      "settings": "Paramètres",
+      "themes": "Thèmes",
+      "main_menu": "Menu principal",
+      "page": "page",
+      "of": "sur",
+      "left_sidebar": "Barre latérale gauche",
+      "right_sidebar": "Barre latérale droite",
+      "user_profiles": "Profils utilisateur"
+    },
+    "roles": {
+      "button": "bouton",
+      "game": "jeu",
+      "game_card": "carte de jeu",
+      "slot": "case",
+      "profile": "profil",
+      "toggle": "interrupteur",
+      "slider": "curseur",
+      "selector": "sélecteur",
+      "progress": "progression",
+      "info": "information",
+      "section": "section"
+    },
+    "hints": {
+      "open": "A pour ouvrir.",
+      "open_user_page": "A pour ouvrir la page utilisateur.",
+      "grid_empty": "Utilise la croix directionnelle pour changer de case.",
+      "game_launchable": "A pour lancer. X pour les options. Y grec pour déplacer. ZL ou ZR pour changer de page.",
+      "game_blocked": "A pour afficher la raison du blocage."
+    },
+    "actions": {
+      "edit_mode": "Croix directionnelle pour choisir la nouvelle position. Y pour placer. B pour annuler.",
+      "empty_slot": "Croix directionnelle pour naviguer. ZL ou ZR pour changer de page.",
+      "game_blocked": "A pour afficher la raison. Y grec pour déplacer. ZL ou ZR pour changer de page.",
+      "game_launchable": "A pour lancer. X pour les options. Y grec pour déplacer. ZL ou ZR pour changer de page.",
+      "settings": "Haut et bas pour choisir une catégorie. A ou droite pour entrer. B pour fermer.",
+      "themes": "Haut et bas pour naviguer. A pour choisir. B pour fermer.",
+      "dialog": "Gauche et droite pour changer de choix. A pour valider. B pour annuler."
+    },
+    "settings": {
+      "tab_prefix": "Onglet",
+      "tab_actions": "A ou droite pour entrer. Haut et bas pour changer d'onglet. B pour fermer.",
+      "list_prefix": "Liste",
+      "list_actions": "Haut et bas pour choisir. A pour valider. B pour fermer la liste.",
+      "toggle_actions": "A pour changer. Gauche pour revenir aux onglets.",
+      "slider_actions": "Gauche ou droite pour ajuster. B pour revenir aux onglets.",
+      "selector_actions": "A ou droite pour ouvrir la liste. B pour revenir aux onglets.",
+      "action_actions": "A pour lancer l'action. B pour revenir aux onglets."
+    },
+    "value": {
+      "label": "Valeur",
+      "percent": "pour cent"
+    },
+    "position": {
+      "row": "ligne",
+      "column": "colonne"
+    },
+    "move_mode": {
+      "enter": "Déplacement du jeu: ",
+      "placed": "Jeu déplacé: ",
+      "cancelled": "Déplacement annulé: "
+    },
+    "grid": {
+      "empty_slot": "Emplacement vide"
+    },
+    "user_profile": "Profil utilisateur"
+  },
+  "tutorial": {
+    "accessibility": {
+      "title": "Accessibilité vocale",
+      "body": "La lecture vocale est disponible pour ce menu. Elle peut lire l'élément sélectionné et les actions disponibles à voix haute.",
+      "objective": "Appuie sur X pour activer la lecture vocale pour la suite. Appuie sur A pour continuer sans l'activer.",
+      "enabled_announcement": "Lecture vocale activée pour la suite. Appuie sur A pour continuer.",
+      "already_enabled_announcement": "La lecture vocale est déjà activée pour la suite.",
+      "disabled_announcement": "Lecture vocale désactivée. Les sons animalese sont actifs.",
+      "text_actions": "A pour continuer. B pour passer cette étape. Plus pour tout passer."
+    },
+    "accessibility_settings": {
+      "title": "Paramètres d'accessibilité",
+      "body": "Des options d'accessibilité sont disponibles dans Paramètres, puis Accessibilité. Tu peux régler la vitesse de parole, les aides répétées, les annonces d'emplacement et les détails de position."
+    },
+    "welcome": {
+      "title": "Bienvenue dans SwitchU",
+      "body": "SwitchU remplace le menu HOME par une interface rapide pour lancer tes jeux, homebrews et outils système."
+    },
+    "navigation": {
+      "title": "Navigation",
+      "body": "Tu peux naviguer avec la croix directionnelle, le stick gauche ou le stick droit. Essaie une direction horizontale et une direction verticale.",
+      "objective": "Teste une direction gauche ou droite puis haut ou bas."
+    },
+    "confirm": {
+      "title": "Valider",
+      "body": "Le bouton A confirme une action, lance un jeu ou ouvre l'élément sélectionné.",
+      "objective": "Appuie sur A pour valider cette étape."
+    },
+    "themes": {
+      "title": "Thèmes",
+      "body": "Les thèmes peuvent changer les couleurs, les images et les sons. Ouvre la section Thèmes depuis la barre latérale pour installer ou appliquer un style."
+    },
+    "cursor": {
+      "title": "Curseur",
+      "body": "Tu peux utiliser le curseur virtuel avec les clics des sticks quand une action demande un pointeur. Clique le stick gauche pour l'activer, le stick droit pour le recentrer."
+    },
+    "support": {
+      "title": "Support",
+      "body": "Pour signaler un problème, ouvre le GitHub du projet: github.com/PoloNX/SwitchU"
+    },
+    "hints": {
+      "disable_voice": "Désactiver voix",
+      "enable_voice": "Activer voix",
+      "voice_enabled": "Voix activée",
+      "reveal": "Afficher",
+      "continue": "Continuer",
+      "test": "Tester",
+      "skip_step": "Passer étape",
+      "skip_all": "Tout passer"
+    }
+  },
+  "sidebar": {
+    "album": "Album",
+    "mii_editor": "Editeur Mii",
+    "settings": "Paramètres",
+    "controllers": "Manettes",
+    "sleep": "Veille",
+    "music": "Musique",
+    "theme_shop": "Boutique de thèmes"
+  },
+  "hint": {
+    "repeat": "Répéter",
+    "voice": "Voix"
+  },
+  "settings": {
+    "tabs": {
+      "system": "Système",
+      "accessibility": "Accessibilité",
+      "audio": "Audio",
+      "display": "Affichage",
+      "internet": "Internet",
+      "controllers": "Manettes",
+      "bluetooth": "Bluetooth",
+      "sleep": "Veille",
+      "music": "Musique",
+      "theme": "Thème",
+      "storage": "Stockage",
+      "about": "À propos"
+    },
+    "system": {
+      "firmware": "Version du firmware",
+      "custom_firmware": "Custom Firmware",
+      "not_detected": "Non détecté",
+      "emunand": "EmuNAND",
+      "inactive_sysnand": "Inactif / SysNAND",
+      "console_nickname": "Surnom de la console",
+      "serial_number": "Numéro de série",
+      "timezone": "Fuseau horaire",
+      "clock_12h": "Horloge 12 heures",
+      "clock_12h_desc": "Affiche l'horloge du menu avec AM et PM.",
+      "usb30": "USB 3.0",
+      "usb30_desc": "Active l'USB 3.0 pour des transferts plus rapides.",
+      "battery_lot": "Lot de batterie",
+      "ui_language": "Langue de l'interface",
+      "console_language": "Langue de la console",
+      "region": "Région",
+      "region_japan": "Japon",
+      "region_usa": "États-Unis",
+      "region_europe": "Europe",
+      "region_australia": "Australie",
+      "region_hong_kong": "Hong Kong",
+      "region_taiwan": "Taïwan",
+      "region_south_korea": "Corée du Sud",
+      "auto_update": "Mise à jour automatique",
+      "error_reporting": "Rapports d'erreurs",
+      "default_profile": "Default Profile",
+      "default_profile_desc": "Launch games with this profile when possible.",
+      "default_profile_ask": "Ask each time"
+    },
+    "accessibility": {
+      "voice": "Lecture vocale",
+      "voice_desc": "Lit à voix haute les éléments ciblés et les actions disponibles.",
+      "voice_language": "Langue de la voix",
+      "voice_language_desc": "Suit la langue système ou la langue de l'interface.",
+      "speech_rate": "Vitesse de parole",
+      "speech_rate_desc": "Ajuste la vitesse de la lecture vocale.",
+      "words_per_minute": "mots/min",
+      "speak_hints": "Lire les aides d'action",
+      "speak_hints_desc": "Annonce les actions disponibles après l'élément sélectionné.",
+      "repeat_context": "Répéter l'emplacement à chaque déplacement",
+      "repeat_context_desc": "Répète la zone actuelle à chaque changement de focus au lieu de seulement quand elle change.",
+      "speak_position": "Lire la position",
+      "speak_position_desc": "Annonce la ligne, la colonne et la position quand elles sont disponibles."
+    },
+    "audio": {
+      "speaker_auto_mute": "Coupure auto des haut-parleurs",
+      "speaker_auto_mute_desc": "Coupe les haut-parleurs automatiquement quand un casque est branché.",
+      "headphone_warning": "Avertissement volume casque",
+      "acknowledged": "Acquitté",
+      "tv_audio_output": "Sortie audio TV",
+      "tv_audio_output_desc": "Choisit le format audio envoyé au téléviseur via HDMI.",
+      "mono": "Mono",
+      "stereo": "Stéréo",
+      "surround": "Surround",
+      "tv_resolution": "Résolution TV",
+      "tv_resolution_desc": "Ajuste la résolution HDMI. Auto utilise la valeur recommandée.",
+      "res_720p": "720p",
+      "res_1080p": "1080p",
+      "hdmi_rgb_range": "Plage RGB HDMI",
+      "hdmi_rgb_range_desc": "Full pour moniteur PC, Limited pour la plupart des TV.",
+      "full": "Complet",
+      "limited": "Limité"
+    },
+    "display": {
+      "brightness": "Luminosité",
+      "auto_brightness": "Luminosité auto",
+      "auto_brightness_desc": "Ajuste automatiquement la luminosité selon la lumière ambiante.",
+      "burn_in": "Réduction du marquage",
+      "burn_in_desc": "Réduit le marquage de l'écran en usage prolongé.",
+      "tv_screen_size": "Taille d'écran TV",
+      "tv_screen_size_desc": "Corrige l'overscan pour que toute l'image soit visible.",
+      "album_storage": "Stockage album",
+      "album_storage_desc": "Où les captures d'écran et vidéos sont sauvegardées.",
+      "album_sd": "Carte SD",
+      "album_nand": "NAND",
+      "ui_wireframe": "Wireframe UI",
+      "ui_wireframe_desc": "Affiche le contour de toutes les Box pour le debug layout."
+    },
+    "internet": {
+      "wifi_ssid": "Réseau WiFi",
+      "ip_address": "Adresse IP",
+      "not_connected": "Non connecté",
+      "wifi": "WiFi",
+      "wifi_desc": "Active ou désactive le WiFi.",
+      "auto_app_download": "Téléchargement auto",
+      "auto_app_download_desc": "Télécharge automatiquement les mises à jour des jeux installés.",
+      "mac_address": "Adresse MAC",
+      "dns": "DNS",
+      "dns_auto": "Auto (DHCP)"
+    },
+    "controllers": {
+      "vibration": "Vibration",
+      "usb_wired": "Communication USB filaire",
+      "usb_wired_desc": "Utilise l'USB filaire pour réduire la latence des manettes compatibles.",
+      "nfc": "NFC (amiibo)"
+    },
+    "bluetooth": {
+      "bluetooth": "Bluetooth",
+      "afh": "Bluetooth AFH",
+      "general": "Général",
+      "connected_device": "Appareil connecté",
+      "no_device_connected": "Aucun appareil connecté",
+      "disconnect": "Déconnecter",
+      "paired_devices": "Appareils associés",
+      "no_paired_devices": "Aucun appareil associé",
+      "discover_devices": "Découvrir des appareils",
+      "start_search": "Rechercher des appareils...",
+      "stop_search": "Arrêter la recherche",
+      "connect": "Connecter",
+      "unpair": "Dissocier",
+      "pair_connect": "Associer et connecter",
+      "device_actions": "Actions de l'appareil",
+      "connected": "Connected",
+      "not_connected": "Not connected"
+    },
+    "sleep": {
+      "1min": "1 min",
+      "3min": "3 min",
+      "5min": "5 min",
+      "10min": "10 min",
+      "30min": "30 min",
+      "1h": "1 heure",
+      "2h": "2 heures",
+      "3h": "3 heures",
+      "6h": "6 heures",
+      "12h": "12 heures",
+      "never": "Jamais",
+      "handheld": "Veille auto en portable",
+      "handheld_desc": "Délai avant veille automatique en mode portable.",
+      "docked": "Veille auto en dock",
+      "docked_desc": "Délai avant veille automatique quand la console est dockée.",
+      "media_sleep": "Veille pendant les médias",
+      "media_sleep_desc": "Permet la mise en veille automatique pendant la lecture de médias.",
+      "wake_power": "Réveil au changement d'alimentation",
+      "wake_power_desc": "Réveille la console quand l'adaptateur secteur est connecté ou déconnecté."
+    },
+    "theme": {
+      "preset": "Preset",
+      "menu_mode": "Mode du menu",
+      "mode_dark": "Sombre",
+      "mode_light": "Clair",
+      "accent": "Accent",
+      "background": "Arrière-plan",
+      "bg_accent": "Accent arrière-plan",
+      "shapes": "Formes flottantes",
+      "delete_preset": "Supprimer le preset",
+      "save_preset": "Enregistrer comme preset",
+      "reset_defaults": "Réinitialiser",
+      "builtin_readonly": "Les presets intégrés ne peuvent pas être supprimés."
+    },
+    "music": {
+      "sound_preset": "Preset sonore",
+      "menu_music": "Musique du menu",
+      "music_volume": "Volume musique",
+      "sfx_volume": "Volume SFX",
+      "next_track": "Piste suivante",
+      "track_changed": "Piste changée"
+    },
+    "storage": {
+      "internal": "Mémoire système",
+      "internal_desc": "Affiche la mémoire système utilisée et l'espace libre.",
+      "internal_unavailable": "Impossible de lire le stockage interne.",
+      "sd": "Carte microSD",
+      "sd_desc": "Affiche le stockage utilisé sur la carte microSD et l'espace libre.",
+      "sd_unavailable": "Aucune carte microSD détectée ou accès refusé.",
+      "available": "Disponible",
+      "state_installed": "Installé",
+      "state_corrupt": "Corrompu",
+      "state_unknown": "Inconnu",
+      "installed_section": "Logiciels installés",
+      "empty_library": "Aucun jeu installé trouvé",
+      "select_game": "Jeu installé",
+      "select_game_desc": "Sélectionnez un titre pour afficher les détails ou le désinstaller.",
+      "uninstall_game": "Désinstaller le jeu sélectionné",
+      "uninstall_game_desc": "Supprime définitivement le titre sélectionné du système.",
+      "uninstall_confirm_title": "Désinstaller le jeu",
+      "uninstall_confirm_msg": "Supprimer %s du système ?",
+      "uninstall_success_title": "Désinstallation terminée",
+      "uninstall_success": "Désinstallation réussie.",
+      "uninstall_failed_title": "Échec de la désinstallation",
+      "uninstall_failed": "Impossible de désinstaller le titre sélectionné.",
+      "location_internal": "Interne",
+      "location_sd": "microSD",
+      "location_system": "Système",
+      "size_unknown": "Taille inconnue",
+      "capacity": "Capacité",
+      "used": "Utilisé",
+      "summary": "Résumé",
+      "details": "Détails",
+      "delete": "Supprimer"
+    },
+    "about": {
+      "version": "Version",
+      "author": "Auteur",
+      "license": "Licence",
+      "license_value": "GPL-2.0",
+      "acknowledgements": "Remerciements",
+      "acknowledgements_desc": "Merci à xortroll pour l'aide vis à vis du développements.",
+      "source_code": "Code source",
+      "source_code_value": "github.com/PoloNX/SwitchU"
+    }
+  },
+  "userselect": {
+    "title": "Qui joue ?"
+  },
+  "game": {
+    "move": "Déplacer",
+    "move_prefix": "Déplacer : ",
+    "close_title": "Fermer le jeu",
+    "close_prefix": "Fermer",
+    "close_suffix": " ?\nLa progression non sauvegardée sera perdue."
+  },
+  "power": {
+    "title": "Alimentation",
+    "choose_action": "Choisissez une action.",
+    "sleep": "Veille",
+    "shutdown": "Éteindre",
+    "reboot": "Redémarrer"
+  },
+  "languages": {
+    "ja-JP": "Japonais",
+    "en-US": "Anglais (US)",
+    "fr-FR": "Français",
+    "de-DE": "Allemand",
+    "it-IT": "Italien",
+    "es-ES": "Espagnol",
+    "zh-CN": "Chinois",
+    "ko-KR": "Coréen",
+    "nl-NL": "Néerlandais",
+    "pt-PT": "Portugais",
+    "ru-RU": "Russe",
+    "zh-TW": "Chinois traditionnel",
+    "en-GB": "Anglais (UK)",
+    "fr-CA": "Français (Canada)",
+    "es-419": "Espagnol (Amérique latine)",
+    "pt-BR": "Portugais brésilien"
+  },
+  "error": {
+    "title": "Impossible de lancer",
+    "gamecard_not_inserted": "La carte de jeu n'est pas insérée.",
+    "needs_verify": "Les données du jeu doivent être vérifiées.",
+    "needs_update": "Une mise à jour requise est disponible.",
+    "no_contents": "Les données du jeu sont manquantes.",
+    "cannot_launch": "Ce jeu ne peut pas être lancé."
+  },
+  "button": {
+    "ok": "OK",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "close": "Close",
+    "replace": "Replace"
+  },
+  "themeshop": {
+    "source": {
+      "builtin": "Intégré",
+      "custom": "Personnalisé",
+      "community": "Communauté",
+      "options": "Options",
+      "unknown": "Inconnu"
+    },
+    "tabs": {
+      "installed": "Installés",
+      "community": "Communauté",
+      "options": "Options"
+    },
+    "accessibility": {
+      "fullscreen_preview": "Aperçu plein écran",
+      "fullscreen_actions": "B pour fermer l'aperçu.",
+      "preview_area": "Aperçu",
+      "actions_area": "Actions",
+      "detail": "Détail",
+      "author": "Auteur",
+      "detail_actions": "Gauche et droite pour changer de contrôle. A pour valider. B pour revenir.",
+      "search_refresh": "Recherche et actualisation",
+      "search_bar": "Barre de recherche",
+      "header_actions": "Gauche et droite pour choisir. A pour valider. Bas pour aller à la grille.",
+      "search_actions": "A pour chercher. Bas pour aller à la grille.",
+      "pagination": "Pagination",
+      "pagination_actions": "Gauche et droite pour changer de bouton. A pour changer de page. Haut pour aller à la grille.",
+      "no_theme": "Aucun thème",
+      "grid_actions": "Croix directionnelle pour naviguer. A pour ouvrir les détails. B pour revenir aux onglets."
+    },
+    "search": {
+      "button": "Rechercher",
+      "guide": "Rechercher des thèmes",
+      "unavailable": "Le clavier de recherche est indisponible.",
+      "no_results": "Aucun thème ne correspond.",
+      "no_results_hint": "Appuie sur X ou utilise Rechercher pour changer ou vider le filtre."
+    },
+    "installed": {
+      "title": "Thèmes installés",
+      "subtitle": "Tes thèmes locaux en galerie.",
+      "empty": "Aucun thème installé.",
+      "status": "État",
+      "status_active": "Actif",
+      "status_available": "Disponible",
+      "sound": "Pack de sons inclus",
+      "sound_none": "Aucun",
+      "remove_hint": "Ce thème peut être supprimé de la console.",
+      "builtin_hint": "Ce thème fait partie de l’application.",
+      "apply": "Appliquer le thème",
+      "remove": "Supprimer le thème"
+    },
+    "community": {
+      "title": "Thèmes de la communauté",
+      "subtitle": "Un catalogue visuel, pas une page de réglages.",
+      "counter_loading": "Chargement",
+      "refresh": "Actualiser",
+      "refreshing": "Actualisation",
+      "loading": "Chargement du catalogue de thèmes...",
+      "catalog_empty": "Aucun thème publié dans le catalogue.",
+      "catalog_failed": "Impossible de charger le catalogue. Utilise Actualiser.",
+      "empty_hint": "Ajoute des thèmes au dépôt et ils apparaîtront ici.",
+      "author_unknown": "Inconnu",
+      "version": "Version",
+      "version_unknown": "Inconnue",
+      "manifest": "Manifeste",
+      "manifest_missing": "Non indiqué",
+      "cover_missing": "Aucune capture n’est indiquée pour ce thème.",
+      "cover_present": "Gauche/Droite pour les captures, A pour le plein écran.",
+      "cover_single": "A ouvre cette capture en plein écran.",
+      "cover_loading": "Chargement de la capture du thème...",
+      "cover_unavailable": "La capture n’a pas pu être chargée. Un aperçu par défaut est affiché.",
+      "install": "Installer",
+      "download_apply": "Télécharger + appliquer",
+      "transfer_busy": "Un transfert de thème est déjà en cours.",
+      "install_pending": "Installation pas encore branchée.",
+      "download_apply_pending": "Télécharger + appliquer pas encore branché.",
+      "selected_missing": "Le thème sélectionné n’est plus dans le catalogue.",
+      "overwrite_apply_title": "Remplacer et appliquer le thème",
+      "overwrite_apply_message": "Un paquet avec cet ID de thème est déjà installé. Le remplacer par la version GitHub, puis l’appliquer ?",
+      "overwrite_install_title": "Remplacer le thème installé",
+      "overwrite_install_message": "Un paquet avec cet ID de thème est déjà installé. Le remplacer par la version GitHub ?"
+    },
+    "transfer": {
+      "prepare_apply": "Préparation du téléchargement + application...",
+      "prepare_install": "Préparation du téléchargement + installation...",
+      "unknown_error": "Erreur de transfert inconnue",
+      "dialog_title": "Téléchargement du thème",
+      "downloading": "Téléchargement du thème...",
+      "downloading_file": "Téléchargement",
+      "finalize_apply": "Finalisation de l'installation avant application...",
+      "finalize_install": "Finalisation de l'installation...",
+      "installed_applying": "Thème installé. Application en cours...",
+      "installed": "Thème installé.",
+      "installed_applied": "Thème installé et appliqué.",
+      "installed_apply_failed": "Thème installé, mais il n’a pas pu être appliqué automatiquement."
+    },
+    "preview": {
+      "loading": "Chargement de la capture...",
+      "unavailable": "Capture indisponible",
+      "missing": "Aucune capture",
+      "prev": "Préc.",
+      "next": "Suiv."
+    }
+  }
+}

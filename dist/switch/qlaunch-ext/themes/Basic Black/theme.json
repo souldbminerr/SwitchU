@@ -1,0 +1,24 @@
+{
+  "id": "builtin:Basic Black",
+  "name": "Basic Black",
+  "author": "qlaunch-ext",
+  "version": "1.0.0",
+  "theme": {
+    "mode": "dark",
+    "colors": {
+      "accent":           [0.524, 1.00, 0.45],
+      "cursor":           [0.524, 1.00, 0.45],
+      "background":       [0.0,   0.0,  0.0],
+      "backgroundAccent": [0.0,   0.0,  0.0],
+      "shapes":           [0.0,   0.0,  0.0]
+    },
+    "background": {
+      "opacity": 0.0,
+      "imageOpacity": 0.0,
+      "shapeCount": 1
+    }
+  },
+  "audio": {
+    "preset": "wiiu"
+  }
+}
